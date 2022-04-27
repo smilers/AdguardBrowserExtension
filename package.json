@@ -88,7 +88,7 @@
     "@adguard/scriptlets": "^1.6.8",
     "@adguard/translate": "^0.2.5",
     "@adguard/tsurlfilter": "^0.7.76",
-    "@babel/runtime": "^7.15.3",
+    "@babel/runtime": "^7.17.9",
     "@xstate/react": "^1.5.1",
     "ace-builds": "^1.4.12",
     "ajv": "^8.6.2",
