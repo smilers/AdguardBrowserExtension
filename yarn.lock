@@ -10188,10 +10188,10 @@ xregexp@3.1.0:
   resolved "https://registry.yarnpkg.com/xregexp/-/xregexp-3.1.0.tgz#14d8461e0bdd38224bfee5039a0898fc42fcd336"
   integrity sha1-FNhGHgvdOCJL/uUDmgiY/EL80zY=
 
-xstate@^4.23.1:
-  version "4.30.6"
-  resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.30.6.tgz#62b6dea37a500e0e1c0ff7c553a801eea5119554"
-  integrity sha512-V7liK1cjkZRh6R/MSneG8S5VLGRatpOUcnNieiYJX4LbwKi9eUVUH5V04ugJYVcJ+2oKDKvEFvzk0VnSC7lTag==
+xstate@^4.38.3:
+  version "4.38.3"
+  resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.38.3.tgz#4e15e7ad3aa0ca1eea2010548a5379966d8f1075"
+  integrity sha512-SH7nAaaPQx57dx6qvfcIgqKRXIh4L0A1iYEqim4s1u7c9VoCgzZc+63FY90AKU4ZzOC2cfJzTnpO4zK7fCUzzw==
 
 y18n@^5.0.5:
   version "5.0.8"
