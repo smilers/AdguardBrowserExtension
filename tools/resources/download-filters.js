@@ -1,11 +1,31 @@
 /**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
  * Update filters in repository
  */
 import path from 'path';
 import fs from 'fs';
-import fse from 'fs-extra';
 import crypto from 'crypto';
+
+import fse from 'fs-extra';
 import axios from 'axios';
+
 import { cliLog } from '../cli-log';
 import {
     METADATA_DOWNLOAD_URL_FORMAT,
@@ -13,8 +33,12 @@ import {
     METADATA_I18N_DOWNLOAD_URL_FORMAT,
     FILTER_DOWNLOAD_URL_FORMAT,
     OPTIMIZED_FILTER_DOWNLOAD_URL_FORMAT,
-    ADGUARD_FILTERS_IDS,
 } from '../constants';
+import {
+    ADGUARD_FILTERS_IDS,
+    LOCAL_METADATA_FILE_NAME,
+    LOCAL_I18N_METADATA_FILE_NAME,
+} from '../../constants';
 
 const CHECKSUM_PATTERN = /^\s*!\s*checksum[\s-:]+([\w\+/=]+).*[\r\n]+/i;
 
@@ -22,7 +46,7 @@ const CHECKSUM_PATTERN = /^\s*!\s*checksum[\s-:]+([\w\+/=]+).*[\r\n]+/i;
  * Getting filters array
  *
  * @param browser Which browser filters to download
- * @return array
+ * @returns array
  */
 const getUrlsOfFiltersResources = (browser) => {
     const filters = [];
@@ -31,12 +55,12 @@ const getUrlsOfFiltersResources = (browser) => {
 
     meta.push({
         url: METADATA_DOWNLOAD_URL_FORMAT.replace('%browser', browser),
-        file: 'filters.json',
+        file: LOCAL_METADATA_FILE_NAME,
     });
 
     meta.push({
         url: METADATA_I18N_DOWNLOAD_URL_FORMAT.replace('%browser', browser),
-        file: 'filters_i18n.json',
+        file: LOCAL_I18N_METADATA_FILE_NAME,
     });
 
     // eslint-disable-next-line no-restricted-syntax
@@ -65,14 +89,21 @@ const getUrlsOfFiltersResources = (browser) => {
  * Normalize response
  *
  * @param response Filter rules response
- * @return Normalized response
+ * @returns Normalized response
  */
 const normalizeResponse = (response) => {
     const partOfResponse = response.substring(0, 200);
-    response = response.replace(partOfResponse.match(CHECKSUM_PATTERN)[0], '');
+    const match = partOfResponse.match(CHECKSUM_PATTERN);
+    if (match) {
+        response = response.replace(match[0], '');
+    }
     response = response.replace(/\r/g, '');
     response = response.replace(/\n+/g, '\n');
     return response;
+};
+
+export const calculateChecksum = (body) => {
+    return crypto.createHash('md5').update(normalizeResponse(body)).digest('base64').replace(/=/g, '');
 };
 
 /**
@@ -91,7 +122,7 @@ const validateChecksum = (url, body) => {
         cliLog.error(`Filter rules from ${url.url} doesn't contain a checksum ${partOfResponse}`);
     }
 
-    const bodyChecksum = crypto.createHash('md5').update(normalizeResponse(body)).digest('base64').replace(/=/g, '');
+    const bodyChecksum = calculateChecksum(body);
 
     if (bodyChecksum !== checksumMatch[1]) {
         cliLog.error(`Wrong checksum: found ${bodyChecksum}, expected ${checksumMatch[1]}`);
@@ -120,6 +151,7 @@ const downloadFilter = async (url, browser) => {
 
 /**
  * Download filter
+ *
  * @param browser Which browser filters to download
  */
 const startDownload = async (browser) => {

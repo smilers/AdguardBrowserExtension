@@ -5,9 +5,9 @@ deployment:
   source-plan: ADGEXT-BEBETASPECS
 release-naming: ${bamboo.inject.version}-beta
 environments:
-  - static.adguard.com
-  - Chrome WebStore
-static.adguard.com:
+  - static.adtidy.org
+  - Chrome WebStore MV3
+static.adtidy.org:
   triggers: []
   tasks:
     - clean
@@ -17,24 +17,23 @@ static.adguard.com:
         force-clean-build: 'true'
     - artifact-download:
         artifacts:
-          - name: edge.zip
           - name: chrome.zip
-          - name: firefox.zip
           - name: build.txt
           - name: chrome.crx
           - name: update.xml
-          - name: firefox.xpi
-          - name: update.json
-          - name: adguard-api.zip
     - script:
         interpreter: SHELL
         scripts:
           - |-
             set -x
             set -e
+
+            # Fix mixed logs
+            exec 2>&1
+
             ls -la
 
-            ./bamboo-deploy-publisher/deploy.sh browser-extension-beta
+            ./bamboo-deploy-publisher/deploy.sh chrome-extension-beta
   final-tasks: []
   variables: {}
   requirements:
@@ -45,9 +44,9 @@ static.adguard.com:
       recipients:
         - webhook:
             name: Deploy webhook
-            url: http://prod.jirahub.service.eu.consul/v1/webhook/bamboo?channel=adguard-qa
+            url: http://prod.jirahub.service.eu.consul/v1/webhook/bamboo?channel=adguard-qa-extensions-builds
 
-Chrome WebStore:
+Chrome WebStore MV3:
   triggers: []
   tasks:
     - clean
@@ -57,20 +56,20 @@ Chrome WebStore:
         force-clean-build: 'true'
     - artifact-download:
         artifacts:
-          - name: edge.zip
-          - name: chrome.zip
-          - name: firefox.zip
-          - name: build.txt
-          - name: chrome.crx
-          - name: update.xml
+          - name: chrome-mv3.zip
     - script:
         interpreter: SHELL
         scripts:
           - |-
             set -x
             set -e
+
+            # Fix mixed logs
+            exec 2>&1
+
             ls -la
 
+            # Publish MV3 Beta to Experimental MV3 item
             ./bamboo-deploy-publisher/deploy.sh browser-extension-webstore-beta
   final-tasks: []
   variables: {}
@@ -82,4 +81,4 @@ Chrome WebStore:
       recipients:
         - webhook:
             name: Deploy webhook
-            url: http://prod.jirahub.service.eu.consul/v1/webhook/bamboo?channel=adguard-qa
+            url: http://prod.jirahub.service.eu.consul/v1/webhook/bamboo?channel=adguard-qa-extensions-builds

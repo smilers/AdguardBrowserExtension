@@ -17,11 +17,26 @@
     "options_antibanner_custom_filter_already_exists": {
         "message": "מסנן מותאם אישית זה התווסף כבר"
     },
-    "popup_header_cta_link": {
-        "message": "רוצה לחסום יותר?"
+    "options_filters_annoyances_consent_description": {
+        "message": "אתה עומד להפעיל מסנן מטרד אחד או יותר. הם חוסמים אלמנטים שאינם קשורים לתוכן האתר או קשורים אך מעצבנים לחוויית המשתמש שלך. בעלי אתרים עשויים לשקול אלמנטים אלה כחובה: אם תחסום אותם, ייתכן שאתה מפר את התנאים שלהם; ייתכן שפונקציונליות מסוימת של אתרי אינטרנט לא תהיה זמינה או שלא תפעל כראוי. אתה מבין ומסכים כי אתה האחראי הבלעדי לציית לתנאי השימוש של אתרים שבהם אתה מבקר וכי AdGuard אינה אחראית לעמידתך בתנאי השימוש של אתרים שבהם אתה מבקר."
+    },
+    "options_filters_annoyances_consent_question": {
+        "message": "הפעל מסננים אלה?"
+    },
+    "options_filters_annoyances_consent_filter_policy": {
+        "message": "לפרטים על מה שחוסמים מסנני המטרד של AdGuard, ראה <a>מדיניות סינון<\/a>"
+    },
+    "options_filters_annoyances_consent_enable_button": {
+        "message": "אפשר"
+    },
+    "popup_header_update_filters": {
+        "message": "בדוק אחר עדכוני מסננים"
     },
     "options_popup_import_settings_wrong_file_ext": {
         "message": "סיומת הקובץ חייבת להיות %extension%"
+    },
+    "popup_resume_protection_button": {
+        "message": "המשך"
     },
     "popup_adguard_for_ios": {
         "message": "AdGuard עבור iOS"
@@ -40,9 +55,6 @@
     },
     "options_popup_version_update_disable_notification": {
         "message": "השבת התראות"
-    },
-    "popup_adguard_footer_title": {
-        "message": "קבל את AdGuard עבור הנייד שלך"
     },
     "options_popup_call_to_action": {
         "message": "הכנס כתובת תקפה או נתיב קובץ תקף של המסנן לתוך השדה לעיל."
@@ -96,6 +108,7 @@
         "message": "AdGuard AdBlocker"
     },
     "description": {
+        "description": "TEXT MAX LENGTH: 132",
         "message": "הרחבה ללא תחרות של חסימת פרסומות נגד פרסום וחלונות קופצים. חוסמת פרסומות בפייסבוק, ביוטיוב ובכל האתרים האחרים."
     },
     "background_tab_title": {
@@ -120,16 +133,13 @@
         "message": "כללי משתמש"
     },
     "filtering_log_modified_rules": {
-        "message": "כללים שהשתנו:"
-    },
-    "filtering_log_privacy_applied_rules": {
-        "message": "מצב סתר מוחל"
+        "message": "כללים שהשתנו: %rules_count%"
     },
     "filtering_log_in_allowlist": {
         "message": "האתר מותר"
     },
     "filtering_log_hide_referrer": {
-        "message": "מפנה מוסתר מצדדים שלישיים"
+        "message": "מפנה הסתר מצדדים שלישיים"
     },
     "filtering_log_hide_search_queries": {
         "message": "שאילתות החיפוש שלך מוסתרות"
@@ -191,11 +201,17 @@
     "options_empty_custom_filter": {
         "message": "אין לך עדיין מסננים מותאמים אישית כלשהם"
     },
+    "options_loader_applying_changes": {
+        "message": "מחיל שינויים…"
+    },
     "options_editor_indicator_saving": {
         "message": "שומר…"
     },
     "options_editor_indicator_saved": {
         "message": "נשמר"
+    },
+    "options_popup_import_error_required_privacy_permission": {
+        "message": "כדי לייבא קובץ הגדרות זה, התר אל AdGuard לשנות את ההגדרות קשורות הפרטיות שלך."
     },
     "options_popup_import_success_title": {
         "message": "הגדרות יובאו בהצלחה"
@@ -212,11 +228,11 @@
     "options_popup_trusted_filter_description": {
         "message": "מסננים מהימנים יכולים להשתמש במסגלים עוצמתיים של כללים של סינון עוצמתי אשר יכולים להיות מסוכנים בידיים הלא נכונות. אל תסמן תיבה זו אלא אם אתה סומך על המסנן לחלוטין."
     },
-    "popup_site_filtering_state": {
-        "message": "הגנה באתר זה"
-    },
     "popup_site_filtering_state_secure_page": {
         "message": "דף מאובטח"
+    },
+    "popup_site_filtering_state_loading": {
+        "message": "...טוען"
     },
     "popup_site_filtering_state_enabled": {
         "message": "הגנה מאופשרת"
@@ -226,6 +242,9 @@
     },
     "popup_site_filtering_state_paused": {
         "message": "ההגנה מושהית"
+    },
+    "popup_site_filtering_state_subtitle_all_websites": {
+        "message": "עבור כל האתרים"
     },
     "popup_site_exception_information": {
         "message": "סינון מושבת מאחר שהוא יכול להפריע לתפעול של אתר זה."
@@ -335,32 +354,8 @@
     "popup_security_report": {
         "message": "בדוק אבטחת אתר"
     },
-    "popup_reset_custom_rules": {
-        "message": "הסר את כל כללי המשתמש עבור דף זה"
-    },
-    "popup_open_settings": {
-        "message": "הגדרות AdGuard"
-    },
-    "popup_block_site_ads_android": {
-        "message": "חסום פרסומות באתר זה"
-    },
-    "popup_security_report_android": {
-        "message": "דוח אבטחה"
-    },
-    "popup_in_allowlist_android": {
-        "message": "ברשימת ההיתר"
-    },
-    "popup_site_protection_disabled_android": {
-        "message": "ההגנה מושהית"
-    },
-    "popup_open_log_android": {
-        "message": "יומן סינון"
-    },
     "context_block_site_ads": {
         "message": "חסום פרסומות באתר זה…"
-    },
-    "context_block_site_element": {
-        "message": "חסום אלמנט…"
     },
     "context_security_report": {
         "message": "בדוק אבטחת אתר…"
@@ -482,9 +477,6 @@
     "filtering_modal_rules": {
         "message": "כללים:"
     },
-    "filtering_modal_privacy": {
-        "message": "מצב סתר:"
-    },
     "filtering_modal_filter": {
         "message": "מסנן:"
     },
@@ -553,6 +545,18 @@
     },
     "filtering_modal_hide_full_url": {
         "message": "הסתר מען מלא"
+    },
+    "filtering_modal_show_full_rule": {
+        "message": "הראה כלל מלא"
+    },
+    "filtering_modal_hide_full_rule": {
+        "message": "הסתר כלל מלא"
+    },
+    "filtering_modal_show_full_element": {
+        "message": "הראה אלמנט מלא"
+    },
+    "filtering_modal_hide_full_element": {
+        "message": "הסתר אלמנט מלא"
     },
     "filtering_modal_copy_to_clipboard": {
         "message": "העתק ללוח גזירה"
@@ -629,8 +633,14 @@
     "options_import_settings": {
         "message": "ייבא הגדרות"
     },
+    "options_report_bug": {
+        "message": "דווח על תקל"
+    },
+    "options_leave_feedback": {
+        "message": "השאר משוב"
+    },
     "options_privacy": {
-        "message": "מצב סתר"
+        "message": "הגנת מעקב"
     },
     "options_update_antibanner_filters": {
         "message": "בדוק אחר עדכוני מסננים"
@@ -689,6 +699,42 @@
     "options_miscellaneous_settings": {
         "message": "הגדרות נוספות"
     },
+    "options_rule_limits": {
+        "message": "מגבלות כללים"
+    },
+    "options_rule_limits_description_link": {
+        "message": "למד עוד על Manifest V3"
+    },
+    "options_rule_limits_dynamic": {
+        "message": "כללים דינמיים"
+    },
+    "options_rule_limits_dynamic_user_rules": {
+        "message": "כללים שנוספו על ידי המשתמש, כגון כללי משתמש ומסננים מותאמים אישית"
+    },
+    "options_rule_limits_static_rulesets": {
+        "message": "כללים סטטיים"
+    },
+    "options_rule_limits_static_rules": {
+        "message": "כללים סטטיים"
+    },
+    "options_rule_limits_warning_title": {
+        "message": "הדפדפן שינה את רשימת המסננים הפעילים"
+    },
+    "options_rule_limits_warning_explanation_title": {
+        "message": "מה קרה?"
+    },
+    "options_rule_limits_warning_explanation_description": {
+        "message": "חריגה מהמגבלה של כללים מובנים פעילים לאחר עדכון או הוספת תוסף חדש. לפי Manifest V3, דפדפן Chrome שלך הגיב על ידי השבתת כל המסננים המובנים של התוסף מלבד אלה המוגדרים כברירת מחדל."
+    },
+    "options_rule_limits_warning_list_enabled_before_title": {
+        "message": "מסננים מאופשרים לפני העדכון"
+    },
+    "options_rule_limits_warning_list_enabled_now_title": {
+        "message": "מסננים מאופשרים כעת"
+    },
+    "options_rule_limits_warning_actions_title": {
+        "message": "הפעולות האפשריות שלך"
+    },
     "options_show_adguard_full_version_title": {
         "message": "הראה מידע על הגרסה המלאה של AdGuard"
     },
@@ -726,10 +772,10 @@
         "message": "השתמש במסננים ממוטבים"
     },
     "options_use_optimized_filters_desc": {
-        "message": "רשימות של מסננים ממוטבים עבור מכשירים ניידים"
+        "message": "משתמש בגרסאות קצרות יותר של מסננים רק עם הכללים הפופולריים ביותר כדי לחסוך תעבורה. מתאים יותר לדפדפני נייד"
     },
     "options_privacy_title": {
-        "message": "מצב סתר"
+        "message": "הגנת מעקב"
     },
     "options_privacy_desc": {
         "message": "הגן על זהותך ועל המידע האישי הרגיש שלך מפני אלפי עוקבנים מקוונים ע״י חסימת שיטות המעקב הפופולריות ביותר."
@@ -747,7 +793,7 @@
         "message": "הסתר את השאילתות עבור אתרים שביקרת בהם דרך מנוע חיפוש."
     },
     "options_send_not_track_title": {
-        "message": "שלח אותות לאתרים לא לעקוב אחריך"
+        "message": "בקש מאתרים לא לעקוב אחריך"
     },
     "options_send_not_track_desc": {
         "message": "שלח את האותות <gpc>בקרה גלובלית של פרטיות<\/gpc> ו<dnt>אל תעקוב<\/dnt> אל האתרים שאתה מבקר בהם."
@@ -777,13 +823,13 @@
         "message": "הסר פרמטרי מעקב"
     },
     "options_strip_tracking_params_description": {
-        "message": "כאשר מאופשר, מסנן מעקב מענים של AdGuard משמש כדי להסיר פרמטרי מעקב ממענים של דפים."
+        "message": "הסר פרמטרים מבקשות רשת עם מסנן מעקב מענים של AdGuard."
     },
     "options_block_known_trackers_title": {
-        "message": "חסום עוקבנים ידועים"
+        "message": "חסום עוקבנים"
     },
     "options_block_known_trackers_description": {
-        "message": "כאשר מאופשר, מסנן הגנה מפני מעקב של AdGuard משמש כדי לחסום עוקבנים ידועים."
+        "message": "חסום עוקבנים וכלי אנליטיקת רשת עם מסנן הגנה מפני מעקב של AdGuard."
     },
     "options_third_party_title": {
         "message": "השמדה עצמית של עוגיות צד שלישי"
@@ -825,7 +871,7 @@
         "message": "מתג הגנה"
     },
     "short_name": {
-        "message": "AdGuard AdBlocker"
+        "message": "AdGuard"
     },
     "options_about": {
         "message": "אודות"
@@ -852,13 +898,10 @@
         "message": "הסר"
     },
     "options_nav_better_than_extension": {
-        "message": "למה התוכנית השלמה של AdGuard טובה יותר מההרחבה?"
+        "message": "למה היישום של AdGuard טוב יותר מההרחבה?"
     },
     "options_nav_compare": {
-        "message": "איך הם בהשוואה"
-    },
-    "options_nav_hide": {
-        "message": "הסתר"
+        "message": "השווה"
     },
     "options_filters_search": {
         "message": "חפש"
@@ -1018,5 +1061,14 @@
     },
     "blocking_pages_btn_proceed": {
         "message": "המשך בכל זאת"
+    },
+    "text_collapser_show_default": {
+        "message": "הראה מלל מלא"
+    },
+    "text_collapser_hide_default": {
+        "message": "הסתר מלל מלא"
+    },
+    "close_button_title": {
+        "message": "סגור"
     }
 }

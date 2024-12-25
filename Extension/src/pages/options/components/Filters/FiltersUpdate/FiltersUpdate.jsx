@@ -1,7 +1,26 @@
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, { useContext } from 'react';
 import { observer } from 'mobx-react';
 
 import { reactTranslator } from '../../../../../common/translators/reactTranslator';
+import { translator } from '../../../../../common/translators/translator';
 import { rootStore } from '../../../stores/RootStore';
 
 import './filters-update.pcss';
@@ -15,36 +34,20 @@ const formatOptions = {
 };
 
 const FiltersUpdate = observer(() => {
-    const { settingsStore, uiStore } = useContext(rootStore);
+    const { settingsStore } = useContext(rootStore);
 
     const {
         rulesCount,
-        lastUpdateTime,
+        latestCheckTime,
         filtersUpdating,
+        isUpdateFiltersButtonActive,
     } = settingsStore;
 
     const updateClickHandler = async () => {
-        try {
-            const updates = await settingsStore.updateFilters();
-            const filterNames = updates.map((filter) => filter.name).join(', ');
-            let description;
-            if (updates.length === 0) {
-                description = `${filterNames} ${reactTranslator.getMessage('options_popup_update_not_found')}`;
-            } else if (updates.length === 1) {
-                description = `${filterNames} ${reactTranslator.getMessage('options_popup_update_filter')}`;
-            } else if (updates.length > 1) {
-                description = `${filterNames} ${reactTranslator.getMessage('options_popup_update_filters')}`;
-            }
-            uiStore.addNotification({ description });
-        } catch (error) {
-            uiStore.addNotification({
-                title: reactTranslator.getMessage('options_popup_update_title_error'),
-                description: reactTranslator.getMessage('options_popup_update_error'),
-            });
-        }
+        await settingsStore.updateFilters();
     };
 
-    const dateObj = new Date(lastUpdateTime);
+    const dateObj = new Date(latestCheckTime);
 
     return (
         <div className="filters-update">
@@ -60,7 +63,8 @@ const FiltersUpdate = observer(() => {
                 type="button"
                 onClick={updateClickHandler}
                 className="button button--m button--transparent filters-update__btn"
-                title={reactTranslator.getMessage('options_update_antibanner_filters')}
+                title={translator.getMessage('options_update_antibanner_filters')}
+                disabled={!isUpdateFiltersButtonActive || filtersUpdating}
             >
                 {filtersUpdating
                     ? reactTranslator.getMessage('options_check_update_progress')

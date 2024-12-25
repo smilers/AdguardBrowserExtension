@@ -11,9 +11,14 @@ Compiler/certificate.pem
 *.iml
 tags
 extensions
-dist/
+.pnpm-store/
+pnpm-debug.log
 yarn-error.log
 node_modules
 private
 tmp
 output.md
+coverage/
+.eslintcache
+Makefile
+.env

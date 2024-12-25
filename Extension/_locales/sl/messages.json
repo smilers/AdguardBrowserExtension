@@ -17,11 +17,29 @@
     "options_antibanner_custom_filter_already_exists": {
         "message": "Ta filter po meri je že bil dodan"
     },
-    "popup_header_cta_link": {
-        "message": "Želite onemogočiti še več?"
+    "options_filters_annoyances_consent_title": {
+        "message": "Pozorno preberite, preden omogočite filtre za motnje"
+    },
+    "options_filters_annoyances_consent_description": {
+        "message": "Omogočili boste enega ali več filtrov motenj. Onemogočamo elemente, ki bodisi niso povezani z vsebino spletne strani bodisi so povezani, vendar so moteči za vašo uporabniško izkušnjo. Lastniki spletnih strani lahko menijo, da so ti elementi obvezni: če jih onemogočite, morda kršite njihove pogoje; nekatere funkcije spletnih strani morda niso na voljo ali morda ne delujejo pravilno. Razumete in se strinjate, da ste sami odgovorni za upoštevanje pogojev uporabe spletnih strani, ki jih obiščete, in da AdGuard ni odgovoren za vaše upoštevanje pogojev uporabe obiskanih spletnih strani."
+    },
+    "options_filters_annoyances_consent_question": {
+        "message": "Želite omogočiti ta filter?"
+    },
+    "options_filters_annoyances_consent_filter_policy": {
+        "message": "Za podrobnosti o tem, kaj onemogočajo filtri motenj AdGuard, glejte <a>Politika filtra<\/a>"
+    },
+    "options_filters_annoyances_consent_enable_button": {
+        "message": "Omogoči"
+    },
+    "popup_header_update_filters": {
+        "message": "Preveri obstoj posodobitev filtra"
     },
     "options_popup_import_settings_wrong_file_ext": {
         "message": "Končnica datoteke mora biti %extension%"
+    },
+    "popup_resume_protection_button": {
+        "message": "Nadaljuj"
     },
     "popup_adguard_for_ios": {
         "message": "AdGuard za iOS"
@@ -40,9 +58,6 @@
     },
     "options_popup_version_update_disable_notification": {
         "message": "Onemogočite obvestila"
-    },
-    "popup_adguard_footer_title": {
-        "message": "Dobite AdGuard za vaš mobilnik"
     },
     "options_popup_call_to_action": {
         "message": "V zgornje polje vnesite veljaven URL ali pot datoteke v filter."
@@ -96,7 +111,8 @@
         "message": "AdGuard Zaviralec oglasov"
     },
     "description": {
-        "message": "Neujemajoča se razširitev za zaviranje oglasov proti oglaševanju in pojavnih oknih. Zavira oglase na Facebooku, YouTubeu in vseh drugih spletnih straneh."
+        "description": "TEXT MAX LENGTH: 132",
+        "message": "Neujemajoča se razširitev za zaviranje oglasov. Zavira oglase na Facebooku, YouTubeu in vseh drugih spletnih straneh."
     },
     "background_tab_title": {
         "message": "Zavihek v ozadju"
@@ -120,10 +136,7 @@
         "message": "Uporabniška pravila"
     },
     "filtering_log_modified_rules": {
-        "message": "Spremenjeno pravil:"
-    },
-    "filtering_log_privacy_applied_rules": {
-        "message": "Uporabljen je bil 'Skrit način'"
+        "message": "Spremenjena pravila: %rules_count%"
     },
     "filtering_log_in_allowlist": {
         "message": "Stran je dovoljena"
@@ -191,11 +204,17 @@
     "options_empty_custom_filter": {
         "message": "Nimate še nobenih filtrov po meri"
     },
+    "options_loader_applying_changes": {
+        "message": "Uveljavitev sprememb..."
+    },
     "options_editor_indicator_saving": {
         "message": "Shranjevanje..."
     },
     "options_editor_indicator_saved": {
         "message": "Shranjeno"
+    },
+    "options_popup_import_error_required_privacy_permission": {
+        "message": "Če želite uvoziti to datoteko z nastavitvami, dovolite AdGuardu, da spremeni vaše nastavitve, povezane z zasebnostjo."
     },
     "options_popup_import_success_title": {
         "message": "Nastavitve so bile uspešno uvožene"
@@ -212,11 +231,11 @@
     "options_popup_trusted_filter_description": {
         "message": "Pri zaupanja vrednim filtrom lahko uporabite modifikatorje pravil filtriranja, ki so lahko nevarni v napačnih rokah. Ne označujte tega polja, razen če mu popolnoma zaupate."
     },
-    "popup_site_filtering_state": {
-        "message": "Zaščita na tej spletni strani"
-    },
     "popup_site_filtering_state_secure_page": {
         "message": "Zaščitena stran"
+    },
+    "popup_site_filtering_state_loading": {
+        "message": "Nalaganje..."
     },
     "popup_site_filtering_state_enabled": {
         "message": "Zaščita je omogočena"
@@ -226,6 +245,9 @@
     },
     "popup_site_filtering_state_paused": {
         "message": "Zaščita je začasno zaustavljena"
+    },
+    "popup_site_filtering_state_subtitle_all_websites": {
+        "message": "za vse spletne strani"
     },
     "popup_site_exception_information": {
         "message": "Filtriranje je onemogočeno, ker lahko moti operacijo s to spletno stranjo."
@@ -335,32 +357,8 @@
     "popup_security_report": {
         "message": "Preveri varnost spletne strani"
     },
-    "popup_reset_custom_rules": {
-        "message": "Izbriši vsa uporabniška pravila za to stran"
-    },
-    "popup_open_settings": {
-        "message": "Nastavitve AdGuarda"
-    },
-    "popup_block_site_ads_android": {
-        "message": "Onemogoči oglase na spletni strani"
-    },
-    "popup_security_report_android": {
-        "message": "Varnostno poročilo"
-    },
-    "popup_in_allowlist_android": {
-        "message": "Na seznam dovoljenih"
-    },
-    "popup_site_protection_disabled_android": {
-        "message": "Zaščita je začasno ustavljena"
-    },
-    "popup_open_log_android": {
-        "message": "Dnevnik filtriranja"
-    },
     "context_block_site_ads": {
         "message": "Onemogoči oglase na tej spletni strani..."
-    },
-    "context_block_site_element": {
-        "message": "Onemogoči element..."
     },
     "context_security_report": {
         "message": "Preveri varnost spletne strani..."
@@ -482,9 +480,6 @@
     "filtering_modal_rules": {
         "message": "Pravila:"
     },
-    "filtering_modal_privacy": {
-        "message": "Skrit način:"
-    },
     "filtering_modal_filter": {
         "message": "Filter:"
     },
@@ -553,6 +548,18 @@
     },
     "filtering_modal_hide_full_url": {
         "message": "Skrij celoten URL"
+    },
+    "filtering_modal_show_full_rule": {
+        "message": "Prikaži celotno pravilo"
+    },
+    "filtering_modal_hide_full_rule": {
+        "message": "Skrij celotno pravilo"
+    },
+    "filtering_modal_show_full_element": {
+        "message": "Prikaži celoten element"
+    },
+    "filtering_modal_hide_full_element": {
+        "message": "Skrij celoten element"
     },
     "filtering_modal_copy_to_clipboard": {
         "message": "Kopiraj v odložišče"
@@ -629,8 +636,14 @@
     "options_import_settings": {
         "message": "Uvozi nastavitve"
     },
+    "options_report_bug": {
+        "message": "Prijavi napako"
+    },
+    "options_leave_feedback": {
+        "message": "Pošlji povratne informacije"
+    },
     "options_privacy": {
-        "message": "Skrit način"
+        "message": "Zaščita pred sledenjem"
     },
     "options_update_antibanner_filters": {
         "message": "Preveri obstoj posodobitev filtrov"
@@ -689,6 +702,42 @@
     "options_miscellaneous_settings": {
         "message": "Razno"
     },
+    "options_rule_limits": {
+        "message": "Omejitve pravil"
+    },
+    "options_rule_limits_description_link": {
+        "message": "Izvedite več o Manifestu V3"
+    },
+    "options_rule_limits_dynamic": {
+        "message": "Dinamična pravila"
+    },
+    "options_rule_limits_dynamic_user_rules": {
+        "message": "Pravila, ki jih doda uporabnik, kot so uporabniška pravila in filtri po meri"
+    },
+    "options_rule_limits_static_rulesets": {
+        "message": "Statični nizi pravil"
+    },
+    "options_rule_limits_static_rules": {
+        "message": "Statična pravila"
+    },
+    "options_rule_limits_warning_title": {
+        "message": "Brskalnik je spremenil seznam aktivnih filtrov"
+    },
+    "options_rule_limits_warning_explanation_title": {
+        "message": "Kaj se je zgodilo?"
+    },
+    "options_rule_limits_warning_explanation_description": {
+        "message": "Omejitev aktivnih vgrajenih pravil je bila presežena po posodobitvi ali dodajanju nove razširitve. Glede na Manifest V3 se je vaš brskalnik Chrome odzval tako, da je onemogočil vse vgrajene filtre razširitve, razen privzetih."
+    },
+    "options_rule_limits_warning_list_enabled_before_title": {
+        "message": "Filtri omogočeni pred posodobitvijo"
+    },
+    "options_rule_limits_warning_list_enabled_now_title": {
+        "message": "Filtri so zdaj omogočeni"
+    },
+    "options_rule_limits_warning_actions_title": {
+        "message": "Vaša možna dejanja"
+    },
     "options_show_adguard_full_version_title": {
         "message": "Prikaži podatke o polni različici AdGuarda"
     },
@@ -726,16 +775,16 @@
         "message": "Uporabi optimizirane filtre"
     },
     "options_use_optimized_filters_desc": {
-        "message": "Seznami filtrov, optimizirani za mobilne naprave"
+        "message": "Uporablja krajše različice filtrov z najbolj priljubljenimi pravili za prihranek prometa. Bolj primeren za mobilne brskalnike"
     },
     "options_privacy_title": {
-        "message": "Skrit način"
+        "message": "Zaščita pred sledenjem"
     },
     "options_privacy_desc": {
         "message": "Obvarujte svojo identiteto in občutljive osebne podatke iz tisočih spletnih sledilnikov z zaviranjem najbolj pogostih metod sledenja."
     },
     "options_hide_referrer_title": {
-        "message": "Skrij napotitelja pred tretjimi osebami"
+        "message": " Skrij napotitelja iz tretjih straneh"
     },
     "options_hide_referrer_desc": {
         "message": "Preprečite tretjim osebam, da vedo, katero spletno stran obiskujete"
@@ -747,10 +796,10 @@
         "message": "Skrijte poizvedbe spletnih strani, ki ste jih obiskali iz iskalnika."
     },
     "options_send_not_track_title": {
-        "message": "Pošiljaj spletnim stranem signale, da mi ne sledijo"
+        "message": "Prosite spletna mesta, naj vam ne sledijo"
     },
     "options_send_not_track_desc": {
-        "message": "Pošljite signala <gpc>Globalni nadzor zasebnosti<\/gpc> and <dnt>Ne sledi<\/dnt> na spletne strani, ki jih obiskujete."
+        "message": "Pošljite zahtevi <gpc>Globalni nadzor zasebnosti<\/gpc> in <dnt>Ne sledi<\/dnt> spletnim stranem, ki jih obiščete."
     },
     "options_stripped_tracking_parameters": {
         "message": "Odstranjeni so parametri sledenja"
@@ -777,13 +826,13 @@
         "message": "Odstrani sledilne parametre"
     },
     "options_strip_tracking_params_description": {
-        "message": "Ko je omogočen, se AdGuard filter sledilcev URL-jem uporablja za odstranitev parametrov sledenja iz URL-jev strani."
+        "message": "Odstranite parametre iz spletnih zahtev s filtrom AdGuard Sledenje URL."
     },
     "options_block_known_trackers_title": {
-        "message": "Onemogoča znane sledilce"
+        "message": "Onemogoči sledilce"
     },
     "options_block_known_trackers_description": {
-        "message": "Ko je omogočen, se AdGuard filter za zaščito pred sledenjem uporablja za zaviranje znanih sledilcev."
+        "message": "Onemogočite sledilnike in orodja za spletno analitiko s filtrom AdGuard Zaščita pred sledenjem."
     },
     "options_third_party_title": {
         "message": "Samouničilni piškotki tretje strani"
@@ -825,7 +874,7 @@
         "message": "Zaščitno stikalo"
     },
     "short_name": {
-        "message": "AdGuard Zaviralec oglasov"
+        "message": "AdGuard"
     },
     "options_about": {
         "message": "Vizitka"
@@ -852,13 +901,10 @@
         "message": "Odstrani"
     },
     "options_nav_better_than_extension": {
-        "message": "Zakaj je AdGuard polnopravni program boljši od razširitve?"
+        "message": "Zakaj je aplikacija AdGuard boljša od razširitve?"
     },
     "options_nav_compare": {
-        "message": "Kako se primerjajo"
-    },
-    "options_nav_hide": {
-        "message": "Skrij"
+        "message": "Primerjaj"
     },
     "options_filters_search": {
         "message": "Poišči"
@@ -1018,5 +1064,18 @@
     },
     "blocking_pages_btn_proceed": {
         "message": "Vseeno nadaljuj"
+    },
+    "text_collapser_show_default": {
+        "message": "Prikaži celotno besedilo"
+    },
+    "text_collapser_hide_default": {
+        "message": "Skrij celotno besedilo"
+    },
+    "close_button_title": {
+        "message": "Zapri"
+    },
+    "filtering_modal_original_rules": {
+        "description": "WARNING: correct number of plural forms is required",
+        "message": "| Izvirno pravilo | Izvirna pravila | Izvirna pravila | Izvirna pravila"
     }
 }

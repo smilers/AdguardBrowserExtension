@@ -17,11 +17,32 @@
     "options_antibanner_custom_filter_already_exists": {
         "message": "Bộ lọc tuỳ chỉnh đã được thêm từ trước"
     },
+    "options_filters_annoyances_consent_title": {
+        "message": "Vui lòng đọc kĩ trước khi kích hoạt các bộ lọc chống làm phiền"
+    },
+    "options_filters_annoyances_consent_description": {
+        "message": "Bạn đang sắp kích hoạt một hoặc nhiều bộ lọc làm phiền. Chúng chặn các phần tử không liên quan đến nội dung trang web hoặc có liên quan nhưng làm phiền trải nghiệm người dùng của bạn. Chủ sở hữu trang web có thể xem xét các phần tử này là bắt buộc: nếu bạn chặn chúng, bạn có thể vi phạm các điều khoản của họ; một số chức năng của trang web có thể không khả dụng hoặc không hoạt động đúng cách. Bạn hiểu và đồng ý rằng bạn hoàn toàn chịu trách nhiệm tuân thủ các điều khoản sử dụng của các trang web bạn truy cập và rằng AdGuard không chịu trách nhiệm về việc tuân thủ các điều khoản sử dụng của các trang web bạn truy cập."
+    },
+    "options_filters_annoyances_consent_question": {
+        "message": "Bật các bộ lọc này?"
+    },
+    "options_filters_annoyances_consent_filter_policy": {
+        "message": "Để biết chi tiết về những gì bộ lọc làm phiền của AdGuard chặn, xem <a>Chính sách bộ lọc<\/a>"
+    },
+    "options_filters_annoyances_consent_enable_button": {
+        "message": "Bật"
+    },
     "popup_header_cta_link": {
-        "message": "Bạn muốn chặn thêm?"
+        "message": "Làm thế nào để tăng cường bảo vệ"
+    },
+    "popup_header_update_filters": {
+        "message": "Kiểm tra cập nhật bộ lọc"
     },
     "options_popup_import_settings_wrong_file_ext": {
         "message": "Phần mở rộng tệp phải là %extension%"
+    },
+    "popup_resume_protection_button": {
+        "message": "Tiếp tục"
     },
     "popup_adguard_for_ios": {
         "message": "AdGuard dành cho IOS"
@@ -42,7 +63,7 @@
         "message": "Tắt thông báo"
     },
     "popup_adguard_footer_title": {
-        "message": "Tải AdGuard cho điện thoại bạn"
+        "message": "Bảo vệ thiết bị di động của bạn"
     },
     "options_popup_call_to_action": {
         "message": "Nhập URL hợp lệ hoặc đường dẫn đến tệp chứa bộ lọc lên trên này."
@@ -51,7 +72,7 @@
         "message": "Bạn sẽ được đăng ký cho bộ lọc đó."
     },
     "options_popup_url_title": {
-        "message": "Đăng ký bộ lọc mới"
+        "message": "Thêm Bộ Lọc Mới"
     },
     "options_popup_url_placeholder": {
         "message": "Nhập URL hoặc đường dẫn"
@@ -96,6 +117,7 @@
         "message": "AdGuard AdBlocker"
     },
     "description": {
+        "description": "TEXT MAX LENGTH: 132",
         "message": "Ứng dụng ngăn chặn tuyệt đối quảng cáo và cửa sổ bật lên. Loại bỏ quảng cáo trên Facebook, Youtube và tất cả các trang web khác."
     },
     "background_tab_title": {
@@ -120,16 +142,19 @@
         "message": "Bộ lọc của người dùng"
     },
     "filtering_log_modified_rules": {
-        "message": "Quy tắc sửa đổi:"
+        "message": "Quy tắc sửa đổi: %rules_count%"
+    },
+    "filtering_log_stealth_rules": {
+        "message": "Quy tắc bảo vệ theo dõi: %rules_count%"
     },
     "filtering_log_privacy_applied_rules": {
-        "message": "Chế độ ẩn danh đã được áp dụng"
+        "message": "Đã áp dụng bảo vệ theo dõi"
     },
     "filtering_log_in_allowlist": {
         "message": "Trang này ở trong Danh sách cho phép"
     },
     "filtering_log_hide_referrer": {
-        "message": "Ẩn Tham chiếu khỏi bên thứ ba"
+        "message": "Người giới thiệu bị ẩn khỏi bên thứ ba"
     },
     "filtering_log_hide_search_queries": {
         "message": "Ẩn các truy vấn tìm kiếm bạn"
@@ -185,17 +210,29 @@
     "options_filters_filter_trusted_tag_desc": {
         "message": "Bạn đã chọn tin tưởng bộ lọc này."
     },
+    "options_filters_info_mv3_total_rules": {
+        "message": "Tổng số quy tắc: %num%"
+    },
+    "options_filters_info_mv3_specs": {
+        "message": "Thông số kỹ thuật trên Github"
+    },
     "options_add_custom_filter": {
         "message": "Thêm bộ lọc tuỳ chỉnh"
     },
     "options_empty_custom_filter": {
         "message": "Hiện tại bạn không có bất kỳ bộ lọc tuỳ chỉnh nào"
     },
+    "options_loader_applying_changes": {
+        "message": "Đang áp dụng thay đổi..."
+    },
     "options_editor_indicator_saving": {
         "message": "Đang lưu..."
     },
     "options_editor_indicator_saved": {
         "message": "Đã lưu"
+    },
+    "options_popup_import_error_required_privacy_permission": {
+        "message": "Để nhập tệp cài đặt này, hãy cho phép AdGuard thay đổi cài đặt liên quan đến quyền riêng tư của bạn."
     },
     "options_popup_import_success_title": {
         "message": "Nhập thiết lập thành công"
@@ -212,20 +249,35 @@
     "options_popup_trusted_filter_description": {
         "message": "Các bộ lọc tin cậy có thể sẽ dùng các quy tắc lọc rất mạnh điều này sẽ gây nguy hiểm cho người dùng nếu chọn sai. Đừng chọn điều này trừ khi bạn hoàn toàn tin tưởng vào nó."
     },
-    "popup_site_filtering_state": {
-        "message": "Bảo vệ trên website này"
-    },
     "popup_site_filtering_state_secure_page": {
         "message": "Trang bảo mật"
+    },
+    "popup_site_filtering_state_loading": {
+        "message": "Đang tải..."
+    },
+    "popup_site_filtering_state_enabling": {
+        "message": "Đang bật tính năng bảo vệ..."
     },
     "popup_site_filtering_state_enabled": {
         "message": "Bảo vệ được kích hoạt"
     },
+    "popup_site_filtering_state_disabling": {
+        "message": "Đang tắt chế độ bảo vệ..."
+    },
     "popup_site_filtering_state_disabled": {
         "message": "Bảo vệ bị vô hiệu"
     },
+    "popup_site_filtering_state_pausing": {
+        "message": "Đang tạm dừng bảo vệ..."
+    },
     "popup_site_filtering_state_paused": {
         "message": "Bảo vệ bị tạm dừng"
+    },
+    "popup_site_filtering_state_resuming": {
+        "message": "Đang tiếp tục bảo vệ..."
+    },
+    "popup_site_filtering_state_subtitle_all_websites": {
+        "message": "cho tất cả các trang web"
     },
     "popup_site_exception_information": {
         "message": "Tính năng lọc bị vô hiệu vì nó có thể gây xung đột với trang web này."
@@ -335,32 +387,11 @@
     "popup_security_report": {
         "message": "Kiểm tra bảo mật website"
     },
-    "popup_reset_custom_rules": {
-        "message": "Đặt lại tất cả Quy tắc của người dùng cho trang này"
-    },
-    "popup_open_settings": {
-        "message": "Cài đặt AdGuard"
-    },
-    "popup_block_site_ads_android": {
-        "message": "Chặn quảng cáo trên website này"
-    },
-    "popup_security_report_android": {
-        "message": "Báo cáo bảo mật"
-    },
-    "popup_in_allowlist_android": {
-        "message": "Trong Danh sách cho phép"
-    },
-    "popup_site_protection_disabled_android": {
-        "message": "Bảo vệ bị tạm dừng"
-    },
-    "popup_open_log_android": {
-        "message": "Nhật ký lọc"
+    "popup_reset_page_user_rules": {
+        "message": "Xóa quy tắc người dùng cho trang web này"
     },
     "context_block_site_ads": {
         "message": "Chặn quảng cáo trên website này..."
-    },
-    "context_block_site_element": {
-        "message": "Chặn yếu tố..."
     },
     "context_security_report": {
         "message": "Kiểm tra bảo mật website..."
@@ -483,7 +514,7 @@
         "message": "Quy tắc:"
     },
     "filtering_modal_privacy": {
-        "message": "Chế độ ẩn danh:"
+        "message": "Bảo vệ theo dõi:"
     },
     "filtering_modal_filter": {
         "message": "Bộ lọc:"
@@ -496,6 +527,9 @@
     },
     "filtering_modal_unblock": {
         "message": "Bỏ chặn"
+    },
+    "filtering_modal_remove_user": {
+        "message": "Xóa quy tắc"
     },
     "filtering_modal_preview_request_button": {
         "message": "Xem trước"
@@ -550,6 +584,18 @@
     },
     "filtering_modal_hide_full_url": {
         "message": "Ẩn toàn bộ URL"
+    },
+    "filtering_modal_show_full_rule": {
+        "message": "Hiện toàn bộ quy tắc"
+    },
+    "filtering_modal_hide_full_rule": {
+        "message": "Ẩn toàn bộ quy tắc"
+    },
+    "filtering_modal_show_full_element": {
+        "message": "Hiện toàn bộ yếu tố"
+    },
+    "filtering_modal_hide_full_element": {
+        "message": "Ẩn toàn bộ yếu tố"
     },
     "filtering_modal_copy_to_clipboard": {
         "message": "Chép vào clipboard"
@@ -626,8 +672,14 @@
     "options_import_settings": {
         "message": "Nhập cài đặt"
     },
+    "options_report_bug": {
+        "message": "Báo cáo lỗi"
+    },
+    "options_leave_feedback": {
+        "message": "Để lại phản hồi"
+    },
     "options_privacy": {
-        "message": "Chế độ ẩn danh"
+        "message": "Bảo vệ chống theo dõi"
     },
     "options_update_antibanner_filters": {
         "message": "Kiểm tra cập nhật bộ lọc"
@@ -686,6 +738,90 @@
     "options_miscellaneous_settings": {
         "message": "Cài đặt thêm"
     },
+    "options_rule_limits": {
+        "message": "Giới hạn quy tắc"
+    },
+    "options_rule_limits_description": {
+        "message": "Phần mở rộng này tuân thủ Manifest V3"
+    },
+    "options_rule_limits_description_link": {
+        "message": "Tìm hiểu thêm về Manifest V3"
+    },
+    "options_rule_limits_dynamic": {
+        "message": "Quy tắc động"
+    },
+    "options_rule_limits_dynamic_user_rules": {
+        "message": "Quy tắc do người dùng thêm vào, chẳng hạn như quy tắc người dùng và bộ lọc tùy chỉnh"
+    },
+    "options_rule_limits_dynamic_regex": {
+        "message": "Quy tắc Regex — bao gồm trong phần trên"
+    },
+    "options_rule_limits_static_rulesets": {
+        "message": "Bộ quy tắc tĩnh"
+    },
+    "options_rule_limits_static_rulesets_builtin": {
+        "message": "Bộ lọc tích hợp, chẳng hạn như Chặn phiền toái hoặc Bộ lọc theo ngôn ngữ"
+    },
+    "options_rule_limits_static_rules": {
+        "message": "Quy tắc tĩnh"
+    },
+    "options_rule_limits_static_rules_all": {
+        "message": "Quy tắc từ bộ lọc tích hợp"
+    },
+    "options_rule_limits_static_rules_regex": {
+        "message": "Quy tắc Regex — bao gồm trong phần trên"
+    },
+    "options_rule_limits_numbers": {
+        "message": "%current% trong số %maximum%"
+    },
+    "options_rule_limits_warning_title": {
+        "message": "Trình duyệt đã sửa đổi danh sách các bộ lọc đang hoạt động"
+    },
+    "options_rule_limits_warning_explanation_title": {
+        "message": "Điều gì đã xảy ra?"
+    },
+    "options_rule_limits_warning_explanation_description": {
+        "message": "Giới hạn của các quy tắc tích hợp đang hoạt động đã bị vượt quá sau khi cập nhật hoặc thêm tiện ích mở rộng mới. Theo Manifest V3, trình duyệt Chrome của bạn đã phản ứng bằng cách tắt tất cả các bộ lọc tích hợp của tiện ích mở rộng ngoại trừ các bộ lọc mặc định."
+    },
+    "options_rule_limits_warning_list_enabled_before_title": {
+        "message": "Bộ lọc được bật trước khi cập nhật"
+    },
+    "options_rule_limits_warning_list_enabled_now_title": {
+        "message": "Bộ lọc được bật ngay bây giờ"
+    },
+    "options_rule_limits_warning_actions_title": {
+        "message": "Các hành động có thể của bạn"
+    },
+    "options_rule_limits_warning_actions_delete_filters": {
+        "message": "Tùy chọn 1. Xóa các tiện ích mở rộng chặn quảng cáo không cần thiết khỏi trình duyệt của bạn. Để kích hoạt lại các bộ lọc được đề cập trong phần \"Bộ lọc được bật trước khi cập nhật\", hãy nhấp vào <a>kích hoạt lại bộ lọc.<\/a>"
+    },
+    "options_rule_limits_warning_actions_install_app": {
+        "message": "Tùy chọn 2. Cài đặt ứng dụng AdGuard Ad Blocker: ứng dụng này không có giới hạn về quy tắc lọc. <a>Tải ứng dụng AdGuard<\/a>"
+    },
+    "options_rule_limits_warning_actions_close_warning_one_filter": {
+        "message": "Tùy chọn 3. Nếu bạn hài lòng với bộ lọc mặc định hiện đang được bật, <a>hãy đóng cảnh báo này.<\/a>"
+    },
+    "options_rule_limits_warning_actions_close_warning_multiple_filters": {
+        "message": "Tùy chọn 3. Nếu bạn hài lòng với các bộ lọc mặc định hiện đang được bật, <a>hãy đóng cảnh báo này.<\/a>"
+    },
+    "options_all_limits_exceeded_warning": {
+        "message": "Bạn đã đạt đến giới hạn các quy tắc tích hợp đang hoạt động. Trình duyệt của bạn đã sửa đổi danh sách các bộ lọc tích hợp đang hoạt động. Số lượng bộ lọc được bật đã thay đổi từ %expected% thành %current%."
+    },
+    "options_limits_warning_static_filters": {
+        "message": "Bạn đã đạt đến giới hạn bộ lọc tích hợp đang hoạt động. %maximum% trong số %current% bộ lọc được bật. Để kích hoạt các quy tắc mới, hãy tắt một số bộ lọc tích hợp."
+    },
+    "options_limits_warning_static_rules": {
+        "message": "Bạn đã đạt đến giới hạn các quy tắc tích hợp đang hoạt động. %maximum% trong số %current% quy tắc được bật. Để kích hoạt các quy tắc mới, hãy tắt một số bộ lọc tích hợp."
+    },
+    "options_limits_warning_static_regex_rules": {
+        "message": "Bạn đã đạt đến giới hạn các quy tắc regex tích hợp đang hoạt động. %maximum% trong số %current% các quy tắc regex được bật. Để kích hoạt các quy tắc mới, hãy tắt một số bộ lọc tích hợp."
+    },
+    "options_limits_warning_dynamic_rules": {
+        "message": "Bạn đã đạt đến giới hạn quy tắc do người dùng thêm. %maximum% trong số %current% quy tắc đã được bật."
+    },
+    "options_limits_warning_dynamic_regex_rules": {
+        "message": "Bạn đã đạt đến giới hạn quy tắc regex do người dùng thêm. %maximum% trong số %current% quy tắc regex đã được bật."
+    },
     "options_show_adguard_full_version_title": {
         "message": "Hiện thông tin trên phiên bản AdGuard đầy đủ"
     },
@@ -723,16 +859,16 @@
         "message": "Sử dụng tối ưu hoá cho bộ lọc"
     },
     "options_use_optimized_filters_desc": {
-        "message": "Danh sách các bộ lọc được tối ưu hóa cho thiết bị di động"
+        "message": "Sử dụng các phiên bản bộ lọc ngắn hơn chỉ với các quy tắc phổ biến nhất để tiết kiệm lưu lượng truy cập. Phù hợp hơn với trình duyệt di động"
     },
     "options_privacy_title": {
-        "message": "Chế độ ẩn danh"
+        "message": "Bảo vệ chống theo dõi"
     },
     "options_privacy_desc": {
         "message": "Bảo vệ danh tính và thông tin cá nhân nhạy cảm của bạn khỏi hàng ngàn người theo dõi trực tuyến bằng cách chặn các phương pháp theo dõi phổ biến nhất."
     },
     "options_hide_referrer_title": {
-        "message": "Ẩn Tham chiếu khỏi bên thứ ba"
+        "message": "Ẩn người giới thiệu khỏi bên thứ ba"
     },
     "options_hide_referrer_desc": {
         "message": "Ngăn chặn bên thứ ba từ bất cứ trang web nào bạn đã truy cập."
@@ -744,10 +880,10 @@
         "message": "Ẩn các truy vấn cho các trang web được truy cập từ một công cụ tìm kiếm."
     },
     "options_send_not_track_title": {
-        "message": "Gửi lệnh không theo dõi cho các trang web"
+        "message": "Yêu cầu các trang web không theo dõi bạn"
     },
     "options_send_not_track_desc": {
-        "message": "Gửi tín hiệu <gpc>Toàn quyền Kiểm soát quyền riêng tư<\/gpc> và <dnt> Không theo dõi<\/dnt> đến những trang mà bạn truy cập."
+        "message": "Gửi <gpc>Kiểm soát quyền riêng tư toàn cầu<\/gpc> và <dnt>Không theo dõi<\/dnt> tới các trang bạn truy cập."
     },
     "options_stripped_tracking_parameters": {
         "message": "Các thông số theo dõi đã bị xoá"
@@ -777,10 +913,10 @@
         "message": "Nếu bật, Bộ lọc Theo dõi AdGuard URL sẽ xóa các tham số theo dõi trong URL của trang."
     },
     "options_block_known_trackers_title": {
-        "message": "Chặn các trình theo dõi đã biết"
+        "message": "Chặn trình theo dõi"
     },
     "options_block_known_trackers_description": {
-        "message": "Khi được bật, Bộ lọc Chống theo dõi của AdGuard được dùng để chặn các trình theo dõi đã biết."
+        "message": "Khi được bật, Bộ lọc theo dõi của AdGuard được sử dụng để chặn các theo dõi."
     },
     "options_third_party_title": {
         "message": "Chặn cookie bên thứ ba"
@@ -821,8 +957,11 @@
     "popup_switch_button": {
         "message": "Công tắc bảo vệ"
     },
+    "popup_limits_exceeded_warning": {
+        "message": "Trình duyệt của bạn đã sửa đổi danh sách các bộ lọc tích hợp đang hoạt động"
+    },
     "short_name": {
-        "message": "AdGuard AdBlocker"
+        "message": "AdGuard"
     },
     "options_about": {
         "message": "Giới thiệu"
@@ -854,9 +993,6 @@
     "options_nav_compare": {
         "message": "Phân biệt hai chương trình"
     },
-    "options_nav_hide": {
-        "message": "Ẩn"
-    },
     "options_filters_search": {
         "message": "Tìm kiếm"
     },
@@ -874,6 +1010,9 @@
     },
     "group_description_annoyances": {
         "message": "Xoá các cửa sổ pop-up và các thông báo phiền phức khác như các thông báo cookies."
+    },
+    "group_description_security": {
+        "message": "Bảo vệ bạn khỏi phần mềm độc hại, lừa đảo và các mối nguy trực tuyến khác."
     },
     "group_description_miscellaneous": {
         "message": "Nhiều cài đặt nhiều hơn để cấu hình lướt web với AdGuard."
@@ -983,6 +1122,9 @@
     "options_stealth_miscellaneous_title": {
         "message": "Khác"
     },
+    "options_coming_soon": {
+        "message": "Sắp ra mắt"
+    },
     "blocking_pages_malware": {
         "message": "Trang web này tại <strong>%host%<\/strong> đã được báo cái là trang nguy hiểm và vừa bị chặn dựa trên tùy chọn bảo mật của bạn."
     },
@@ -1012,5 +1154,22 @@
     },
     "blocking_pages_btn_proceed": {
         "message": "Vẫn truy cập"
+    },
+    "text_collapser_show_default": {
+        "message": "Hiện toàn bộ ký tự"
+    },
+    "text_collapser_hide_default": {
+        "message": "Ẩn toàn bộ ký tự"
+    },
+    "close_button_title": {
+        "message": "Đóng"
+    },
+    "filtering_modal_applied_rules": {
+        "description": "WARNING: correct number of plural forms is required",
+        "message": "| Quy tắc áp dụng"
+    },
+    "filtering_modal_original_rules": {
+        "description": "WARNING: correct number of plural forms is required",
+        "message": "| Quy tắc gốc"
     }
 }

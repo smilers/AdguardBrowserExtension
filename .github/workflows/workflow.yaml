@@ -1,46 +1,58 @@
 name: Tests Browser Extension
 
+env:
+  PNPM_VERSION: 8
+  NODE_VERSION: 20
+
 on: push
 
 jobs:
   test:
-
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - name: Use Node.js
-        uses: actions/setup-node@v1
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
-          node-version: 14.x
+          version: ${{ env.PNPM_VERSION }}
 
-      - name: yarn install
-        run: yarn install
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
 
-      - name: yarn test
-        run: yarn run test
+      - name: pnpm install
+        run: pnpm install
+
+      - name: pnpm test
+        run: pnpm test
 
   notify:
-    needs:
-      - test
-
+    needs: test
+    # Run this job only if the previous job failed and the event was triggered from the original repository
+    # Note: 'always()' is needed to run the notify job even if the test job was failed
     if:
-      ${{ always() &&
+      ${{
+        always() &&
+        needs.test.result == 'failure' &&
+        github.repository == 'AdguardTeam/AdguardBrowserExtension' &&
         (
           github.event_name == 'push' ||
+          github.event_name == 'workflow_dispatch' ||
           github.event.pull_request.head.repo.full_name == github.repository
         )
       }}
     runs-on: ubuntu-latest
     steps:
-      - name: Conclusion
-        uses: technote-space/workflow-conclusion-action@v1
-      - name: Send Slack notif
+      - name: Send Slack notification
         uses: 8398a7/action-slack@v3
         with:
-          status: ${{ env.WORKFLOW_CONCLUSION }}
-          fields: workflow, repo, message, commit, author, eventName, ref
+          status: failure
+          fields: workflow, repo, message, commit, author, eventName, ref, job
+          job_name: test
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -1,14 +1,33 @@
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, { useContext, useEffect } from 'react';
 import { observer } from 'mobx-react';
 
-import throttle from 'lodash/throttle';
+import { throttle } from 'lodash-es';
+
 import { Filters } from '../Filters';
 import { messenger } from '../../../services/messenger';
-import { log } from '../../../../common/log';
+import { logger } from '../../../../common/logger';
 import { rootStore } from '../../stores/RootStore';
 import { RequestModal } from '../RequestWizard/RequestModal';
 import { Icons } from '../../../common/components/ui/Icons';
-import { FILTERING_LOG, NOTIFIER_TYPES } from '../../../../common/constants';
+import { FILTERING_LOG, NotifierType } from '../../../../common/constants';
 import { useAppearanceTheme } from '../../../common/hooks/useAppearanceTheme';
 import { FilteringEvents } from '../FilteringEvents';
 
@@ -31,7 +50,10 @@ const FilteringLog = observer(() => {
     }, [logStore]);
 
     useEffect(() => {
-        const FETCH_EVENTS_TIMEOUT_MS = 1500;
+        const FETCH_EVENTS_TIMEOUT_MS = 300;
+
+        logStore.getFilteringLogEvents();
+
         const intervalId = setInterval(async () => {
             await logStore.getFilteringLogEvents();
         }, FETCH_EVENTS_TIMEOUT_MS);
@@ -64,11 +86,12 @@ const FilteringLog = observer(() => {
 
         (async () => {
             const events = [
-                NOTIFIER_TYPES.TAB_ADDED,
-                NOTIFIER_TYPES.TAB_UPDATE,
-                NOTIFIER_TYPES.TAB_CLOSE,
-                NOTIFIER_TYPES.TAB_RESET,
-                NOTIFIER_TYPES.SETTING_UPDATED,
+                NotifierType.TabAdded,
+                NotifierType.TabUpdate,
+                NotifierType.TabClose,
+                NotifierType.TabReset,
+                NotifierType.SettingUpdated,
+                NotifierType.CustomFilterAdded,
             ];
 
             removeListenerCallback = messenger.createLongLivedConnection(
@@ -78,29 +101,34 @@ const FilteringLog = observer(() => {
                     const { type, data } = message;
 
                     switch (type) {
-                        case NOTIFIER_TYPES.TAB_ADDED:
-                        case NOTIFIER_TYPES.TAB_UPDATE: {
+                        case NotifierType.TabAdded:
+                        case NotifierType.TabUpdate: {
                             const [tabInfo] = data;
                             logStore.onTabUpdate(tabInfo);
                             break;
                         }
-                        case NOTIFIER_TYPES.TAB_CLOSE: {
+                        case NotifierType.TabClose: {
                             const [tabInfo] = data;
                             await logStore.onTabClose(tabInfo);
                             break;
                         }
-                        case NOTIFIER_TYPES.TAB_RESET: {
+                        case NotifierType.TabReset: {
                             const [tabInfo] = data;
                             logStore.onTabReset(tabInfo);
+                            wizardStore.closeModal();
                             break;
                         }
-                        case NOTIFIER_TYPES.SETTING_UPDATED: {
+                        case NotifierType.SettingUpdated: {
                             const [{ propertyName, propertyValue }] = data;
                             logStore.onSettingUpdated(propertyName, propertyValue);
                             break;
                         }
+                        case NotifierType.CustomFilterAdded: {
+                            await logStore.getFilteringLogData();
+                            break;
+                        }
                         default: {
-                            log.debug('There is no listener for type:', type);
+                            logger.debug('There is no listener for type:', type);
                             break;
                         }
                     }
@@ -111,7 +139,7 @@ const FilteringLog = observer(() => {
         return () => {
             removeListenerCallback();
         };
-    }, [logStore]);
+    }, [logStore, wizardStore]);
 
     useEffect(() => {
         const windowStateHandler = () => {
@@ -120,18 +148,23 @@ const FilteringLog = observer(() => {
                 outerHeight,
                 screenTop,
                 screenLeft,
+                screen,
             } = window;
 
-            // eslint-disable-next-line no-restricted-globals
-            const isFullscreen = innerWidth === screen.width && innerHeight === screen.height;
+            const isFullscreen = outerWidth === screen.width && outerHeight === screen.height;
 
-            messenger.setFilteringLogWindowState({
-                width: outerWidth,
-                height: outerHeight,
-                top: screenTop,
-                left: screenLeft,
-                isFullscreen,
-            });
+            if (isFullscreen) {
+                messenger.setFilteringLogWindowState({
+                    state: 'fullscreen',
+                });
+            } else {
+                messenger.setFilteringLogWindowState({
+                    width: outerWidth,
+                    height: outerHeight,
+                    top: screenTop,
+                    left: screenLeft,
+                });
+            }
         };
 
         const throttledWindowStateHandler = throttle(windowStateHandler, RESIZE_THROTTLE);

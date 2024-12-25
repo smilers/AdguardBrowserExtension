@@ -1,10 +1,28 @@
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, { useContext } from 'react';
 import { observer } from 'mobx-react';
 
 import { popupStore } from '../../../stores/PopupStore';
 import { TIME_RANGES } from '../../../constants';
 import { reactTranslator } from '../../../../../common/translators/reactTranslator';
-import { Icon } from '../../../../common/components/ui/Icon';
+import { Select } from '../../../../common/components/ui/Select';
 
 export const Filters = observer(() => {
     const store = useContext(popupStore);
@@ -17,81 +35,68 @@ export const Filters = observer(() => {
 
     const statsData = store.statsDataByType;
 
-    const existingGroups = stats.blockedGroups.filter((group) => {
-        return statsData.find((data) => data.groupId === group.groupId);
-    });
+    const existingGroupsOptions = stats.blockedGroups
+        .filter((group) => {
+            return statsData.find((data) => data.groupId === group.groupId);
+        })
+        .map(({ groupId, groupName }) => ({
+            value: groupId,
+            title: groupName,
+        }));
 
-    const handleBlockedTypeChange = (e) => {
-        store.setSelectedBlockedType(e.target.value);
+    const handleBlockedTypeChange = (value) => {
+        store.setSelectedBlockedType(value);
     };
 
-    const handleTimeRangeChange = (e) => {
-        store.setSelectedTimeRange(e.target.value);
+    const handleTimeRangeChange = (value) => {
+        store.setSelectedTimeRange(value);
     };
 
-    const timeRangeOptions = {
-        [TIME_RANGES.DAY]: {
-            id: TIME_RANGES.DAY,
+    const timeRangeOptions = [
+        {
+            value: TIME_RANGES.DAY,
             title: reactTranslator.getMessage('popup_statistics_time_day'),
         },
-        [TIME_RANGES.WEEK]: {
-            id: TIME_RANGES.WEEK,
+        {
+            value: TIME_RANGES.WEEK,
             title: reactTranslator.getMessage('popup_statistics_time_week'),
         },
-        [TIME_RANGES.MONTH]: {
-            id: TIME_RANGES.MONTH,
+        {
+            value: TIME_RANGES.MONTH,
             title: reactTranslator.getMessage('popup_statistics_time_month'),
         },
-        [TIME_RANGES.YEAR]: {
-            id: TIME_RANGES.YEAR,
+        {
+            value: TIME_RANGES.YEAR,
             title: reactTranslator.getMessage('popup_statistics_time_year'),
         },
-    };
+    ];
 
+    /*
+     * We cannot use native select because there is a bug in chromium browsers:
+     * after a mouse click, chromium browsers activate the ":focus-visible" pseudo-class,
+     * which should only be activated when selecting with the keyboard and not the mouse.
+     * @see https://bugs.chromium.org/p/chromium/issues/detail?id=1383062
+     */
     return (
         <div className="stats-chart__filters">
-            <div className="stats-chart__select stats-chart__select--left">
-                <Icon id="#select" classname="icon--select stats-chart__icon" />
-                <select
-                    className="stats-chart__select-in"
-                    name="blocked-type"
-                    id="blocked-type"
-                    onChange={handleBlockedTypeChange}
-                    value={store.selectedBlockedType}
-                >
-                    {existingGroups.map((group) => {
-                        return (
-                            <option
-                                key={group.groupId}
-                                value={group.groupId}
-                            >
-                                {group.groupName}
-                            </option>
-                        );
-                    })}
-                </select>
-            </div>
-            <div className="stats-chart__select stats-chart__select--left">
-                <Icon id="#select" classname="icon--select stats-chart__icon" />
-                <select
-                    className="stats-chart__select-in"
-                    name="time-range"
-                    id="time-range"
-                    onChange={handleTimeRangeChange}
-                    value={store.selectedTimeRange}
-                >
-                    {Object.values(timeRangeOptions).map((timeRange) => {
-                        return (
-                            <option
-                                key={timeRange.id}
-                                value={timeRange.id}
-                            >
-                                {timeRange.title}
-                            </option>
-                        );
-                    })}
-                </select>
-            </div>
+            <Select
+                id="blocked-type"
+                name="blocked-type"
+                handler={handleBlockedTypeChange}
+                value={store.selectedBlockedType}
+                options={existingGroupsOptions}
+                className="stats-chart__select-in"
+                popupModification
+            />
+            <Select
+                id="time-range"
+                name="time-range"
+                className="stats-chart__select-in"
+                handler={handleTimeRangeChange}
+                value={store.selectedTimeRange}
+                options={timeRangeOptions}
+                popupModification
+            />
         </div>
     );
 });

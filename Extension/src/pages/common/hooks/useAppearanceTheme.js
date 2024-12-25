@@ -1,7 +1,26 @@
-import throttle from 'lodash/throttle';
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import { useLayoutEffect } from 'react';
 
-import { APPEARANCE_THEMES } from '../../constants';
+import { throttle } from 'lodash-es';
+
+import { AppearanceTheme } from '../../../common/settings';
 
 export const useAppearanceTheme = (appearanceTheme) => {
     useLayoutEffect(() => {
@@ -22,12 +41,12 @@ export const useAppearanceTheme = (appearanceTheme) => {
         }
 
         switch (theme) {
-            case APPEARANCE_THEMES.DARK: {
+            case AppearanceTheme.Dark: {
                 document.documentElement.classList.add(DARK_THEME_CLASS);
                 document.documentElement.classList.remove(LIGHT_THEME_CLASS);
                 break;
             }
-            case APPEARANCE_THEMES.LIGHT: {
+            case AppearanceTheme.Light: {
                 document.documentElement.classList.add(LIGHT_THEME_CLASS);
                 document.documentElement.classList.remove(DARK_THEME_CLASS);
                 break;

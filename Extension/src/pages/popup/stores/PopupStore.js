@@ -1,4 +1,23 @@
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import { createContext } from 'react';
+
 import browser from 'webextension-polyfill';
 import {
     action,
@@ -11,9 +30,13 @@ import {
 import punycode from 'punycode/';
 
 import { messenger } from '../../services/messenger';
-import { POPUP_STATES, TIME_RANGES, VIEW_STATES } from '../constants';
+import {
+    POPUP_STATES,
+    TIME_RANGES,
+    VIEW_STATES,
+} from '../constants';
 import { reactTranslator } from '../../../common/translators/reactTranslator';
-import { MESSAGE_TYPES } from '../../../common/constants';
+import { MessageType } from '../../../common/messages';
 
 // Do not allow property change outside of store actions
 configure({ enforceActions: 'observed' });
@@ -93,6 +116,10 @@ class PopupStore {
 
         const response = await messenger.getTabInfoForPopup(currentTab?.id);
 
+        if (!response) {
+            return;
+        }
+
         runInAction(() => {
             const {
                 frameInfo,
@@ -101,16 +128,20 @@ class PopupStore {
                 settings,
             } = response;
 
-            // frame info
-            this.applicationFilteringDisabled = frameInfo.applicationFilteringDisabled;
-            this.applicationAvailable = frameInfo.applicationAvailable;
-            this.url = frameInfo.url;
-            this.totalBlocked = frameInfo.totalBlocked;
-            this.totalBlockedTab = frameInfo.totalBlockedTab;
-            this.domainName = frameInfo.domainName;
-            this.documentAllowlisted = frameInfo.documentAllowlisted;
-            this.userAllowlisted = frameInfo.userAllowlisted;
-            this.canAddRemoveRule = frameInfo.canAddRemoveRule;
+            if (frameInfo) {
+                this.applicationFilteringDisabled = frameInfo.applicationFilteringDisabled;
+                this.applicationAvailable = frameInfo.applicationAvailable;
+                this.url = frameInfo.url;
+                this.totalBlocked = frameInfo.totalBlocked;
+                this.totalBlockedTab = frameInfo.totalBlockedTab;
+                this.domainName = frameInfo.domainName;
+                this.documentAllowlisted = frameInfo.documentAllowlisted;
+                this.userAllowlisted = frameInfo.userAllowlisted;
+                this.canAddRemoveRule = frameInfo.canAddRemoveRule;
+
+                this.isInitialDataReceived = true;
+                this.currentTabId = currentTab?.id;
+            }
 
             // options
             this.showInfoAboutFullVersion = options.showInfoAboutFullVersion;
@@ -123,9 +154,6 @@ class PopupStore {
 
             // settings
             this.settings = settings;
-
-            this.isInitialDataReceived = true;
-            this.currentTabId = currentTab?.id;
         });
     };
 
@@ -186,7 +214,7 @@ class PopupStore {
         let isAllowlisted = this.documentAllowlisted;
 
         if (isAllowlisted) {
-            messenger.removeAllowlistDomain(this.currentTabId);
+            messenger.removeAllowlistDomain(this.currentTabId, true);
             isAllowlisted = false;
         } else {
             messenger.addAllowlistDomain(this.currentTabId);
@@ -302,7 +330,7 @@ class PopupStore {
     @action
     closePromoNotification = async () => {
         this.promoNotification = null;
-        await messenger.sendMessage(MESSAGE_TYPES.SET_NOTIFICATION_VIEWED, { withDelay: false });
+        await messenger.sendMessage(MessageType.SetNotificationViewed, { withDelay: false });
     };
 
     @action
@@ -312,15 +340,17 @@ class PopupStore {
         runInAction(() => {
             this.promoNotification = null;
         });
-        await messenger.sendMessage(MESSAGE_TYPES.SET_NOTIFICATION_VIEWED, { withDelay: false });
-        await messenger.sendMessage('openTab', { url });
+        // TODO: This message will mark the notification as viewed,
+        // but it seems that we need to show it.
+        await messenger.sendMessage(MessageType.SetNotificationViewed, { withDelay: false });
+        await browser.tabs.create({ url });
     };
 
     @action
     updateBlockedStats = (tabInfo) => {
         this.totalBlocked = tabInfo.totalBlocked;
         this.totalBlockedTab = tabInfo.totalBlockedTab;
-    }
+    };
 
     @action
     onSettingUpdated = (name, value) => {
@@ -336,7 +366,7 @@ class PopupStore {
             return null;
         }
 
-        return this.settings.values[this.settings.names.APPEARANCE_THEME];
+        return this.settings.values[this.settings.names.AppearanceTheme];
     }
 }
 

@@ -1,3 +1,21 @@
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, { useContext } from 'react';
 import { observer } from 'mobx-react';
 
@@ -9,7 +27,7 @@ import {
     PRIVACY_URL,
     WEBSITE_URL,
     DISCUSS_URL,
-} from '../../../constants';
+} from '../../constants';
 import { reactTranslator } from '../../../../common/translators/reactTranslator';
 
 import './about-page.pcss';
@@ -17,7 +35,7 @@ import './about-page.pcss';
 const About = observer(() => {
     const { settingsStore } = useContext(rootStore);
 
-    const { version } = settingsStore;
+    const { version, libVersions } = settingsStore;
 
     if (!version) {
         return null;
@@ -38,9 +56,16 @@ const About = observer(() => {
                     {reactTranslator.getMessage('options_about_title')}
                 </div>
                 <div className="about__version">
-                    {reactTranslator.getMessage('options_about_version')}
-                    {' '}
-                    {version}
+                    {`${reactTranslator.getMessage('options_about_version')} ${version}`}
+                    <p>
+                        {`TSWebExtension v${libVersions.tswebextension}`}
+                        <br />
+                        {`TSUrlFilter v${libVersions.tsurlfilter}`}
+                        <br />
+                        {`Scriptlets v${libVersions.scriptlets}`}
+                        <br />
+                        {`ExtendedCss v${libVersions.extendedCss}`}
+                    </p>
                 </div>
                 <div className="about__copyright">
                     <div className="about__copyright-item">
@@ -50,12 +75,12 @@ const About = observer(() => {
                         {reactTranslator.getMessage('options_copyright')}
                     </div>
                 </div>
-                <div className="about__menu">
+                <div className="links-menu">
                     <a
                         target="_blank"
                         rel="noopener noreferrer"
                         href={CHANGELOG_URL}
-                        className="about__menu-item"
+                        className="links-menu__item"
                     >
                         {reactTranslator.getMessage('options_open_changelog')}
                     </a>
@@ -63,7 +88,7 @@ const About = observer(() => {
                         target="_blank"
                         rel="noopener noreferrer"
                         href={PRIVACY_URL}
-                        className="about__menu-item"
+                        className="links-menu__item"
                     >
                         {reactTranslator.getMessage('options_privacy_policy')}
                     </a>
@@ -71,7 +96,7 @@ const About = observer(() => {
                         target="_blank"
                         rel="noopener noreferrer"
                         href={WEBSITE_URL}
-                        className="about__menu-item"
+                        className="links-menu__item"
                     >
                         {reactTranslator.getMessage('options_site')}
                     </a>
@@ -79,7 +104,7 @@ const About = observer(() => {
                         target="_blank"
                         rel="noopener noreferrer"
                         href={DISCUSS_URL}
-                        className="about__menu-item"
+                        className="links-menu__item"
                     >
                         {reactTranslator.getMessage('options_discuss')}
                     </a>
@@ -87,7 +112,7 @@ const About = observer(() => {
                         target="_blank"
                         rel="noopener noreferrer"
                         href={ACKNOWLEDGMENTS_URL}
-                        className="about__menu-item"
+                        className="links-menu__item"
                     >
                         {reactTranslator.getMessage('options_acknowledgment')}
                     </a>
@@ -95,7 +120,7 @@ const About = observer(() => {
                         target="_blank"
                         rel="noopener noreferrer"
                         href={GITHUB_URL}
-                        className="about__menu-item"
+                        className="links-menu__item"
                     >
                         {reactTranslator.getMessage('options_github')}
                     </a>

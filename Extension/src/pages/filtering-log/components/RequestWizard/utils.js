@@ -1,10 +1,29 @@
-import { ANTIBANNER_FILTERS_ID } from '../../../../common/constants';
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+import { ContentType as RequestType } from '@adguard/tswebextension';
+
+import { AntiBannerFiltersId } from '../../../../common/constants';
 import { strings } from '../../../../common/strings';
 import { reactTranslator } from '../../../../common/translators/reactTranslator';
-import { RequestTypes } from '../../../../background/utils/request-types';
 
 /**
  * Url utils
+ *
  * @type {{getUrlWithoutScheme, isHierarchicUrl, getProtocol, getCookieDomain}}
  */
 export const UrlUtils = {
@@ -19,6 +38,8 @@ export const UrlUtils = {
 
     /**
      * Removes protocol from URL and "www." if url starts with it
+     *
+     * @param url
      */
     getUrlWithoutScheme(url) {
         let resultUrl;
@@ -34,7 +55,8 @@ export const UrlUtils = {
     },
 
     /**
-     * Checks the given URL whether is hierarchical or not
+     * Checks the given URL whether is hierarchical or not.
+     *
      * @param url
      * @returns {boolean}
      */
@@ -43,7 +65,8 @@ export const UrlUtils = {
     },
 
     /**
-     * Gets domain for cookie rule
+     * Returns domain for cookie rule.
+     *
      * @param {string} frameDomain
      * @returns {string}
      */
@@ -57,16 +80,20 @@ export const UrlUtils = {
 /**
  * Filter's name for filterId
  *
- * @param {Number} filterId
+ * @param {number} filterId
  * @param filtersMetadata
- * @returns {String}
+ * @returns {string}
  */
 export const getFilterName = (filterId, filtersMetadata) => {
-    if (filterId === ANTIBANNER_FILTERS_ID.USER_FILTER_ID) {
+    if (typeof filterId !== 'number') {
+        return null;
+    }
+
+    if (filterId === AntiBannerFiltersId.UserFilterId) {
         return reactTranslator.getMessage('options_userfilter');
     }
 
-    if (filterId === ANTIBANNER_FILTERS_ID.ALLOWLIST_FILTER_ID) {
+    if (filterId === AntiBannerFiltersId.AllowlistFilterId) {
         return reactTranslator.getMessage('options_allowlist');
     }
 
@@ -79,7 +106,7 @@ export const getFilterName = (filterId, filtersMetadata) => {
  * Request type map
  *
  * @param event
- * @returns {String}
+ * @returns {string}
  */
 export const getRequestEventType = (event) => {
     const {
@@ -94,12 +121,12 @@ export const getRequestEventType = (event) => {
 
     if (requestRule?.cookieRule
         || requestRule?.isModifyingCookieRule) {
-        requestEventType = RequestTypes.COOKIE;
+        requestEventType = RequestType.Cookie;
     } else if (cspReportBlocked) {
         // By default csp requests in firefox have other request type,
         // but if event cspReportBlocked is true
         // we consider such request to have "CSP report" type
-        requestEventType = RequestTypes.CSP_REPORT;
+        requestEventType = RequestType.CspReport;
     } else if (removeHeader) {
         return 'REMOVEHEADER';
     } else if (removeParam) {
@@ -107,35 +134,37 @@ export const getRequestEventType = (event) => {
     }
 
     switch (requestEventType) {
-        case 'DOCUMENT':
-        case 'SUBDOCUMENT':
+        case RequestType.Document:
+        case RequestType.Subdocument:
             return 'HTML';
-        case 'STYLESHEET':
+        case RequestType.Stylesheet:
             return 'CSS';
-        case 'SCRIPT':
+        case RequestType.Script:
             return 'JavaScript';
-        case 'XMLHTTPREQUEST':
+        case RequestType.XmlHttpRequest:
             return 'XHR';
-        case 'IMAGE':
+        case RequestType.Image:
             return 'Image';
-        case 'OBJECT':
-        case 'MEDIA':
+        case RequestType.Object:
+        case RequestType.Media:
             return 'Media';
-        case 'FONT':
+        case RequestType.Font:
             return 'Font';
-        case 'WEBSOCKET':
+        case RequestType.Websocket:
             return 'WebSocket';
-        case 'WEBRTC':
+        case RequestType.WebRtc:
             return 'WebRTC';
-        case 'CSP':
+        case RequestType.Csp:
             return 'CSP';
-        case 'CSP_REPORT':
+        case RequestType.PermissionsPolicy:
+            return 'Permissions Policy';
+        case RequestType.CspReport:
             return 'CSP report';
-        case 'COOKIE':
+        case RequestType.Cookie:
             return 'Cookie';
-        case 'PING':
+        case RequestType.Ping:
             return 'Ping';
-        case 'OTHER':
+        case RequestType.Other:
             return 'Other';
         default:
             return '';
@@ -144,8 +173,9 @@ export const getRequestEventType = (event) => {
 
 /**
  * Returns data for cookie event
+ *
  * @param event
- * @return {string|null}
+ * @returns {string|null}
  */
 export const getCookieData = (event) => {
     if (!event.requestRule?.cookieRule || !event?.cookieName) {

@@ -1,3 +1,21 @@
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import {
     action,
     computed,
@@ -5,8 +23,14 @@ import {
     observable,
     runInAction,
 } from 'mobx';
-import { log } from '../../../common/log';
-import { createSavingService, EVENTS as SAVING_FSM_EVENTS, STATES } from '../../common/components/Editor/savingFSM';
+
+import { logger } from '../../../common/logger';
+import {
+    createSavingService,
+    EVENTS as SAVING_FSM_EVENTS,
+    STATES,
+} from '../../common/components/Editor/savingFSM';
+import { MIN_FILTERS_UPDATE_DISPLAY_DURATION_MS } from '../../common/constants';
 import { sleep } from '../../helpers';
 import { messenger } from '../../services/messenger';
 import { SEARCH_FILTERS } from '../components/Filters/Search/constants';
@@ -17,7 +41,13 @@ import {
     sortGroupsOnSearch,
 } from '../components/Filters/helpers';
 import { optionsStorage } from '../options-storage';
-import { ANTIBANNER_GROUPS_ID, TRUSTED_TAG, WASTE_CHARACTERS } from '../../../common/constants';
+import {
+    AntiBannerFiltersId,
+    AntibannerGroupsId,
+    RECOMMENDED_TAG_ID,
+    TRUSTED_TAG,
+    WASTE_CHARACTERS,
+} from '../../../common/constants';
 
 const savingAllowlistService = createSavingService({
     id: 'allowlist',
@@ -39,6 +69,53 @@ const savingAllowlistService = createSavingService({
     },
 });
 
+/**
+ * Sometimes the options page might be opened before the background page is ready to provide data.
+ * In this case, we need to retry getting data from the background service.
+ * https://github.com/AdguardTeam/AdguardBrowserExtension/issues/2712
+ *
+ * @returns data for the options page from the background page
+ */
+const getOptionsDataWithRetry = async () => {
+    /**
+     * Delay between retries in milliseconds
+     */
+    const RETRY_DELAY_MS = 500;
+
+    /**
+     * Total number of retries.
+     */
+    const TOTAL_RETRY_TIMES = 10;
+
+    /**
+     * Inner function to retry getting data from the background service.
+     *
+     * @param retryTimes {number} - number of retries left
+     */
+    const innerRetry = async (retryTimes) => {
+        if (retryTimes === 0) {
+            logger.error('Failed to get options data from the background service');
+            return null;
+        }
+        try {
+            const data = await messenger.getOptionsData();
+
+            if (data) {
+                return data;
+            }
+
+            await sleep(RETRY_DELAY_MS);
+            return innerRetry(retryTimes - 1);
+        } catch (e) {
+            logger.error(e);
+            await sleep(RETRY_DELAY_MS);
+            return innerRetry(retryTimes - 1);
+        }
+    };
+
+    return innerRetry(TOTAL_RETRY_TIMES);
+};
+
 class SettingsStore {
     KEYS = {
         ALLOW_ACCEPTABLE_ADS: 'allowAcceptableAds',
@@ -51,6 +128,8 @@ class SettingsStore {
     @observable optionsReadyToRender = false;
 
     @observable version = null;
+
+    @observable libVersions = null;
 
     @observable filters = [];
 
@@ -88,6 +167,12 @@ class SettingsStore {
 
     @observable allowlistSizeReset = false;
 
+    @observable filtersToGetConsentFor = [];
+
+    @observable isAnnoyancesConsentModalOpen = false;
+
+    @observable filterIdSelectedForConsent = null;
+
     constructor(rootStore) {
         makeObservable(this);
         this.rootStore = rootStore;
@@ -104,7 +189,20 @@ class SettingsStore {
 
     @action
     async requestOptionsData(firstRender) {
-        const data = await messenger.getOptionsData();
+        // do not re-render options page if the annoyances consent modal is open.
+        // it is needed to prevent switch disabling due to the actual state while the modal is shown
+        if (this.isAnnoyancesConsentModalOpen) {
+            return;
+        }
+
+        let data = null;
+        if (firstRender) {
+            // on first render background service might not be ready to provide data, so we need to get it with retry
+            data = await getOptionsDataWithRetry();
+        } else {
+            data = await messenger.getOptionsData();
+        }
+
         runInAction(() => {
             this.settings = data.settings;
             // on first render we sort filters to show enabled on the top
@@ -113,6 +211,15 @@ class SettingsStore {
                 this.setFilters(sortFilters(data.filtersMetadata.filters));
             } else {
                 // on the next filters updates, we update filters keeping order
+                /**
+                 * TODO (v.zhelvis): Updating filters on background service response can cause filter enable state mismatch,
+                 * because we toggle switches on frontend side first, but cannot determine when action
+                 * in background service is completed and final result of user action.
+                 * It seems that we need to use a new approach with atomic updates instead of global state synchronisation
+                 * to avoid this kind of problems. This task can be split into two parts:
+                 * - Moving specific logic from the background to the settings page.
+                 * - Integrate a transparent transaction model with simple collision resolution to prevent race conditions.
+                 */
                 this.setFilters(updateFilters(this.filters, data.filtersMetadata.filters));
             }
             // do not rerender groups on its turning on/off while searching
@@ -123,6 +230,7 @@ class SettingsStore {
             }
             this.rulesCount = data.filtersInfo.rulesCount;
             this.version = data.appVersion;
+            this.libVersions = data.libVersions;
             this.constants = data.constants;
             this.setAllowAcceptableAds(data.filtersMetadata.filters);
             this.setBlockKnownTrackers(data.filtersMetadata.filters);
@@ -131,11 +239,6 @@ class SettingsStore {
             this.optionsReadyToRender = true;
             this.fullscreenUserRulesEditorIsOpen = data.fullscreenUserRulesEditorIsOpen;
         });
-    }
-
-    @action
-    updateRulesCount(rulesCount) {
-        this.rulesCount = rulesCount;
     }
 
     @action
@@ -155,9 +258,12 @@ class SettingsStore {
     }
 
     @action
-    updateSetting(settingId, value) {
+    updateSetting(settingId, value, ignoreBackground = false) {
         this.settings.values[settingId] = value;
-        messenger.changeUserSetting(settingId, value);
+
+        if (!ignoreBackground) {
+            messenger.changeUserSetting(settingId, value);
+        }
     }
 
     async setFilterRelatedSettingState(filterId, optionKey, enabled) {
@@ -185,9 +291,9 @@ class SettingsStore {
 
     @action
     async setAllowAcceptableAdsState(enabled) {
-        const { SEARCH_AND_SELF_PROMO_FILTER_ID } = this.constants.AntiBannerFiltersId;
+        const { SearchAndSelfPromoFilterId } = this.constants.AntiBannerFiltersId;
         await this.setFilterRelatedSettingState(
-            SEARCH_AND_SELF_PROMO_FILTER_ID,
+            SearchAndSelfPromoFilterId,
             this.KEYS.ALLOW_ACCEPTABLE_ADS,
             !enabled,
         );
@@ -195,9 +301,9 @@ class SettingsStore {
 
     @action
     async setBlockKnownTrackersState(enabled) {
-        const { TRACKING_FILTER_ID } = this.constants.AntiBannerFiltersId;
+        const { TrackingFilterId } = this.constants.AntiBannerFiltersId;
         await this.setFilterRelatedSettingState(
-            TRACKING_FILTER_ID,
+            TrackingFilterId,
             this.KEYS.BLOCK_KNOWN_TRACKERS,
             enabled,
         );
@@ -205,9 +311,9 @@ class SettingsStore {
 
     @action
     async setStripTrackingParametersState(enabled) {
-        const { URL_TRACKING_FILTER_ID } = this.constants.AntiBannerFiltersId;
+        const { UrlTrackingFilterId } = this.constants.AntiBannerFiltersId;
         await this.setFilterRelatedSettingState(
-            URL_TRACKING_FILTER_ID,
+            UrlTrackingFilterId,
             this.KEYS.STRIP_TRACKING_PARAMETERS,
             enabled,
         );
@@ -221,20 +327,20 @@ class SettingsStore {
 
     @action
     setAllowAcceptableAds(filters) {
-        const { SEARCH_AND_SELF_PROMO_FILTER_ID } = this.constants.AntiBannerFiltersId;
-        this.setSetting(SEARCH_AND_SELF_PROMO_FILTER_ID, this.KEYS.ALLOW_ACCEPTABLE_ADS, filters);
+        const { SearchAndSelfPromoFilterId } = this.constants.AntiBannerFiltersId;
+        this.setSetting(SearchAndSelfPromoFilterId, this.KEYS.ALLOW_ACCEPTABLE_ADS, filters);
     }
 
     @action
     setBlockKnownTrackers(filters) {
-        const { TRACKING_FILTER_ID } = this.constants.AntiBannerFiltersId;
-        this.setSetting(TRACKING_FILTER_ID, this.KEYS.BLOCK_KNOWN_TRACKERS, filters);
+        const { TrackingFilterId } = this.constants.AntiBannerFiltersId;
+        this.setSetting(TrackingFilterId, this.KEYS.BLOCK_KNOWN_TRACKERS, filters);
     }
 
     @action
     setStripTrackingParameters(filters) {
-        const { URL_TRACKING_FILTER_ID } = this.constants.AntiBannerFiltersId;
-        this.setSetting(URL_TRACKING_FILTER_ID, this.KEYS.STRIP_TRACKING_PARAMETERS, filters);
+        const { UrlTrackingFilterId } = this.constants.AntiBannerFiltersId;
+        this.setSetting(UrlTrackingFilterId, this.KEYS.STRIP_TRACKING_PARAMETERS, filters);
     }
 
     isFilterEnabled(filterId) {
@@ -243,35 +349,95 @@ class SettingsStore {
         return filter.enabled;
     }
 
+    isCategoryEnabled(categoryId) {
+        const category = this.categories
+            .find((c) => c.groupId === categoryId);
+        return category.enabled;
+    }
+
+    /**
+     * Checks whether the group is touched.
+     *
+     * @param {number} groupId Group id.
+     *
+     * @returns {boolean} True if the group is touched, false otherwise.
+     */
+    isGroupTouched(groupId) {
+        return this.categories.some((c) => c.groupId === groupId && c.touched);
+    }
+
     isAllowAcceptableAdsFilterEnabled() {
-        const { SEARCH_AND_SELF_PROMO_FILTER_ID } = this.constants.AntiBannerFiltersId;
-        this.isFilterEnabled(SEARCH_AND_SELF_PROMO_FILTER_ID);
+        const { SearchAndSelfPromoFilterId } = this.constants.AntiBannerFiltersId;
+        this.isFilterEnabled(SearchAndSelfPromoFilterId);
     }
 
     isBlockKnownTrackersFilterEnabled() {
-        const { TRACKING_FILTER_ID } = this.constants.AntiBannerFiltersId;
-        this.isFilterEnabled(TRACKING_FILTER_ID);
+        const { TrackingFilterId } = this.constants.AntiBannerFiltersId;
+        this.isFilterEnabled(TrackingFilterId);
     }
 
     isStripTrackingParametersFilterEnabled() {
-        const { URL_TRACKING_FILTER_ID } = this.constants.AntiBannerFiltersId;
-        this.isFilterEnabled(URL_TRACKING_FILTER_ID);
+        const { UrlTrackingFilterId } = this.constants.AntiBannerFiltersId;
+        this.isFilterEnabled(UrlTrackingFilterId);
     }
 
+    /**
+     * List of annoyances filters.
+     */
     @computed
-    get lastUpdateTime() {
-        return Math.max(...this.filters.map((filter) => filter.lastCheckTime || 0));
+    get annoyancesFilters() {
+        const annoyancesGroup = this.categories.find((group) => {
+            return group.groupId === AntibannerGroupsId.AnnoyancesFiltersGroupId;
+        });
+        return annoyancesGroup.filters;
+    }
+
+    /**
+     * List of recommended annoyances filters.
+     */
+    @computed
+    get recommendedAnnoyancesFilters() {
+        return this.annoyancesFilters.filter((filter) => {
+            return filter.tags.includes(RECOMMENDED_TAG_ID);
+        });
+    }
+
+    /**
+     * List of AdGuard annoyances filters.
+     */
+    @computed
+    get agAnnoyancesFilters() {
+        return [
+            ...this.recommendedAnnoyancesFilters,
+            this.annoyancesFilters.find((f) => {
+                return f.filterId === AntiBannerFiltersId.AnnoyancesCombinedFilterId;
+            }),
+        ];
+    }
+
+    /**
+     * Used to display the last check time under all rules count.
+     *
+     * @returns {number} the latest check time of all filters.
+     */
+    @computed
+    get latestCheckTime() {
+        return Math.max(...this.filters
+            .map(({ lastScheduledCheckTime, lastCheckTime }) => Math.max(
+                lastScheduledCheckTime || 0,
+                lastCheckTime || 0,
+            )));
     }
 
     @action
-    async updateGroupSetting(id, enabled) {
-        await messenger.updateGroupStatus(id, enabled);
+    async updateGroupSetting(groupId, enabled) {
+        const recommendedFiltersIds = await messenger.updateGroupStatus(groupId, enabled);
+
         runInAction(() => {
-            const groupId = parseInt(id, 10);
-            if (groupId === ANTIBANNER_GROUPS_ID.OTHER_FILTERS_GROUP_ID
+            if (groupId === AntibannerGroupsId.OtherFiltersGroupId
                 && this.isAllowAcceptableAdsFilterEnabled()) {
                 this.allowAcceptableAds = enabled;
-            } else if (groupId === ANTIBANNER_GROUPS_ID.PRIVACY_FILTERS_GROUP_ID) {
+            } else if (groupId === AntibannerGroupsId.PrivacyFiltersGroupId) {
                 if (this.isBlockKnownTrackersFilterEnabled()) {
                     this.blockKnownTrackers = enabled;
                 }
@@ -290,7 +456,44 @@ class SettingsStore {
                     }
                 }
             });
+
+            if (Array.isArray(recommendedFiltersIds)) {
+                recommendedFiltersIds.forEach((id) => {
+                    this.setFilterEnabledState(id, true);
+                });
+            }
         });
+    }
+
+    @action
+    updateGroupStateUI(groupId, enabled) {
+        this.categories.forEach((category) => {
+            if (category.groupId === groupId) {
+                if (enabled) {
+                    category.enabled = true;
+                } else {
+                    delete category.enabled;
+                }
+            }
+        });
+    }
+
+    @action
+    updateFilterStateUI(filterId, enabled) {
+        this.filters.forEach((filter) => {
+            if (filter.filterId === filterId) {
+                if (enabled) {
+                    filter.enabled = true;
+                } else {
+                    delete filter.enabled;
+                }
+            }
+        });
+    }
+
+    @action
+    setFiltersToGetConsentFor(filters) {
+        this.filtersToGetConsentFor = filters;
     }
 
     @action
@@ -332,22 +535,35 @@ class SettingsStore {
     };
 
     @action
-    async updateFilterSetting(rawFilterId, enabled) {
-        const filterId = Number.parseInt(rawFilterId, 10);
+    async updateFilterSetting(filterId, enabled) {
+        /**
+         * Optimistically set the enabled property to true.
+         * The verified state of the filter will be emitted after the engine update.
+         */
         this.setFilterEnabledState(filterId, enabled);
+
         try {
-            const filters = await messenger.updateFilterStatus(filterId, enabled);
-            this.refreshFilters(filters);
+            const groupId = await messenger.updateFilterStatus(filterId, enabled);
             // update allow acceptable ads setting
-            if (filterId === this.constants.AntiBannerFiltersId.SEARCH_AND_SELF_PROMO_FILTER_ID) {
+            if (filterId === this.constants.AntiBannerFiltersId.SearchAndSelfPromoFilterId) {
                 this.allowAcceptableAds = enabled;
-            } else if (filterId === this.constants.AntiBannerFiltersId.TRACKING_FILTER_ID) {
+            } else if (filterId === this.constants.AntiBannerFiltersId.TrackingFilterId) {
                 this.blockKnownTrackers = enabled;
-            } else if (filterId === this.constants.AntiBannerFiltersId.URL_TRACKING_FILTER_ID) {
+            } else if (filterId === this.constants.AntiBannerFiltersId.UrlTrackingFilterId) {
                 this.stripTrackingParameters = enabled;
             }
+
+            if (groupId) {
+                const group = this.categories.find((group) => group.groupId === groupId);
+
+                if (group) {
+                    group.enabled = true;
+                    // if any filter in group is enabled, the group is considered as touched
+                    group.touched = true;
+                }
+            }
         } catch (e) {
-            log.error(e);
+            logger.error(e);
             this.setFilterEnabledState(filterId, !enabled);
         }
     }
@@ -365,7 +581,7 @@ class SettingsStore {
             this.refreshFilters(filtersUpdates);
             setTimeout(() => {
                 this.setFiltersUpdating(false);
-            }, 2000);
+            }, MIN_FILTERS_UPDATE_DISPLAY_DURATION_MS);
             return filtersUpdates;
         } catch (error) {
             this.setFiltersUpdating(false);
@@ -383,6 +599,11 @@ class SettingsStore {
 
         runInAction(() => {
             this.filters.push(newFilter);
+            /**
+             * Optimistically set the enabled property to true.
+             * The verified state of the filter will be emitted after the engine update.
+             */
+            this.setFilterEnabledState(newFilter.filterId, true);
 
             if (this.searchSelect !== SEARCH_FILTERS.ALL) {
                 this.setSearchSelect(SEARCH_FILTERS.ALL);
@@ -412,7 +633,7 @@ class SettingsStore {
             const { content } = await messenger.getAllowlist();
             this.setAllowlist(content);
         } catch (e) {
-            log.debug(e);
+            logger.debug(e);
         }
     };
 
@@ -560,7 +781,7 @@ class SettingsStore {
             return null;
         }
 
-        return this.settings.values[this.settings.names.APPEARANCE_THEME];
+        return this.settings.values[this.settings.names.AppearanceTheme];
     }
 
     @computed
@@ -568,12 +789,12 @@ class SettingsStore {
         if (!this.settings) {
             return null;
         }
-        return !this.settings.values[this.settings.names.DISABLE_SHOW_ADGUARD_PROMO_INFO];
+        return !this.settings.values[this.settings.names.DisableShowAdguardPromoInfo];
     }
 
     @action
     async hideAdguardPromoInfo() {
-        await this.updateSetting(this.settings.names.DISABLE_SHOW_ADGUARD_PROMO_INFO, true);
+        await this.updateSetting(this.settings.names.DisableShowAdguardPromoInfo, true);
     }
 
     @computed
@@ -597,12 +818,12 @@ class SettingsStore {
 
     @computed
     get footerRateShowState() {
-        return !this.settings.values[this.settings.names.HIDE_RATE_BLOCK];
+        return !this.settings.values[this.settings.names.HideRateBlock];
     }
 
     @action
     async hideFooterRateShow() {
-        await this.updateSetting(this.settings.names.HIDE_RATE_BLOCK, true);
+        await this.updateSetting(this.settings.names.HideRateBlock, true);
     }
 
     @action
@@ -617,7 +838,7 @@ class SettingsStore {
 
     @computed
     get userFilterEnabledSettingId() {
-        return this.settings.names.USER_FILTER_ENABLED;
+        return this.settings.names.UserFilterEnabled;
     }
 
     @computed
@@ -628,6 +849,59 @@ class SettingsStore {
     @action
     setAllowlistSizeReset(value) {
         this.allowlistSizeReset = value;
+    }
+
+    @computed
+    get isUpdateFiltersButtonActive() {
+        return this.filters.some((filter) => filter.enabled
+            && this.isCategoryEnabled(filter.groupId));
+    }
+
+    @action
+    setIsAnnoyancesConsentModalOpen = (value) => {
+        this.isAnnoyancesConsentModalOpen = value;
+    };
+
+    @action
+    setFilterIdSelectedForConsent = (filterId) => {
+        this.filterIdSelectedForConsent = filterId;
+        this.updateFilterStateUI(filterId, true);
+    };
+
+    @action
+    handleFilterConsentCancel = () => {
+        if (this.filterIdSelectedForConsent) {
+            this.updateFilterStateUI(this.filterIdSelectedForConsent, false);
+            this.filterIdSelectedForConsent = null;
+            return;
+        }
+
+        // handle modal for group
+        this.updateGroupStateUI(AntibannerGroupsId.AnnoyancesFiltersGroupId, false);
+    };
+
+    @action
+    handleFilterConsentConfirm = async () => {
+        if (this.filterIdSelectedForConsent) {
+            await this.updateFilterSetting(this.filterIdSelectedForConsent, true);
+            await messenger.setConsentedFilters([this.filterIdSelectedForConsent]);
+            this.filterIdSelectedForConsent = null;
+            return;
+        }
+        // handle consent modal for group
+        await this.updateGroupSetting(AntibannerGroupsId.AnnoyancesFiltersGroupId, true);
+        await messenger.setConsentedFilters(
+            this.recommendedAnnoyancesFilters.map((f) => f.filterId),
+        );
+    };
+
+    @computed
+    get shouldShowFilterPolicy() {
+        if (this.filterIdSelectedForConsent) {
+            return this.agAnnoyancesFilters.some((f) => f.filterId === this.filterIdSelectedForConsent);
+        }
+        // consent modal for group
+        return true;
     }
 }
 

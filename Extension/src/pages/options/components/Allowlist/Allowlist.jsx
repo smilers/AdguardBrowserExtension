@@ -1,5 +1,26 @@
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, {
-    useContext, useEffect, useRef, useState,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
 } from 'react';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
@@ -8,12 +29,13 @@ import { SettingsSection } from '../Settings/SettingsSection';
 import { Editor } from '../../../common/components/Editor';
 import { rootStore } from '../../stores/RootStore';
 import { handleFileUpload } from '../../../helpers';
-import { log } from '../../../../common/log';
+import { logger } from '../../../../common/logger';
 import { reactTranslator } from '../../../../common/translators/reactTranslator';
-import { AllowlistSavingButton } from './AllowlistSavingButton';
 import { usePrevious } from '../../../common/hooks/usePrevious';
 import { Setting, SETTINGS_TYPES } from '../Settings/Setting';
 import { exportData, ExportTypes } from '../../../common/utils/export';
+
+import { AllowlistSavingButton } from './AllowlistSavingButton';
 
 const Allowlist = observer(() => {
     const { settingsStore, uiStore } = useContext(rootStore);
@@ -42,7 +64,7 @@ const Allowlist = observer(() => {
 
     const { settings } = settingsStore;
 
-    const { DEFAULT_ALLOWLIST_MODE } = settings.names;
+    const { DefaultAllowlistMode } = settings.names;
 
     const importClickHandler = (e) => {
         e.preventDefault();
@@ -62,7 +84,7 @@ const Allowlist = observer(() => {
             await settingsStore.appendAllowlist(content);
             setAllowlistRerender(true);
         } catch (e) {
-            log.debug(e.message);
+            logger.debug(e.message);
             uiStore.addNotification({ description: e.message });
         }
 
@@ -94,7 +116,7 @@ const Allowlist = observer(() => {
         await settingsStore.updateSetting(id, data);
     };
 
-    const { ALLOWLIST_ENABLED } = settings.names;
+    const { AllowlistEnabled } = settings.names;
 
     let shouldResetSize = false;
     if (settingsStore.allowlistSizeReset) {
@@ -106,8 +128,9 @@ const Allowlist = observer(() => {
         <>
             <SettingsSection
                 title={reactTranslator.getMessage('options_allowlist')}
-                id={ALLOWLIST_ENABLED}
-                description={settings.values[DEFAULT_ALLOWLIST_MODE]
+                id={AllowlistEnabled}
+                mode="smallContainer"
+                description={settings.values[DefaultAllowlistMode]
                     ? reactTranslator.getMessage('options_allowlist_desc')
                     : (
                         <div>
@@ -127,9 +150,9 @@ const Allowlist = observer(() => {
                     )}
                 inlineControl={(
                     <Setting
-                        id={ALLOWLIST_ENABLED}
+                        id={AllowlistEnabled}
                         type={SETTINGS_TYPES.CHECKBOX}
-                        value={settings.values[ALLOWLIST_ENABLED]}
+                        value={settings.values[AllowlistEnabled]}
                         handler={allowlistChangeHandler}
                     />
                 )}
