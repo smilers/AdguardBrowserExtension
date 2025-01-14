@@ -1,3 +1,21 @@
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, {
     useContext,
     useState,
@@ -7,23 +25,26 @@ import React, {
 } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react';
-import sortBy from 'lodash/sortBy';
-import classNames from 'classnames';
 
+import classNames from 'classnames';
+import { sortBy } from 'lodash-es';
+
+import { rootStore } from '../../stores/RootStore';
+import { reactTranslator } from '../../../../common/translators/reactTranslator';
+import { SettingsSection } from '../Settings/SettingsSection';
+import { Icon } from '../../../common/components/ui/Icon';
+import { Setting, SETTINGS_TYPES } from '../Settings/Setting';
+import { AntibannerGroupsId } from '../../../../common/constants';
+
+import { AnnoyancesConsent } from './AnnoyancesConsent';
 import { Group } from './Group';
 import { SearchGroup } from './Search/SearchGroup';
 import { Filter } from './Filter';
 import { EmptyCustom } from './EmptyCustom';
 import { Search } from './Search';
 import { FiltersUpdate } from './FiltersUpdate';
-import { rootStore } from '../../stores/RootStore';
-import { reactTranslator } from '../../../../common/translators/reactTranslator';
 import { AddCustomModal } from './AddCustomModal';
-import { SettingsSection } from '../Settings/SettingsSection';
-import { Icon } from '../../../common/components/ui/Icon';
 import { SEARCH_FILTERS } from './Search/constants';
-import { Setting, SETTINGS_TYPES } from '../Settings/Setting';
-import { ANTIBANNER_GROUPS_ID } from '../../../../common/constants';
 
 const QUERY_PARAM_NAMES = {
     GROUP: 'group',
@@ -47,14 +68,14 @@ const Filters = observer(() => {
     const [groupDetermined, setGroupDetermined] = useState(false);
 
     const GROUP_DESCRIPTION = {
-        0: reactTranslator.getMessage('group_description_custom'),
-        1: reactTranslator.getMessage('group_description_adblocking'),
-        2: reactTranslator.getMessage('group_description_stealth'),
-        3: reactTranslator.getMessage('group_description_social'),
-        4: reactTranslator.getMessage('group_description_annoyances'),
-        5: reactTranslator.getMessage('group_description_security'),
-        6: reactTranslator.getMessage('group_description_miscellaneous'),
-        7: reactTranslator.getMessage('group_description_lang'),
+        [AntibannerGroupsId.CustomFiltersGroupId]: reactTranslator.getMessage('group_description_custom'),
+        [AntibannerGroupsId.AdBlockingFiltersGroupId]: reactTranslator.getMessage('group_description_adblocking'),
+        [AntibannerGroupsId.PrivacyFiltersGroupId]: reactTranslator.getMessage('group_description_stealth'),
+        [AntibannerGroupsId.SocialFiltersGroupId]: reactTranslator.getMessage('group_description_social'),
+        [AntibannerGroupsId.AnnoyancesFiltersGroupId]: reactTranslator.getMessage('group_description_annoyances'),
+        [AntibannerGroupsId.SecurityFiltersGroupId]: reactTranslator.getMessage('group_description_security'),
+        [AntibannerGroupsId.OtherFiltersGroupId]: reactTranslator.getMessage('group_description_miscellaneous'),
+        [AntibannerGroupsId.LanguageFiltersGroupId]: reactTranslator.getMessage('group_description_lang'),
     };
 
     const {
@@ -71,15 +92,27 @@ const Filters = observer(() => {
     }, [location.search, query, settingsStore]);
 
     const handleGroupSwitch = async ({ id, data }) => {
-        await settingsStore.updateGroupSetting(id, data);
+        const groupId = Number.parseInt(id, 10);
+
+        // get user consent about recommended filters for the first time user enables annoyances filter group. AG-29161
+        if (
+            groupId === AntibannerGroupsId.AnnoyancesFiltersGroupId
+            && !settingsStore.isGroupTouched(groupId)
+            // on group enable
+            && data
+        ) {
+            settingsStore.setFiltersToGetConsentFor(settingsStore.recommendedAnnoyancesFilters);
+            settingsStore.updateGroupStateUI(AntibannerGroupsId.AnnoyancesFiltersGroupId, true);
+            settingsStore.setIsAnnoyancesConsentModalOpen(true);
+            return;
+        }
+
+        await settingsStore.updateGroupSetting(groupId, data);
     };
 
     const groupClickHandler = (groupId) => () => {
-        // Prevent a click event after text selection
-        if (!window.getSelection().toString()) {
-            settingsStore.setSelectedGroupId(groupId);
-            history.push(`/filters?group=${groupId}`);
-        }
+        settingsStore.setSelectedGroupId(groupId);
+        history.push(`/filters?group=${groupId}`);
     };
 
     const getEnabledFiltersByGroup = (group) => (
@@ -87,6 +120,8 @@ const Filters = observer(() => {
     );
 
     const renderGroups = (groups) => {
+        // TODO: use 'displayNumber' as a const
+        // or add sorting by it to a separate helper as it is used in several places
         const sortedGroups = sortBy(groups, 'displayNumber');
         return sortedGroups.map((group) => {
             const enabledFilters = getEnabledFiltersByGroup(group);
@@ -206,12 +241,8 @@ const Filters = observer(() => {
         });
 
         // eslint-disable-next-line max-len
-        const isCustom = settingsStore.selectedGroupId === ANTIBANNER_GROUPS_ID.CUSTOM_FILTERS_GROUP_ID;
+        const isCustom = settingsStore.selectedGroupId === AntibannerGroupsId.CustomFiltersGroupId;
         const isEmpty = filtersToRender.length === 0;
-
-        const groupChangeHandler = async ({ id, data }) => {
-            await settingsStore.updateGroupSetting(id, !data);
-        };
 
         const renderBackButton = () => (
             <>
@@ -244,9 +275,8 @@ const Filters = observer(() => {
                         id={selectedGroup.groupId}
                         type={SETTINGS_TYPES.CHECKBOX}
                         label={reactTranslator.getMessage('options_privacy_title')}
-                        inverted
-                        value={!selectedGroup.enabled}
-                        handler={groupChangeHandler}
+                        value={selectedGroup.enabled}
+                        handler={handleGroupSwitch}
                     />
                 )}
                 renderBackButton={renderBackButton}
@@ -270,6 +300,15 @@ const Filters = observer(() => {
                         />
                     </>
                 )}
+                {settingsStore.isAnnoyancesConsentModalOpen && (
+                    <AnnoyancesConsent
+                        isOpen={settingsStore.isAnnoyancesConsentModalOpen}
+                        setIsOpen={settingsStore.setIsAnnoyancesConsentModalOpen}
+                        onConfirm={settingsStore.handleFilterConsentConfirm}
+                        onCancel={settingsStore.handleFilterConsentCancel}
+                        shouldShowFilterPolicy={settingsStore.shouldShowFilterPolicy}
+                    />
+                )}
             </SettingsSection>
         );
     }
@@ -283,6 +322,15 @@ const Filters = observer(() => {
             {settingsStore.isSearching
                 ? renderGroupsOnSearch(filtersToRender)
                 : renderGroups(categories)}
+            {settingsStore.isAnnoyancesConsentModalOpen && (
+                <AnnoyancesConsent
+                    isOpen={settingsStore.isAnnoyancesConsentModalOpen}
+                    setIsOpen={settingsStore.setIsAnnoyancesConsentModalOpen}
+                    onConfirm={settingsStore.handleFilterConsentConfirm}
+                    onCancel={settingsStore.handleFilterConsentCancel}
+                    shouldShowFilterPolicy={settingsStore.shouldShowFilterPolicy}
+                />
+            )}
         </SettingsSection>
     );
 });

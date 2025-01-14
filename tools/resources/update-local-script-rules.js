@@ -1,4 +1,22 @@
 /**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
  * By the rules of AMO we cannot use remote scripts (and our JS rules can be counted as such).
  * Because of that we use the following approach (that was accepted by AMO reviewers):
  *
@@ -9,53 +27,64 @@
  *  This way filters maintainers can test new rules before including them in the filters.
  */
 import { promises as fs } from 'fs';
-import {
-    ADGUARD_FILTERS_IDS,
-    FILTERS_DEST,
-    LOCAL_SCRIPT_RULES_COMMENT,
-} from '../constants';
 
-/**
- * @param arr - array with elements [{domains: '', script: ''}, ...]
- * @param domainsToCheck String
- * @param scriptToCheck String
- * @returns {boolean}
- */
-const isInArray = (arr, domainsToCheck, scriptToCheck) => {
-    for (let i = 0; i < arr.length; i += 1) {
-        const element = arr[i];
-        const { domains, script } = element;
-        if (domains === domainsToCheck && script === scriptToCheck) {
-            return true;
-        }
-    }
-    return false;
-};
+import * as _ from 'lodash';
+
+import {
+    CosmeticRuleParser,
+    FilterListParser,
+    defaultParserOptions,
+} from '@adguard/agtree';
+
+import { FILTERS_DEST, LOCAL_SCRIPT_RULES_COMMENT } from '../constants';
+import { ADGUARD_FILTERS_IDS } from '../../constants';
 
 const updateLocalScriptRulesForBrowser = async (browser) => {
     const folder = FILTERS_DEST.replace('%browser', browser);
     const rules = {
         comment: LOCAL_SCRIPT_RULES_COMMENT,
-        rules: [],
+        rules: {},
     };
 
     // eslint-disable-next-line no-restricted-syntax
     for (const filterId of ADGUARD_FILTERS_IDS) {
         // eslint-disable-next-line no-await-in-loop
-        const filters = (await fs.readFile(`${folder}/filter_${filterId}.txt`)).toString();
-        const lines = filters.split('\n');
+        const rawFilterList = (await fs.readFile(`${folder}/filter_${filterId}.txt`)).toString();
+        const filterListNode = FilterListParser.parse(rawFilterList, {
+            ...defaultParserOptions,
+            includeRaws: false,
+            isLocIncluded: false,
+            tolerant: true,
+        });
 
-        lines.forEach((line) => {
-            line = line.trim();
-            if (line && line[0] !== '!' && line.indexOf('#%#') > -1) {
-                const m = line.split('#%#');
-                m[0] = m[0] === '' ? '<any>' : m[0];
-                // check that rule is not in array already
-                if (!isInArray(rules.rules, m[0], m[1])) {
-                    rules.rules.push({
-                        domains: m[0],
-                        script: m[1],
-                    });
+        filterListNode.children.forEach((ruleNode) => {
+            if (
+                ruleNode.category === 'Cosmetic'
+                && (ruleNode.type === 'ScriptletInjectionRule' || ruleNode.type === 'JsInjectionRule')
+            ) {
+                // Re-generate raw body to make it consistent with TSUrlFilter rule instances
+                // (TSUrlFilter also re-generates body from AST in the cosmetic rule constructor)
+                const rawBody = CosmeticRuleParser.generateBody(ruleNode);
+                const permittedDomains = [];
+                const restrictedDomains = [];
+
+                ruleNode.domains.children.forEach((domainNode) => {
+                    if (domainNode.exception) {
+                        restrictedDomains.push(domainNode.value);
+                    } else {
+                        permittedDomains.push(domainNode.value);
+                    }
+                });
+
+                const toPush = {
+                    permittedDomains,
+                    restrictedDomains,
+                };
+
+                if (rules.rules[rawBody] === undefined) {
+                    rules.rules[rawBody] = [toPush];
+                } else if (!_.some(rules.rules[rawBody], toPush)) {
+                    rules.rules[rawBody].push(toPush);
                 }
             }
         });
@@ -68,8 +97,5 @@ const updateLocalScriptRulesForBrowser = async (browser) => {
 };
 
 export const updateLocalScriptRules = async () => {
-    await updateLocalScriptRulesForBrowser('chromium');
-    await updateLocalScriptRulesForBrowser('edge');
     await updateLocalScriptRulesForBrowser('firefox');
-    await updateLocalScriptRulesForBrowser('opera');
 };

@@ -1,8 +1,26 @@
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /* eslint-disable no-await-in-loop,no-restricted-syntax,no-console */
 import { promises as fs } from 'fs';
 import path from 'path';
-import uniq from 'lodash/uniq';
-import xor from 'lodash/xor';
+
+import { uniq, xor } from 'lodash';
 
 import { cliLog } from '../cli-log';
 import { getLocaleTranslations } from '../helpers';
@@ -46,6 +64,7 @@ const writeInFile = (filename, body) => {
 
 /**
  * Finds files paths within directory corresponding to filesReg
+ *
  * @param {string} dir
  * @param {string} filesReg
  * @returns {Promise<*>}

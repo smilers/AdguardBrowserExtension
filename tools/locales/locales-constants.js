@@ -1,3 +1,21 @@
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import path from 'path';
 import fs from 'fs';
 
@@ -32,7 +50,7 @@ const LOCALES_ABSOLUTE_PATH = path.join(__dirname, LOCALES_RELATIVE_PATH);
  */
 const LOCALE_PAIRS = {
     /**
-     * Norvegian language locale code in Crowdin is 'no'
+     * Norwegian language locale code in Crowdin is 'no'
      * Chrome recognizes both locale code 'nb' and 'no',
      * Firefox recognizes only 'nb'
      */
@@ -43,9 +61,14 @@ const LOCALE_PAIRS = {
     es_419: 'es',
 };
 
+/**
+ * List of supported locales.
+ */
+const LOCALES = Object.keys(LANGUAGES);
+
 export {
+    LOCALES,
     BASE_LOCALE,
-    LANGUAGES,
     PROJECT_ID,
     TWOSKY_CONFIG_PATH,
     API_URL,

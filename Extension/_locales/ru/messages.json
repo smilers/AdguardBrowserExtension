@@ -6,10 +6,10 @@
         "message": "Все фильтры"
     },
     "options_filters_list_search_display_option_enabled": {
-        "message": "Включенные"
+        "message": "Включённые"
     },
     "options_filters_list_search_display_option_disabled": {
-        "message": "Отключенные"
+        "message": "Отключённые"
     },
     "options_filters_empty_title": {
         "message": "Ничего не найдено"
@@ -17,11 +17,32 @@
     "options_antibanner_custom_filter_already_exists": {
         "message": "Этот пользовательский фильтр уже добавлен"
     },
+    "options_filters_annoyances_consent_title": {
+        "message": "Пожалуйста, внимательно прочитайте текст ниже, прежде чем включать фильтры раздражителей"
+    },
+    "options_filters_annoyances_consent_description": {
+        "message": "Вы собираетесь включить один или несколько фильтров раздражителей. Они блокируют элементы, которые либо не имеют отношения к содержимому сайта, либо имеют, но раздражают пользователя. Владельцы сайтов могут считать эти элементы обязательными: если вы блокируете их, вы можете нарушить их условия; некоторые функции сайтов могут быть недоступны или работать некорректно. Включая фильтры, вы понимаете и соглашаетесь с тем, что несёте полную ответственность за соблюдение условий использования посещаемых вами сайтов и что AdGuard не несёт ответственности за соблюдение вами условий использования посещаемых вами сайтов."
+    },
+    "options_filters_annoyances_consent_question": {
+        "message": "Включить фильтры?"
+    },
+    "options_filters_annoyances_consent_filter_policy": {
+        "message": "Подробнее о том, что блокируют фильтры раздражителей, читайте <a>в Политике фильтрации AdGuard<\/a>"
+    },
+    "options_filters_annoyances_consent_enable_button": {
+        "message": "Включить"
+    },
     "popup_header_cta_link": {
-        "message": "Хотите блокировать больше?"
+        "message": "Как усилить защиту"
+    },
+    "popup_header_update_filters": {
+        "message": "Проверить обновления фильтров"
     },
     "options_popup_import_settings_wrong_file_ext": {
         "message": "Расширение файла должно быть %extension%"
+    },
+    "popup_resume_protection_button": {
+        "message": "Возобновить"
     },
     "popup_adguard_for_ios": {
         "message": "AdGuard для iOS"
@@ -33,16 +54,16 @@
         "message": "Версия:"
     },
     "options_filters_filter_link": {
-        "message": "На главную"
+        "message": "Перейти на сайт"
     },
     "options_filters_filter_updated": {
-        "message": "Обновлен:"
+        "message": "Обновлён:"
     },
     "options_popup_version_update_disable_notification": {
         "message": "Отключить уведомления"
     },
     "popup_adguard_footer_title": {
-        "message": "AdGuard для мобильного"
+        "message": "Защитите смартфон или планшет"
     },
     "options_popup_call_to_action": {
         "message": "Введите корректный URL фильтра или путь к локальному файлу в строку выше."
@@ -51,7 +72,7 @@
         "message": "Вы будете подписаны на этот фильтр."
     },
     "options_popup_url_title": {
-        "message": "Новая подписка на фильтр"
+        "message": "Добавление нового фильтра"
     },
     "options_popup_url_placeholder": {
         "message": "Путь или ссылка:"
@@ -84,7 +105,7 @@
         "message": "Количество правил:"
     },
     "options_popup_filter_homepage": {
-        "message": "Домашняя страница:"
+        "message": "Сайт:"
     },
     "options_popup_filter_url": {
         "message": "URL:"
@@ -96,7 +117,8 @@
         "message": "AdGuard Антибаннер"
     },
     "description": {
-        "message": "Непревзойденная защита от рекламы и всплывающих окон. Блокирует рекламу в VK (Вконтакте), Одноклассники, Facebook, на YouTube и других сайтах."
+        "description": "TEXT MAX LENGTH: 132",
+        "message": "Эффективное расширение для блокировки рекламы и всплывающих окон. Блокирует рекламу в VK, Одноклассниках, YouTube и других сайтах."
     },
     "background_tab_title": {
         "message": "Фоновая вкладка"
@@ -120,22 +142,25 @@
         "message": "Пользовательские правила"
     },
     "filtering_log_modified_rules": {
-        "message": "Измененные правила:"
+        "message": "Изменённые правила: %rules_count%"
+    },
+    "filtering_log_stealth_rules": {
+        "message": "Правила защиты от трекинга: %rules_count%"
     },
     "filtering_log_privacy_applied_rules": {
-        "message": "Правила Антитрекинга применены"
+        "message": "Использовалась Защита от трекинга"
     },
     "filtering_log_in_allowlist": {
         "message": "Этот сайт в белом списке"
     },
     "filtering_log_hide_referrer": {
-        "message": "Referrer скрыт от сторонних ресурсов"
+        "message": "Referer скрыт от сторонних ресурсов"
     },
     "filtering_log_hide_search_queries": {
         "message": "Ваши поисковые запросы скрыты"
     },
     "filtering_log_remove_client_data": {
-        "message": "Заголовок X-Client-Data удален"
+        "message": "Заголовок X-Client-Data удалён"
     },
     "filtering_log_send_not_track": {
         "message": "Заголовок Do-Not-Track отправлен"
@@ -174,7 +199,7 @@
         "message": "Включено:"
     },
     "options_filters_enabled_and_more": {
-        "message": "%enabled% и еще %more%"
+        "message": "%enabled% и ещё %more%"
     },
     "options_filters_enabled_and_last": {
         "message": "%enabled% и %last%"
@@ -185,17 +210,29 @@
     "options_filters_filter_trusted_tag_desc": {
         "message": "Вы решили доверять этому фильтру."
     },
+    "options_filters_info_mv3_total_rules": {
+        "message": "Всего правил: %num%"
+    },
+    "options_filters_info_mv3_specs": {
+        "message": "Спецификации на Github"
+    },
     "options_add_custom_filter": {
         "message": "Добавить фильтр"
     },
     "options_empty_custom_filter": {
         "message": "У вас пока нет пользовательских фильтров"
     },
+    "options_loader_applying_changes": {
+        "message": "Сохранение изменений..."
+    },
     "options_editor_indicator_saving": {
         "message": "Сохранение..."
     },
     "options_editor_indicator_saved": {
         "message": "Сохранено"
+    },
+    "options_popup_import_error_required_privacy_permission": {
+        "message": "Чтобы импортировать этот файл, разрешите AdGuard изменить ваши настройки конфиденциальности."
     },
     "options_popup_import_success_title": {
         "message": "Настройки успешно импортированы"
@@ -210,22 +247,37 @@
         "message": "Доверенный"
     },
     "options_popup_trusted_filter_description": {
-        "message": "Доверенные фильтры могут использовать мощные модификаторы правил фильтрации, которые, в свою очередь, могут представлять опасность, находясь в ненадежных руках. Не устанавливайте этот флажок, если полностью не доверяете фильтру."
-    },
-    "popup_site_filtering_state": {
-        "message": "Фильтрация на этом сайте"
+        "message": "Доверенные фильтры могут использовать мощные модификаторы правил фильтрации, которые, в свою очередь, могут представлять опасность, находясь в ненадёжных руках. Не устанавливайте этот флажок, если полностью не доверяете фильтру."
     },
     "popup_site_filtering_state_secure_page": {
-        "message": "Защищенная страница"
+        "message": "Защищённая страница"
+    },
+    "popup_site_filtering_state_loading": {
+        "message": "Загрузка..."
+    },
+    "popup_site_filtering_state_enabling": {
+        "message": "Включение защиты..."
     },
     "popup_site_filtering_state_enabled": {
         "message": "Защита включена"
     },
+    "popup_site_filtering_state_disabling": {
+        "message": "Отключение защиты..."
+    },
     "popup_site_filtering_state_disabled": {
         "message": "Защита отключена"
     },
+    "popup_site_filtering_state_pausing": {
+        "message": "Приостановка защиты..."
+    },
     "popup_site_filtering_state_paused": {
         "message": "Защита приостановлена"
+    },
+    "popup_site_filtering_state_resuming": {
+        "message": "Возобновление защиты..."
+    },
+    "popup_site_filtering_state_subtitle_all_websites": {
+        "message": "для всех сайтов"
     },
     "popup_site_exception_information": {
         "message": "На этом сайте фильтрация отключена, так как она может мешать его работе."
@@ -237,40 +289,40 @@
         "message": "Всего: %num%"
     },
     "popup_statistics_total": {
-        "message": "Всего"
+        "message": "Всего правил"
     },
     "popup_statistics_week_days_mon": {
-        "message": "Пон."
+        "message": "Пн"
     },
     "popup_statistics_week_days_tue": {
-        "message": "Вт."
+        "message": "Вт"
     },
     "popup_statistics_week_days_wed": {
-        "message": "Ср."
+        "message": "Ср"
     },
     "popup_statistics_week_days_thu": {
-        "message": "Чт."
+        "message": "Чт"
     },
     "popup_statistics_week_days_fri": {
-        "message": "Пт."
+        "message": "Пт"
     },
     "popup_statistics_week_days_sat": {
-        "message": "Сб."
+        "message": "Сб"
     },
     "popup_statistics_week_days_sun": {
-        "message": "Вс."
+        "message": "Вс"
     },
     "popup_statistics_months_jan": {
-        "message": "Янв."
+        "message": "Янв"
     },
     "popup_statistics_months_feb": {
-        "message": "Фев."
+        "message": "Фев"
     },
     "popup_statistics_months_mar": {
         "message": "Март"
     },
     "popup_statistics_months_apr": {
-        "message": "Апр."
+        "message": "Апр"
     },
     "popup_statistics_months_may": {
         "message": "Май"
@@ -282,19 +334,19 @@
         "message": "Июль"
     },
     "popup_statistics_months_aug": {
-        "message": "Авг."
+        "message": "Авг"
     },
     "popup_statistics_months_sep": {
-        "message": "Сент."
+        "message": "Сент"
     },
     "popup_statistics_months_oct": {
-        "message": "Окт."
+        "message": "Окт"
     },
     "popup_statistics_months_nov": {
-        "message": "Ноя."
+        "message": "Ноя"
     },
     "popup_statistics_months_dec": {
-        "message": "Дек."
+        "message": "Дек"
     },
     "options_popup_update_title_error": {
         "message": "Ошибка обновления фильтров"
@@ -303,10 +355,10 @@
         "message": "Обновлений не найдено"
     },
     "options_popup_update_error": {
-        "message": "Не удалось получить обновления. Пожалуйста, попробуйте еще раз позже."
+        "message": "Не удалось получить обновления. Пожалуйста, попробуйте ещё раз позже."
     },
     "options_popup_update_filter": {
-        "message": "обновлен."
+        "message": "обновлён."
     },
     "options_popup_update_filters": {
         "message": "обновлены."
@@ -335,32 +387,11 @@
     "popup_security_report": {
         "message": "Проверить безопасность сайта"
     },
-    "popup_reset_custom_rules": {
-        "message": "Удалить все пользовательские правила для этой страницы"
-    },
-    "popup_open_settings": {
-        "message": "Настройки AdGuard"
-    },
-    "popup_block_site_ads_android": {
-        "message": "Заблокировать рекламу на сайте"
-    },
-    "popup_security_report_android": {
-        "message": "Отчет о безопасности"
-    },
-    "popup_in_allowlist_android": {
-        "message": "В белом списке"
-    },
-    "popup_site_protection_disabled_android": {
-        "message": "Защита приостановлена"
-    },
-    "popup_open_log_android": {
-        "message": "Журнал фильтрации"
+    "popup_reset_page_user_rules": {
+        "message": "Удалить правила для этого сайта"
     },
     "context_block_site_ads": {
         "message": "Заблокировать рекламу на сайте..."
-    },
-    "context_block_site_element": {
-        "message": "Заблокировать элемент..."
     },
     "context_security_report": {
         "message": "Проверить безопасность сайта..."
@@ -408,7 +439,7 @@
         "message": "Загрузка базы фильтров..."
     },
     "filters_download_loading": {
-        "message": "Пожалуйста, подождите. Идет загрузка базы фильтров..."
+        "message": "Пожалуйста, подождите. Идёт загрузка базы данных фильтров..."
     },
     "filtering_modal_element": {
         "message": "Элемент:"
@@ -417,7 +448,7 @@
         "message": "Cookie:"
     },
     "filtering_modal_important": {
-        "message": "Установить для правила наивысший приоритет"
+        "message": "Повысить приоритет правила"
     },
     "filtering_log_title": {
         "message": "Журнал фильтрации"
@@ -483,7 +514,7 @@
         "message": "Правила:"
     },
     "filtering_modal_privacy": {
-        "message": "Антитрекинг"
+        "message": "Защита от трекинга:"
     },
     "filtering_modal_filter": {
         "message": "Фильтр:"
@@ -554,6 +585,18 @@
     "filtering_modal_hide_full_url": {
         "message": "Скрыть полный URL"
     },
+    "filtering_modal_show_full_rule": {
+        "message": "Показать правило целиком"
+    },
+    "filtering_modal_hide_full_rule": {
+        "message": "Скрыть полное правило"
+    },
+    "filtering_modal_show_full_element": {
+        "message": "Показать элемент полностью"
+    },
+    "filtering_modal_hide_full_element": {
+        "message": "Скрыть подробности элемента"
+    },
     "filtering_modal_copy_to_clipboard": {
         "message": "Копировать"
     },
@@ -567,13 +610,13 @@
         "message": "Обычные"
     },
     "filtering_log_filter_allowed": {
-        "message": "Разрешенные"
+        "message": "Разрешённые"
     },
     "filtering_log_filter_blocked": {
         "message": "Заблокированные"
     },
     "filtering_log_filter_modified": {
-        "message": "Измененные"
+        "message": "Изменённые"
     },
     "filtering_log_filter_user_rules": {
         "message": "Пользовательские правила"
@@ -582,13 +625,13 @@
         "message": "Обработан"
     },
     "filtering_log_status_allowed": {
-        "message": "Разрешен"
+        "message": "Разрешён"
     },
     "filtering_log_status_blocked": {
         "message": "Заблокирован"
     },
     "filtering_log_status_modified": {
-        "message": "Изменен"
+        "message": "Изменён"
     },
     "options_settings": {
         "message": "Настройки AdGuard"
@@ -629,8 +672,14 @@
     "options_import_settings": {
         "message": "Импорт настроек"
     },
+    "options_report_bug": {
+        "message": "Сообщить об ошибке"
+    },
+    "options_leave_feedback": {
+        "message": "Оставить отзыв"
+    },
     "options_privacy": {
-        "message": "Антитрекинг"
+        "message": "Защита от трекинга"
     },
     "options_update_antibanner_filters": {
         "message": "Проверить обновления фильтров"
@@ -672,7 +721,7 @@
         "message": "Защита от фишинговых и вредоносных сайтов"
     },
     "options_safebrowsing_enabled_desc": {
-        "message": "Включите модуль Антифишинг, который обнаруживает потенциально вредоносные и фишинговые сайты, сверяя их с онлайн-базой данных. <a>Подробнее<\/a>"
+        "message": "Обнаруживает потенциально вредоносные и фишинговые сайты, сверяя их с онлайн-базой данных. <a>Подробнее<\/a>"
     },
     "options_site": {
         "message": "Официальный сайт"
@@ -688,6 +737,90 @@
     },
     "options_miscellaneous_settings": {
         "message": "Дополнительные настройки"
+    },
+    "options_rule_limits": {
+        "message": "Лимит правил"
+    },
+    "options_rule_limits_description": {
+        "message": "Это расширение соответствует Manifest V3"
+    },
+    "options_rule_limits_description_link": {
+        "message": "Узнать больше о Manifest V3"
+    },
+    "options_rule_limits_dynamic": {
+        "message": "Динамические правила"
+    },
+    "options_rule_limits_dynamic_user_rules": {
+        "message": "Правила, которые добавляете вы — пользовательские правила и фильтры"
+    },
+    "options_rule_limits_dynamic_regex": {
+        "message": "Правила регулярных выражений. Входят в лимит динамических правил"
+    },
+    "options_rule_limits_static_rulesets": {
+        "message": "Статические наборы правил"
+    },
+    "options_rule_limits_static_rulesets_builtin": {
+        "message": "Встроенные фильтры, например Блокировка раздражителей или Языковые"
+    },
+    "options_rule_limits_static_rules": {
+        "message": "Статические правила"
+    },
+    "options_rule_limits_static_rules_all": {
+        "message": "Правила из встроенных фильтров"
+    },
+    "options_rule_limits_static_rules_regex": {
+        "message": "Правила регулярных выражений. Входят в лимит динамических правил"
+    },
+    "options_rule_limits_numbers": {
+        "message": "%current% из %maximum%"
+    },
+    "options_rule_limits_warning_title": {
+        "message": "Браузер изменил список активных фильтров"
+    },
+    "options_rule_limits_warning_explanation_title": {
+        "message": "Что произошло?"
+    },
+    "options_rule_limits_warning_explanation_description": {
+        "message": "Лимит активных встроенных правил был превышен: возможно, обновилось расширение AdGuard или вы установили новое расширение. Согласно Manifest V3 Chrome отключил все фильтры, кроме фильтров по умолчанию."
+    },
+    "options_rule_limits_warning_list_enabled_before_title": {
+        "message": "Фильтры до обновления"
+    },
+    "options_rule_limits_warning_list_enabled_now_title": {
+        "message": "Фильтры сейчас"
+    },
+    "options_rule_limits_warning_actions_title": {
+        "message": "Что можно сделать"
+    },
+    "options_rule_limits_warning_actions_delete_filters": {
+        "message": "Вариант 1. Удалите ненужные расширения, блокирующие рекламу. Чтобы заново включить фильтры из раздела «Фильтры до обновления», нажмите <a>включить<\/a>."
+    },
+    "options_rule_limits_warning_actions_install_app": {
+        "message": "Вариант 2. Установите приложение AdGuard: у него нет ограничений по правилам фильтрации. <a>Скачать AdGuard<\/a>"
+    },
+    "options_rule_limits_warning_actions_close_warning_one_filter": {
+        "message": "Вариант 3. Если текущие фильтры вас устраивают, <a>закройте это предупреждение<\/a>."
+    },
+    "options_rule_limits_warning_actions_close_warning_multiple_filters": {
+        "message": "Вариант 3. Если текущие фильтры вас устраивают, <a>закройте это предупреждение<\/a>."
+    },
+    "options_all_limits_exceeded_warning": {
+        "message": "Достигнут лимит активных встроенных правил. Браузер изменил список включённых фильтров. Количество фильтров изменено с %expected% на %current%."
+    },
+    "options_limits_warning_static_filters": {
+        "message": "Достигнут лимит активных встроенных фильтров. Включено %maximum% из %current%. Чтобы новые правила применялись, отключите некоторые фильтры."
+    },
+    "options_limits_warning_static_rules": {
+        "message": "Достигнут лимит активных встроенных правил. Включено %maximum% из %current%. Чтобы новые правила применялись, отключите некоторые фильтры."
+    },
+    "options_limits_warning_static_regex_rules": {
+        "message": "Достигнут лимит активных встроенных правил регулярных выражений. Включено %maximum% из %current%. Чтобы новые правила применялись, отключите некоторые фильтры."
+    },
+    "options_limits_warning_dynamic_rules": {
+        "message": "Достигнут лимит активных пользовательских правил. Включено %maximum% из %current%."
+    },
+    "options_limits_warning_dynamic_regex_rules": {
+        "message": "Достигнут лимит активных правил регулярных выражений. Включено %maximum% из %current%."
     },
     "options_show_adguard_full_version_title": {
         "message": "Показывать информацию о полной версии AdGuard"
@@ -726,31 +859,31 @@
         "message": "Использовать оптимизированные фильтры"
     },
     "options_use_optimized_filters_desc": {
-        "message": "Список фильтров, оптимизированных для мобильных устройств"
+        "message": "Для экономии трафика использует сокращённые версии фильтров, включающие только самые популярные правила. Лучше подходит для мобильных браузеров"
     },
     "options_privacy_title": {
-        "message": "Антитрекинг"
+        "message": "Защита от трекинга"
     },
     "options_privacy_desc": {
-        "message": "Защищает ваши данные от тысяч онлайн-счетчиков, блокируя наиболее популярные методы отслеживания."
+        "message": "Защищает ваши данные от тысяч онлайн-трекеров, блокируя наиболее популярные методы отслеживания."
     },
     "options_hide_referrer_title": {
-        "message": "Скрывать Referrer от сторонних ресурсов"
+        "message": "Скрыть Referer от сторонних ресурсов"
     },
     "options_hide_referrer_desc": {
-        "message": "Не позволяет сторонним ресурсам узнать, какой веб-сайт вы посещаете."
+        "message": "Не позволяет сторонним ресурсам узнать, какой сайт вы посещаете"
     },
     "options_hide_search_queries_title": {
         "message": "Скрывать поисковые запросы"
     },
     "options_hide_search_queries_desc": {
-        "message": "Скрывать запросы для сайтов, на которые вы перешли из поисковой системы."
+        "message": "Скрывать запросы для сайтов, на которые вы перешли из поисковой системы"
     },
     "options_send_not_track_title": {
-        "message": "Отправлять сайтам сигналы о неотслеживании"
+        "message": "Просить сайты не отслеживать вас"
     },
     "options_send_not_track_desc": {
-        "message": "Отправлять сигналы <gpc>Global Privacy Control<\/gpc> и <dnt>Do Not Track<\/dnt> посещаемым веб-сайтам."
+        "message": "Отправлять сигналы <gpc>Global Privacy Control<\/gpc> и <dnt>Do Not Track<\/dnt> сайтам, которые вы посещаете."
     },
     "options_stripped_tracking_parameters": {
         "message": "Параметры отслеживания удалены"
@@ -771,28 +904,28 @@
         "message": "Отключить WebRTC"
     },
     "options_disable_webrtc_desc": {
-        "message": "Это может позволить другим узнать ваш реальный IP-адрес, даже если вы используете прокси-сервер или VPN."
+        "message": "WebRTC может позволить другим узнать ваш реальный IP-адрес, даже если вы используете прокси-сервер или VPN."
     },
     "options_strip_tracking_params_title": {
         "message": "Удалять параметры отслеживания"
     },
     "options_strip_tracking_params_description": {
-        "message": "Если эта опция включена, фильтр отслеживания по URL удаляет параметры отслеживания из адресов страниц."
+        "message": "Использовать Фильтр отслеживания по URL для удаления параметров отслеживания из адресов страниц."
     },
     "options_block_known_trackers_title": {
-        "message": "Блокировать известные трекеры"
+        "message": "Блокировать трекеры"
     },
     "options_block_known_trackers_description": {
-        "message": "Если эта опция включена, специальный фильтр AdGuard борется со всеми известными трекерами."
+        "message": "Использовать Фильтр счётчиков и систем аналитики для блокировки трекеров."
     },
     "options_third_party_title": {
-        "message": "Самоуничтожение сторонних файлов cookies"
+        "message": "Самоуничтожение сторонних куки"
     },
     "options_third_party_desc": {
         "message": "Ограничить время существования сторонних файлов cookie (минуты)."
     },
     "options_first_party_title": {
-        "message": "Самоуничтожение основных файлов cookies (не рекомендуется)"
+        "message": "Самоуничтожение куки сайта (не рекомендуется)"
     },
     "options_first_party_desc": {
         "message": "Ограничить время существования основных файлов cookie (минуты)."
@@ -810,22 +943,25 @@
         "message": "Статистика"
     },
     "popup_statistics_time_day": {
-        "message": "Последние 24 часа"
+        "message": "За день"
     },
     "popup_statistics_time_week": {
-        "message": "Прошлая неделя"
+        "message": "За неделю"
     },
     "popup_statistics_time_month": {
-        "message": "Прошлый месяц"
+        "message": "За месяц"
     },
     "popup_statistics_time_year": {
-        "message": "Прошлый год"
+        "message": "За год"
     },
     "popup_switch_button": {
         "message": "Переключение защиты"
     },
+    "popup_limits_exceeded_warning": {
+        "message": "Браузер изменил список активных встроенных фильтров"
+    },
     "short_name": {
-        "message": "AdGuard Антибаннер"
+        "message": "AdGuard"
     },
     "options_about": {
         "message": "О программе"
@@ -843,7 +979,7 @@
         "message": "Версия"
     },
     "options_copyright": {
-        "message": "Все права защищены. "
+        "message": "Все права защищены."
     },
     "options_remove_filter_confirm_modal_title": {
         "message": "Удалить этот фильтр?"
@@ -852,13 +988,10 @@
         "message": "Удалить"
     },
     "options_nav_better_than_extension": {
-        "message": "Почему полнофункциональная программа AdGuard лучше расширения?"
+        "message": "Почему приложение AdGuard лучше расширения?"
     },
     "options_nav_compare": {
-        "message": "В чем разница"
-    },
-    "options_nav_hide": {
-        "message": "Скрыть"
+        "message": "Сравнить"
     },
     "options_filters_search": {
         "message": "Поиск"
@@ -939,16 +1072,16 @@
         "message": "Только запросы, обработанные без фильтрации"
     },
     "filtering_log_tag_tooltip_allowed": {
-        "message": "Только разрешенные и разблокированные запросы"
+        "message": "Только разрешённые и разблокированные запросы"
     },
     "filtering_log_tag_tooltip_blocked": {
         "message": "Только заблокированные запросы"
     },
     "filtering_log_tag_tooltip_modified": {
-        "message": "Только измененные запросы"
+        "message": "Только изменённые запросы"
     },
     "filtering_log_tag_tooltip_user_rules": {
-        "message": "Только запросы, измененные пользовательскими правилами"
+        "message": "Только запросы, изменённые пользовательскими правилами"
     },
     "filtering_log_tag_tooltip_html": {
         "message": "Документы и поддокументы"
@@ -969,10 +1102,10 @@
         "message": "Медиа"
     },
     "filtering_log_tag_tooltip_other": {
-        "message": "Шрифты, пинги, WebRTC, WebSocket и т.д. "
+        "message": "Шрифты, пинги, WebRTC, WebSocket и т.д."
     },
     "filtering_log_badge_tooltip_third_party": {
-        "message": "Сторонний запросы"
+        "message": "Сторонний запрос"
     },
     "filtering_log_badge_tooltip_http_req_method": {
         "message": "Метод HTTP-запроса"
@@ -988,6 +1121,9 @@
     },
     "options_stealth_miscellaneous_title": {
         "message": "Разное"
+    },
+    "options_coming_soon": {
+        "message": "Скоро"
     },
     "blocking_pages_malware": {
         "message": "Данная веб-страница <strong>%host%<\/strong> может содержать вредоносное ПО. Она была заблокирована в соответствии с вашими настройками безопасности."
@@ -1017,6 +1153,23 @@
         "message": "Назад"
     },
     "blocking_pages_btn_proceed": {
-        "message": "Все равно продолжить"
+        "message": "Всё равно продолжить"
+    },
+    "text_collapser_show_default": {
+        "message": "Показать полный текст"
+    },
+    "text_collapser_hide_default": {
+        "message": "Скрыть полный текст"
+    },
+    "close_button_title": {
+        "message": "Закрыть"
+    },
+    "filtering_modal_applied_rules": {
+        "description": "WARNING: correct number of plural forms is required",
+        "message": "| Применённое правило | Применённые правила | Применённые правила"
+    },
+    "filtering_modal_original_rules": {
+        "description": "WARNING: correct number of plural forms is required",
+        "message": "| Оригинальное правило | Оригинальные правила | Оригинальные правила"
     }
 }

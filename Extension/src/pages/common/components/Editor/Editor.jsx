@@ -1,19 +1,39 @@
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, { useState, useEffect } from 'react';
 import ReactResizeDetector from 'react-resize-detector';
 import AceEditor from 'react-ace';
+
 import cn from 'classnames';
+// These side effects imports must be placed after the 'react-ace' import
+import 'ace-builds/src-noconflict/ext-searchbox.js';
+import 'ace-builds/src-noconflict/theme-textmate.js';
+import 'ace-builds/src-noconflict/mode-text.js';
 
-import 'ace-builds/src-noconflict/ext-searchbox';
-import 'ace-builds/src-noconflict/theme-textmate';
-import 'ace-builds/src-noconflict/mode-text';
+import { logger } from '../../../../common/logger';
 
-import { log } from '../../../../common/log';
-import './mode-adguard';
+import './mode-adguard.js';
 
 import './editor.pcss';
 
 const DEFAULT_EDITOR_SIZE = {
-    width: '100%',
+    width: '610px',
     height: '300px',
 };
 
@@ -39,7 +59,7 @@ const Editor = ({
                 setSize(JSON.parse(editorStorageSize));
             } catch (e) {
                 setSize(DEFAULT_EDITOR_SIZE);
-                log.debug(e.message);
+                logger.debug(e.message);
             }
         }
     }, [editorStorageSize]);

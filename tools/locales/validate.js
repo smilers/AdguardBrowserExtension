@@ -1,20 +1,38 @@
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import { validator } from '@adguard/translate';
 
 import { cliLog } from '../cli-log';
-
-import {
-    getLocaleTranslations,
-    areArraysEqual,
-} from '../helpers';
+import { getLocaleTranslations, areArraysEqual } from '../helpers';
 
 import {
     BASE_LOCALE,
-    LANGUAGES,
+    LOCALE_PAIRS,
+    LOCALES,
     REQUIRED_LOCALES,
     THRESHOLD_PERCENTAGE,
 } from './locales-constants';
 
-const LOCALES = Object.keys(LANGUAGES);
+/**
+ * Marker for text max length in description.
+ */
+const TEXT_MAX_LENGTH_MARKER = 'TEXT MAX LENGTH:';
 
 /**
  * @typedef Result
@@ -26,6 +44,7 @@ const LOCALES = Object.keys(LANGUAGES);
 
 /**
  * Logs translations readiness (default validation process)
+ *
  * @param {Result[]} results
  * @param {boolean} [isMinimum=false]
  */
@@ -57,6 +76,7 @@ const printTranslationsResults = (results, isMinimum = false) => {
 
 /**
  * Logs invalid translations (critical errors)
+ *
  * @param {Result[]} criticals
  */
 const printCriticalResults = (criticals) => {
@@ -69,14 +89,98 @@ const printCriticalResults = (criticals) => {
     });
 };
 
-const validateMessage = (baseKey, baseLocaleTranslations, localeTranslations) => {
-    const baseMessageValue = baseLocaleTranslations[baseKey].message;
-    const localeMessageValue = localeTranslations[baseKey].message;
-    try {
-        validator.isTranslationValid(baseMessageValue, localeMessageValue);
-    } catch (error) {
-        return { key: baseKey, error };
+/**
+ * Normalizes locale code before validation.
+ *
+ * @param {string} rawLocale Locale code to normalize.
+ *
+ * @example
+ * 'pt_BR' -> 'pt_br'
+ * 'es_419' -> 'es'
+ *
+ * @returns {string} Normalized locale code.
+ */
+const normalizeLocale = (rawLocale) => {
+    // locale should be lowercase, e.g. 'pt_br', not 'pt_BR'
+    const locale = rawLocale.toLowerCase();
+
+    return LOCALE_PAIRS[locale] || locale;
+};
+
+/**
+ * Validates the length of the translated string
+ * against the `TEXT MAX LENGTH:` marker in the base description.
+ *
+ * @param {string} baseDescriptionValue Base description value.
+ * @param {string} localeMessageValue Translated message value.
+ *
+ * @returns {string | null} Error message if the length is invalid, otherwise null.
+ */
+const validateTranslatedLength = (baseDescriptionValue, localeMessageValue) => {
+    if (!baseDescriptionValue) {
+        return null;
     }
+
+    if (!baseDescriptionValue.includes(TEXT_MAX_LENGTH_MARKER)) {
+        return null;
+    }
+
+    const markerIndex = baseDescriptionValue.indexOf(TEXT_MAX_LENGTH_MARKER);
+    if (markerIndex === -1) {
+        return null;
+    }
+
+    const lengthStr = baseDescriptionValue.slice(markerIndex + TEXT_MAX_LENGTH_MARKER.length).trim();
+    const maxLength = Number(lengthStr);
+    if (Number.isNaN(maxLength)) {
+        return `Invalid max length value: ${lengthStr}`;
+    }
+
+    if (maxLength && localeMessageValue.length > maxLength) {
+        return `Text length is more than allowed ${maxLength} characters, actual: ${localeMessageValue.length}`;
+    }
+
+    return null;
+};
+
+/**
+ * Validates that localized string correspond by structure to base locale string.
+ *
+ * @param {string} baseKey Key of the base locale string.
+ * @param {object} baseLocaleTranslations Translations of the base locale.
+ * @param {string} rawLocale Locale to validate.
+ * @param {object} localeTranslations Translations of the locale to validate.
+ *
+ * @returns {object} Validation result if error occurred, otherwise undefined.
+ */
+const validateMessage = (baseKey, baseLocaleTranslations, rawLocale, localeTranslations) => {
+    const baseMessageValue = baseLocaleTranslations[baseKey].message;
+    const baseDescriptionValue = baseLocaleTranslations[baseKey].description;
+    const localeMessageValue = localeTranslations[baseKey].message;
+
+    const lengthValidationError = validateTranslatedLength(baseDescriptionValue, localeMessageValue);
+    if (lengthValidationError) {
+        return {
+            key: baseKey,
+            error: lengthValidationError,
+        };
+    }
+
+    const locale = normalizeLocale(rawLocale);
+
+    let validation;
+    try {
+        if (!validator.isTranslationValid(
+            baseMessageValue,
+            localeMessageValue,
+            locale,
+        )) {
+            throw new Error('Invalid translation');
+        }
+    } catch (error) {
+        validation = { key: baseKey, error };
+    }
+    return validation;
 };
 
 /**
@@ -88,6 +192,7 @@ const validateMessage = (baseKey, baseLocaleTranslations, localeTranslations) =>
 
 /**
  * Checks locales translations readiness
+ *
  * @param {string[]} locales - list of locales
  * @param {ValidationFlags} flags
  * @returns {Result[]} array of object with such properties:
@@ -110,7 +215,7 @@ export const checkTranslations = async (locales, flags) => {
             if (!localeMessages.includes(baseKey)) {
                 untranslatedStrings.push(baseKey);
             } else {
-                const validationError = validateMessage(baseKey, baseLocaleTranslations, localeTranslations);
+                const validationError = validateMessage(baseKey, baseLocaleTranslations, locale, localeTranslations);
                 if (validationError) {
                     invalidTranslations.push(validationError);
                 }

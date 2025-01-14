@@ -1,12 +1,62 @@
-/* eslint-disable max-len */
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import path from 'path';
+
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
-import path from 'path';
+import { DefinePlugin } from 'webpack';
 
-import { BUILD_PATH, ENVS } from '../constants';
+import {
+    BUILD_PATH,
+    ENVS,
+    BROWSERS,
+} from '../constants';
 import { getEnvConf, updateLocalesMSGName } from '../helpers';
-import { getModuleReplacements } from './module-replacements';
+import {
+    WEB_ACCESSIBLE_RESOURCES_OUTPUT,
+    SUBSCRIBE_OUTPUT,
+    CONTENT_SCRIPT_START_OUTPUT,
+    CONTENT_SCRIPT_END_OUTPUT,
+    OPTIONS_OUTPUT,
+    FILTERING_LOG_OUTPUT,
+    FILTER_DOWNLOAD_OUTPUT,
+    FULLSCREEN_USER_RULES_OUTPUT,
+    SAFEBROWSING_OUTPUT,
+    DOCUMENT_BLOCK_OUTPUT,
+    BACKGROUND_OUTPUT,
+    POPUP_OUTPUT,
+    THANKYOU_OUTPUT,
+    EDITOR_OUTPUT,
+    REACT_VENDOR_OUTPUT,
+    MOBX_VENDOR_OUTPUT,
+    XSTATE_VENDOR_OUTPUT,
+    ASSISTANT_INJECT_OUTPUT,
+    SCRIPTLETS_VENDOR_OUTPUT,
+    TSURLFILTER_VENDOR_OUTPUT,
+    TSWEBEXTENSION_VENDOR_OUTPUT,
+    AGTREE_VENDOR_OUTPUT,
+    CSS_TOKENIZER_VENDOR_OUTPUT,
+    TEXT_ENCODING_POLYFILL_VENDOR_OUTPUT,
+} from '../../constants';
+
+import { megabytesToBytes, SizeLimitPlugin } from './size-limit-plugin';
 
 const config = getEnvConf(process.env.BUILD_ENV);
 
@@ -16,15 +66,26 @@ const POPUP_PATH = path.resolve(__dirname, '../../Extension/pages/popup');
 const FILTERING_LOG_PATH = path.resolve(__dirname, '../../Extension/pages/filtering-log');
 const FILTER_DOWNLOAD_PATH = path.resolve(__dirname, '../../Extension/pages/filter-download');
 const CONTENT_SCRIPT_START_PATH = path.resolve(__dirname, '../../Extension/pages/content-script-start');
+const ASSISTANT_INJECT_PATH = path.resolve(__dirname, '../../Extension/pages/assistant-inject');
 const CONTENT_SCRIPT_END_PATH = path.resolve(__dirname, '../../Extension/pages/content-script-end');
+const SUBSCRIBE_PATH = path.resolve(__dirname, '../../Extension/pages/subscribe');
 const THANKYOU_PATH = path.resolve(__dirname, '../../Extension/pages/thankyou');
-const ASSISTANT_PATH = path.resolve(__dirname, '../../Extension/pages/assistant');
 const FULLSCREEN_USER_RULES_PATH = path.resolve(__dirname, '../../Extension/pages/fullscreen-user-rules');
 const SAFEBROWSING_PATH = path.resolve(__dirname, '../../Extension/pages/safebrowsing');
 const AD_BLOCKED_PATH = path.resolve(__dirname, '../../Extension/pages/ad-blocked');
 const EDITOR_PATH = path.resolve(__dirname, '../../Extension/src/pages/common/components/Editor');
 
+const TEXT_ENCODER_POLYFILL_PATH = path.resolve(
+    __dirname,
+    '../../node_modules/@adguard/tswebextension/dist/text-encoding-polyfill.js',
+);
+
 const OUTPUT_PATH = config.outputPath;
+
+const SIZE_LIMITS_MB = {
+    // Need to be less than 4 MB, because Firefox Extensions Store has a limit of 5 MB for .js files.
+    '.js': megabytesToBytes(4),
+};
 
 const htmlTemplatePluginCommonOptions = {
     cache: false,
@@ -35,105 +96,161 @@ export const genCommonConfig = (browserConfig) => {
     const isDev = process.env.BUILD_ENV === ENVS.DEV;
     return {
         mode: config.mode,
+        target: 'web',
         optimization: {
             minimize: false,
             runtimeChunk: 'single',
         },
-        cache: false,
+        cache: isDev,
         devtool: isDev ? 'eval-source-map' : false,
         entry: {
-            'pages/background': {
+            [BACKGROUND_OUTPUT]: {
                 import: BACKGROUND_PATH,
-                runtime: false,
+                dependOn: [
+                    SCRIPTLETS_VENDOR_OUTPUT,
+                    TSURLFILTER_VENDOR_OUTPUT,
+                    CSS_TOKENIZER_VENDOR_OUTPUT,
+                    AGTREE_VENDOR_OUTPUT,
+                    TSWEBEXTENSION_VENDOR_OUTPUT,
+                    TEXT_ENCODING_POLYFILL_VENDOR_OUTPUT,
+                ],
             },
-            'pages/options': {
+            [OPTIONS_OUTPUT]: {
                 import: OPTIONS_PATH,
                 dependOn: [
-                    'vendors/react',
-                    'vendors/mobx',
-                    'vendors/xstate',
-                    'shared/editor',
+                    REACT_VENDOR_OUTPUT,
+                    MOBX_VENDOR_OUTPUT,
+                    XSTATE_VENDOR_OUTPUT,
+                    EDITOR_OUTPUT,
                 ],
             },
-            'pages/popup': {
+            [POPUP_OUTPUT]: {
                 import: POPUP_PATH,
                 dependOn: [
-                    'vendors/react',
-                    'vendors/mobx',
+                    REACT_VENDOR_OUTPUT,
+                    MOBX_VENDOR_OUTPUT,
                 ],
             },
-            'pages/filtering-log': {
+            [FILTERING_LOG_OUTPUT]: {
                 import: FILTERING_LOG_PATH,
                 dependOn: [
-                    'vendors/react',
-                    'vendors/mobx',
-                    'vendors/xstate',
+                    SCRIPTLETS_VENDOR_OUTPUT,
+                    TSURLFILTER_VENDOR_OUTPUT,
+                    AGTREE_VENDOR_OUTPUT,
+                    CSS_TOKENIZER_VENDOR_OUTPUT,
+                    TSWEBEXTENSION_VENDOR_OUTPUT,
+                    TEXT_ENCODING_POLYFILL_VENDOR_OUTPUT,
+                    REACT_VENDOR_OUTPUT,
+                    MOBX_VENDOR_OUTPUT,
+                    XSTATE_VENDOR_OUTPUT,
                 ],
             },
-            'pages/filter-download': {
+            [FILTER_DOWNLOAD_OUTPUT]: {
                 import: FILTER_DOWNLOAD_PATH,
                 runtime: false,
             },
-            'pages/content-script-start': {
+            [CONTENT_SCRIPT_START_OUTPUT]: {
                 import: CONTENT_SCRIPT_START_PATH,
                 runtime: false,
             },
-            'pages/content-script-end': {
+            [ASSISTANT_INJECT_OUTPUT]: {
+                import: ASSISTANT_INJECT_PATH,
+                runtime: false,
+            },
+            [CONTENT_SCRIPT_END_OUTPUT]: {
                 import: CONTENT_SCRIPT_END_PATH,
                 runtime: false,
             },
-            'pages/thankyou': {
+            [SUBSCRIBE_OUTPUT]: {
+                import: SUBSCRIBE_PATH,
+                runtime: false,
+            },
+            [THANKYOU_OUTPUT]: {
                 import: THANKYOU_PATH,
                 runtime: false,
             },
-            'pages/assistant': {
-                import: ASSISTANT_PATH,
-                runtime: false,
-            },
-            'pages/fullscreen-user-rules': {
+            [FULLSCREEN_USER_RULES_OUTPUT]: {
                 import: FULLSCREEN_USER_RULES_PATH,
                 dependOn: [
-                    'vendors/react',
-                    'vendors/mobx',
-                    'vendors/xstate',
-                    'shared/editor',
+                    REACT_VENDOR_OUTPUT,
+                    MOBX_VENDOR_OUTPUT,
+                    XSTATE_VENDOR_OUTPUT,
+                    EDITOR_OUTPUT,
                 ],
             },
-            'pages/safebrowsing': {
+            [SAFEBROWSING_OUTPUT]: {
                 import: SAFEBROWSING_PATH,
                 dependOn: [
-                    'vendors/react',
+                    REACT_VENDOR_OUTPUT,
                 ],
             },
-            'pages/ad-blocked': {
+            [DOCUMENT_BLOCK_OUTPUT]: {
                 import: AD_BLOCKED_PATH,
                 dependOn: [
-                    'vendors/react',
+                    REACT_VENDOR_OUTPUT,
                 ],
             },
-            'shared/editor': {
+            [EDITOR_OUTPUT]: {
                 import: EDITOR_PATH,
                 dependOn: [
-                    'vendors/react',
+                    REACT_VENDOR_OUTPUT,
                 ],
             },
-            'vendors/react': ['react', 'react-dom'],
-            'vendors/mobx': ['mobx'],
-            'vendors/xstate': ['xstate'],
+            [REACT_VENDOR_OUTPUT]: ['react', 'react-dom'],
+            [MOBX_VENDOR_OUTPUT]: ['mobx'],
+            [XSTATE_VENDOR_OUTPUT]: ['xstate'],
+            [SCRIPTLETS_VENDOR_OUTPUT]: ['@adguard/scriptlets'],
+            [TSURLFILTER_VENDOR_OUTPUT]: {
+                import: '@adguard/tsurlfilter',
+                dependOn: [
+                    SCRIPTLETS_VENDOR_OUTPUT,
+                ],
+            },
+            [CSS_TOKENIZER_VENDOR_OUTPUT]: ['@adguard/css-tokenizer'],
+            [AGTREE_VENDOR_OUTPUT]: ['@adguard/agtree'],
+            [TEXT_ENCODING_POLYFILL_VENDOR_OUTPUT]: {
+                import: TEXT_ENCODER_POLYFILL_PATH,
+            },
+            [TSWEBEXTENSION_VENDOR_OUTPUT]: {
+                import: '@adguard/tswebextension',
+                dependOn: [
+                    SCRIPTLETS_VENDOR_OUTPUT,
+                    TSURLFILTER_VENDOR_OUTPUT,
+                    TEXT_ENCODING_POLYFILL_VENDOR_OUTPUT,
+                ],
+            },
         },
         output: {
             path: path.join(BUILD_PATH, OUTPUT_PATH),
             filename: '[name].js',
         },
         resolve: {
-            extensions: ['*', '.js', '.jsx'],
-            symlinks: false,
-            // Node modules polyfills
+            modules: [
+                'node_modules',
+
+                // By default, package managers like Yarn and NPM create a flat structure in the `node_modules` folder,
+                // placing all dependencies directly in the root `node_modules`.
+                // For instance, when we install `@adguard/agtree` in this project, both it and its dependency,
+                // `@adguard/css-tokenizer`, are typically placed in the root `node_modules` folder.
+                //
+                // However, pnpm follows a different, nested structure where dependencies are stored
+                // under `node_modules/.pnpm/node_modules`.
+                // This structure helps reduce duplication but also means that dependencies of dependencies
+                // are not directly accessible in the root.
+                //
+                // As a result, Webpack may fail to resolve these "nested" dependencies in pnpm's setup,
+                // since they are not in the root `node_modules`.
+                // To ensure Webpack can locate dependencies correctly in a pnpm project,
+                // we add `node_modules/.pnpm/node_modules` to the module resolution path as a fallback.
+                'node_modules/.pnpm/node_modules',
+            ],
             fallback: {
-                url: require.resolve('url'),
-                crypto: require.resolve('crypto-browserify'),
-                stream: require.resolve('stream-browserify'),
+                'crypto': require.resolve('crypto-browserify'),
+                'stream': require.resolve('stream-browserify'),
             },
+            extensions: ['.*', '.js', '.jsx', '.ts', '.tsx'],
+            // pnpm uses symlinks to manage dependencies, so we need to resolve them
+            symlinks: true,
         },
         module: {
             rules: [
@@ -145,7 +262,6 @@ export const genCommonConfig = (browserConfig) => {
                     use: [{
                         loader: 'preprocess-loader',
                         options: {
-                            remoteScripts: browserConfig.remoteScripts,
                             devtools: browserConfig.devtools,
                             ppOptions: {
                                 type: 'js',
@@ -158,7 +274,7 @@ export const genCommonConfig = (browserConfig) => {
                  * by deleting source map url comments in production build
                  */
                 {
-                    test: /\.(js|jsx)$/,
+                    test: /\.(js|ts)x?$/,
                     enforce: 'pre',
                     use: [
                         {
@@ -170,12 +286,24 @@ export const genCommonConfig = (browserConfig) => {
                     ],
                 },
                 {
-                    test: /\.(js|jsx)$/,
-                    exclude: /node_modules/,
-                    use: [{
-                        loader: 'babel-loader',
-                        options: { babelrc: true },
-                    }],
+                    test: /\.(js|ts)x?$/,
+                    exclude: /node_modules\/(?!@adguard\/tswebextension)/,
+                    use: [
+                        {
+                            loader: 'swc-loader',
+                            options: {
+                                env: {
+                                    targets: {
+                                        chrome: 79,
+                                        firefox: 78,
+                                        opera: 66,
+                                    },
+                                    mode: 'usage',
+                                    coreJs: '3.32',
+                                },
+                            },
+                        },
+                    ],
                 },
                 {
                     test: /\.(css|pcss)$/,
@@ -200,57 +328,93 @@ export const genCommonConfig = (browserConfig) => {
 
         plugins: [
             new CleanWebpackPlugin(),
-            ...getModuleReplacements(browserConfig),
             new HtmlWebpackPlugin({
                 ...htmlTemplatePluginCommonOptions,
                 template: path.join(BACKGROUND_PATH, 'index.html'),
                 templateParameters: {
                     browser: process.env.BROWSER,
                 },
-                filename: 'pages/background.html',
-                chunks: ['pages/background'],
+                filename: `${BACKGROUND_OUTPUT}.html`,
+                chunks: [
+                    SCRIPTLETS_VENDOR_OUTPUT,
+                    TSURLFILTER_VENDOR_OUTPUT,
+                    CSS_TOKENIZER_VENDOR_OUTPUT,
+                    AGTREE_VENDOR_OUTPUT,
+                    TSWEBEXTENSION_VENDOR_OUTPUT,
+                    TEXT_ENCODING_POLYFILL_VENDOR_OUTPUT,
+                    BACKGROUND_OUTPUT,
+                ],
             }),
             new HtmlWebpackPlugin({
                 ...htmlTemplatePluginCommonOptions,
                 template: path.join(OPTIONS_PATH, 'index.html'),
-                filename: 'pages/options.html',
-                chunks: ['vendors/react', 'vendors/mobx', 'vendors/xstate', 'shared/editor', 'pages/options'],
+                filename: `${OPTIONS_OUTPUT}.html`,
+                chunks: [
+                    SCRIPTLETS_VENDOR_OUTPUT,
+                    TSURLFILTER_VENDOR_OUTPUT,
+                    CSS_TOKENIZER_VENDOR_OUTPUT,
+                    AGTREE_VENDOR_OUTPUT,
+                    REACT_VENDOR_OUTPUT,
+                    MOBX_VENDOR_OUTPUT,
+                    XSTATE_VENDOR_OUTPUT,
+                    EDITOR_OUTPUT,
+                    OPTIONS_OUTPUT,
+                ],
             }),
             new HtmlWebpackPlugin({
                 ...htmlTemplatePluginCommonOptions,
                 template: path.join(POPUP_PATH, 'index.html'),
-                filename: 'pages/popup.html',
-                chunks: ['vendors/react', 'vendors/mobx', 'pages/popup'],
+                filename: `${POPUP_OUTPUT}.html`,
+                chunks: [REACT_VENDOR_OUTPUT, MOBX_VENDOR_OUTPUT, POPUP_OUTPUT],
             }),
             new HtmlWebpackPlugin({
                 ...htmlTemplatePluginCommonOptions,
                 template: path.join(FILTERING_LOG_PATH, 'index.html'),
-                filename: 'pages/filtering-log.html',
-                chunks: ['vendors/react', 'vendors/mobx', 'vendors/xstate', 'pages/filtering-log'],
+                filename: `${FILTERING_LOG_OUTPUT}.html`,
+                chunks: [
+                    SCRIPTLETS_VENDOR_OUTPUT,
+                    TSURLFILTER_VENDOR_OUTPUT,
+                    CSS_TOKENIZER_VENDOR_OUTPUT,
+                    AGTREE_VENDOR_OUTPUT,
+                    TSWEBEXTENSION_VENDOR_OUTPUT,
+                    TEXT_ENCODING_POLYFILL_VENDOR_OUTPUT,
+                    REACT_VENDOR_OUTPUT,
+                    MOBX_VENDOR_OUTPUT,
+                    XSTATE_VENDOR_OUTPUT,
+                    FILTERING_LOG_OUTPUT,
+                ],
             }),
             new HtmlWebpackPlugin({
                 ...htmlTemplatePluginCommonOptions,
                 template: path.join(FILTER_DOWNLOAD_PATH, 'index.html'),
-                filename: 'pages/filter-download.html',
-                chunks: ['pages/filter-download'],
+                filename: `${FILTER_DOWNLOAD_OUTPUT}.html`,
+                chunks: [FILTER_DOWNLOAD_OUTPUT],
             }),
             new HtmlWebpackPlugin({
                 ...htmlTemplatePluginCommonOptions,
                 template: path.join(FULLSCREEN_USER_RULES_PATH, 'index.html'),
-                filename: 'pages/fullscreen-user-rules.html',
-                chunks: ['vendors/react', 'vendors/mobx', 'vendors/xstate', 'shared/editor', 'pages/fullscreen-user-rules'],
+                filename: `${FULLSCREEN_USER_RULES_OUTPUT}.html`,
+                chunks: [
+                    CSS_TOKENIZER_VENDOR_OUTPUT,
+                    AGTREE_VENDOR_OUTPUT,
+                    REACT_VENDOR_OUTPUT,
+                    MOBX_VENDOR_OUTPUT,
+                    XSTATE_VENDOR_OUTPUT,
+                    EDITOR_OUTPUT,
+                    FULLSCREEN_USER_RULES_OUTPUT,
+                ],
             }),
             new HtmlWebpackPlugin({
                 ...htmlTemplatePluginCommonOptions,
                 template: path.join(AD_BLOCKED_PATH, 'index.html'),
-                filename: 'pages/ad-blocked.html',
-                chunks: ['vendors/react', 'pages/ad-blocked'],
+                filename: `${DOCUMENT_BLOCK_OUTPUT}.html`,
+                chunks: [REACT_VENDOR_OUTPUT, DOCUMENT_BLOCK_OUTPUT],
             }),
             new HtmlWebpackPlugin({
                 ...htmlTemplatePluginCommonOptions,
                 template: path.join(SAFEBROWSING_PATH, 'index.html'),
-                filename: 'pages/safebrowsing.html',
-                chunks: ['vendors/react', 'pages/safebrowsing'],
+                filename: `${SAFEBROWSING_OUTPUT}.html`,
+                chunks: [REACT_VENDOR_OUTPUT, SAFEBROWSING_OUTPUT],
             }),
             new CopyWebpackPlugin({
                 patterns: [
@@ -270,15 +434,20 @@ export const genCommonConfig = (browserConfig) => {
                     {
                         context: 'Extension',
                         from: 'web-accessible-resources',
-                        to: 'web-accessible-resources',
-                    },
-                    {
-                        context: 'Extension',
-                        from: 'src/content-script/subscribe.js',
-                        to: 'content-script/subscribe.js',
+                        to: WEB_ACCESSIBLE_RESOURCES_OUTPUT,
                     },
                 ],
             }),
+            new DefinePlugin({
+                // We are doing stricter JS rule checking for Firefox AMO, so we
+                // need to determine if the Firefox browser is AMO or not.
+                IS_FIREFOX_AMO: browserConfig.browser === BROWSERS.FIREFOX_AMO,
+                IS_RELEASE: process.env.BUILD_ENV === ENVS.RELEASE,
+                IS_BETA: process.env.BUILD_ENV === ENVS.BETA,
+            }),
+            // Check the size of the output JS files and fail the build if any file exceeds the limit
+            // (but not in the development mode)
+            new SizeLimitPlugin(isDev ? {} : SIZE_LIMITS_MB),
         ],
     };
 };

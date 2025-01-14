@@ -1,6 +1,27 @@
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, { useRef, useEffect } from 'react';
+
+import cn from 'classnames';
+
 import { useOutsideClick } from '../../../hooks/useOutsideClick';
-import { useSelect } from './SelectProvider';
+import { useOutsideFocus } from '../../../hooks/useOutsideFocus';
 import { Icon } from '../Icon';
 
 import './select.pcss';
@@ -10,10 +31,12 @@ export const Select = ({
     handler,
     options,
     value,
+    hidden,
+    setHidden,
+    popupModification = false,
 }) => {
     const ref = useRef(null);
-
-    const [hidden, setHidden] = useSelect(id);
+    const refList = useRef(null);
 
     const renderItems = () => options.map((option) => {
         const { value: currentValue, title } = option;
@@ -47,6 +70,10 @@ export const Select = ({
         setHidden(true);
     });
 
+    useOutsideFocus(refList, () => {
+        setHidden(true);
+    });
+
     const handleSelectClick = (e) => {
         e.stopPropagation();
         setHidden(!hidden);
@@ -56,7 +83,7 @@ export const Select = ({
     const currentTitle = currentValue.title;
 
     return (
-        <div id={id} className="select" ref={ref}>
+        <div id={id} className={cn('select', popupModification ? 'popup-modification' : '')} ref={ref}>
             <button
                 type="button"
                 className="select__value"
@@ -68,12 +95,14 @@ export const Select = ({
                 id="#select"
                 classname="icon--select select__ico"
             />
-            <div
-                hidden={hidden}
-                className="select__list"
-            >
-                {renderItems(options)}
-            </div>
+            {!hidden && (
+                <div
+                    className="select__list"
+                    ref={refList}
+                >
+                    {renderItems(options)}
+                </div>
+            )}
         </div>
     );
 };

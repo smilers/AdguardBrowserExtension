@@ -17,11 +17,32 @@
     "options_antibanner_custom_filter_already_exists": {
         "message": "Dieser benutzerdefinierte Filter wurde bereits hinzugefügt"
     },
+    "options_filters_annoyances_consent_title": {
+        "message": "Bitte sorgfältig lesen, bevor Sie Belästigungsfilter aktivieren"
+    },
+    "options_filters_annoyances_consent_description": {
+        "message": "Sie aktivieren einen oder mehrere Belästigungsfilter. Diese blockieren Elemente, die entweder für den Inhalt der Website irrelevant sind oder die zwar relevant sind, den Nutzer:innen aber stören. Die Eigentümer der Website können diese Elemente als obligatorisch betrachten. Wenn Sie diese Elemente blockieren, verstoßen Sie möglicherweise gegen ihre Nutzungsbedingungen und einige Funktionen der Website sind möglicherweise nicht verfügbar oder funktionieren nicht richtig. Durch die Aktivierung von Filtern verstehen Sie und stimmen Sie zu, dass Sie allein für die Einhaltung der Nutzungsbedingungen der von Ihnen besuchten Websites verantwortlich sind und dass AdGuard nicht für Ihre Einhaltung der Nutzungsbedingungen der von Ihnen besuchten Websites verantwortlich ist."
+    },
+    "options_filters_annoyances_consent_question": {
+        "message": "Filter aktivieren?"
+    },
+    "options_filters_annoyances_consent_filter_policy": {
+        "message": "Details dazu, was genau die AdGuard Belästigungsfilter blockieren, finden Sie in der <a>Filterrichtlinie<\/a>"
+    },
+    "options_filters_annoyances_consent_enable_button": {
+        "message": "Aktivieren"
+    },
     "popup_header_cta_link": {
-        "message": "Noch mehr sperren?"
+        "message": "So verbessern Sie den Schutz"
+    },
+    "popup_header_update_filters": {
+        "message": "Auf Filteraktualisierungen prüfen"
     },
     "options_popup_import_settings_wrong_file_ext": {
         "message": "Die Dateierweiterung sollte %extension% sein"
+    },
+    "popup_resume_protection_button": {
+        "message": "Fortsetzen"
     },
     "popup_adguard_for_ios": {
         "message": "AdGuard für iOS"
@@ -36,13 +57,13 @@
         "message": "Zur Startseite"
     },
     "options_filters_filter_updated": {
-        "message": "Аktualisiert:"
+        "message": " aktualisiert: "
     },
     "options_popup_version_update_disable_notification": {
         "message": "Benachrichtigungen deaktivieren"
     },
     "popup_adguard_footer_title": {
-        "message": "AdGuard für Ihr Handy"
+        "message": "Schützen Sie Ihr mobiles Endgerät"
     },
     "options_popup_call_to_action": {
         "message": "Geben Sie eine gültige URL oder einen Dateipfad des Filters in das Eingabefeld oben ein."
@@ -51,7 +72,7 @@
         "message": "Sie werden diesem Filter abonniert.\n"
     },
     "options_popup_url_title": {
-        "message": "Neues Filterabonnement"
+        "message": "Neues Filter-Abonnement"
     },
     "options_popup_url_placeholder": {
         "message": "URL oder Pfad eingeben:"
@@ -84,7 +105,7 @@
         "message": "Regeln total:"
     },
     "options_popup_filter_homepage": {
-        "message": "Startseite:"
+        "message": "Homepage:"
     },
     "options_popup_filter_url": {
         "message": "URL:"
@@ -96,40 +117,44 @@
         "message": "AdGuard Werbeblocker"
     },
     "description": {
+        "description": "TEXT MAX LENGTH: 132",
         "message": "Unübertroffene Werbeblocker-Erweiterung gegen Werbung und Pop-ups. Sperrt Werbung auf Facebook, YouTube und allen anderen Websites."
     },
     "background_tab_title": {
         "message": "Hintergrund-Tab"
     },
     "options_allowlist": {
-        "message": "Freigabeliste"
+        "message": "Positivliste"
     },
     "options_allowlist_desc": {
-        "message": "AdGuard filtert keine Websites, die in der Freigabeliste enthalten sind."
+        "message": "AdGuard filtert keine Websites, die in der Positivliste enthalten sind."
     },
     "options_allowlist_invert": {
-        "message": "Freigabeliste umkehren"
+        "message": "Positivliste umkehren"
     },
     "options_allowlist_invert_desc": {
-        "message": "Werbung überall zulassen, außer auf Websites aus der Freigabeliste."
+        "message": "Werbung überall zulassen, außer auf Websites aus der Positivliste."
     },
     "options_allowlist_alert_invert": {
-        "message": "Freigabeliste ist invertiert. Werbung wird nur auf Websites gesperrt, die der Liste hinzugefügt wurden. <a>Deaktivieren<\/a>"
+        "message": "Positivliste ist invertiert. Werbung wird nur auf Websites gesperrt, die der Liste hinzugefügt wurden. <a>Deaktivieren<\/a>"
     },
     "options_userfilter": {
         "message": "Benutzerregeln"
     },
     "filtering_log_modified_rules": {
-        "message": "Geänderte Regeln:"
+        "message": "Geänderte Regeln: %rules_count%"
+    },
+    "filtering_log_stealth_rules": {
+        "message": "Regeln zum Tracking-Schutz: %rules_count%"
     },
     "filtering_log_privacy_applied_rules": {
-        "message": "Privatsphären-Modus aktiviert"
+        "message": "Tracking-Schutz wird verwendet"
     },
     "filtering_log_in_allowlist": {
         "message": "Die Seite wurde zugelassen"
     },
     "filtering_log_hide_referrer": {
-        "message": "Referrer vor Drittanbietern versteckt"
+        "message": "Referer vor Dritten verborgen"
     },
     "filtering_log_hide_search_queries": {
         "message": "Ihre Suchanfragen versteckt"
@@ -185,17 +210,29 @@
     "options_filters_filter_trusted_tag_desc": {
         "message": "Sie vertrauen diesem Filter."
     },
+    "options_filters_info_mv3_total_rules": {
+        "message": "Regeln insgesamt: %num%"
+    },
+    "options_filters_info_mv3_specs": {
+        "message": "Spezifikationen auf Github"
+    },
     "options_add_custom_filter": {
         "message": "Eigenen Filter hinzufügen"
     },
     "options_empty_custom_filter": {
         "message": "Sie haben noch keine benutzerdefinierte Filter"
     },
+    "options_loader_applying_changes": {
+        "message": "Änderungen werden übernommen …"
+    },
     "options_editor_indicator_saving": {
         "message": "Speichern …"
     },
     "options_editor_indicator_saved": {
         "message": "Gespeichert"
+    },
+    "options_popup_import_error_required_privacy_permission": {
+        "message": "Um diese Einstellungsdatei importieren zu können, erlauben Sie AdGuard, Ihre Datenschutzeinstellungen ändern zu dürfen."
     },
     "options_popup_import_success_title": {
         "message": "Einstellungen erfolgreich importiert"
@@ -212,20 +249,35 @@
     "options_popup_trusted_filter_description": {
         "message": "Die Filter, die als zuverlässig markiert wurden, können leistungsstarke Filterregel-Modifikatoren verwenden, die in den falschen Händen gefährlich sein können. Aktivieren Sie dieses Kontrollkästchen nur, wenn Sie dem Filter vertrauen."
     },
-    "popup_site_filtering_state": {
-        "message": "Schutz auf dieser Website"
-    },
     "popup_site_filtering_state_secure_page": {
         "message": "Geschützte Seite"
+    },
+    "popup_site_filtering_state_loading": {
+        "message": "Wird geladen …"
+    },
+    "popup_site_filtering_state_enabling": {
+        "message": "Schutz wird aktiviert..."
     },
     "popup_site_filtering_state_enabled": {
         "message": "Schutz ist aktiviert"
     },
+    "popup_site_filtering_state_disabling": {
+        "message": "Schutz wird deaktiviert..."
+    },
     "popup_site_filtering_state_disabled": {
         "message": "Schutz ist deaktiviert"
     },
+    "popup_site_filtering_state_pausing": {
+        "message": "Schutz wird angehalten..."
+    },
     "popup_site_filtering_state_paused": {
         "message": "Schutz ist angehalten"
+    },
+    "popup_site_filtering_state_resuming": {
+        "message": "Schutz wird fortgesetzt..."
+    },
+    "popup_site_filtering_state_subtitle_all_websites": {
+        "message": "für alle Websites"
     },
     "popup_site_exception_information": {
         "message": "Das Filtern wurde deaktiviert, da dies die Funktionalität dieser Website beeinträchtigen kann."
@@ -312,7 +364,7 @@
         "message": "wurden aktualisiert."
     },
     "options_popup_version_update_title_text": {
-        "message": "AdGuard-Browsererweiterung wurde auf Version %current_version% aktualisiert"
+        "message": "AdGuard Browsererweiterung wurde auf Version %current_version% aktualisiert"
     },
     "options_popup_version_update_description_minor": {
         "message": "Diese Version enthält hauptsächlich Bugfixes und kleine Verbesserungen."
@@ -335,32 +387,11 @@
     "popup_security_report": {
         "message": "Website-Sicherheit prüfen\n"
     },
-    "popup_reset_custom_rules": {
-        "message": "Eigene Regeln für diese Seite löschen"
-    },
-    "popup_open_settings": {
-        "message": "AdGuard-Einstellungen"
-    },
-    "popup_block_site_ads_android": {
-        "message": "Werbung auf dieser Website sperren"
-    },
-    "popup_security_report_android": {
-        "message": "Sicherheitsbericht"
-    },
-    "popup_in_allowlist_android": {
-        "message": "In der Freigabeliste"
-    },
-    "popup_site_protection_disabled_android": {
-        "message": "Schutz ist pausiert"
-    },
-    "popup_open_log_android": {
-        "message": "Filter-Protokoll"
+    "popup_reset_page_user_rules": {
+        "message": "Benutzerregeln für diese Website löschen"
     },
     "context_block_site_ads": {
         "message": "Werbung auf dieser Seite sperren …"
-    },
-    "context_block_site_element": {
-        "message": "Element sperren …"
     },
     "context_security_report": {
         "message": "Website-Sicherheit prüfen...\n"
@@ -483,7 +514,7 @@
         "message": "Regeln:"
     },
     "filtering_modal_privacy": {
-        "message": "Privatsphären-Modus:"
+        "message": "Tracking-Schutz:"
     },
     "filtering_modal_filter": {
         "message": "Filter:"
@@ -504,7 +535,7 @@
         "message": "Vorschau"
     },
     "filtering_modal_remove_allowlist": {
-        "message": "Aus Freigabeliste entfernen"
+        "message": "Aus Positivliste entfernen"
     },
     "filtering_modal_add_title": {
         "message": "Hinzufügen einer Regel"
@@ -554,6 +585,18 @@
     "filtering_modal_hide_full_url": {
         "message": "Vollständige URL ausblenden"
     },
+    "filtering_modal_show_full_rule": {
+        "message": "Vollständige Regel anzeigen"
+    },
+    "filtering_modal_hide_full_rule": {
+        "message": "Vollständige Regel ausblenden"
+    },
+    "filtering_modal_show_full_element": {
+        "message": "Vollständiges Element anzeigen"
+    },
+    "filtering_modal_hide_full_element": {
+        "message": "Vollständiges Element ausblenden"
+    },
     "filtering_modal_copy_to_clipboard": {
         "message": "In die Zwischenablage kopieren"
     },
@@ -597,7 +640,7 @@
         "message": "Allgemein"
     },
     "options_block_acceptable_ads": {
-        "message": "Werbung in Suchmaschinen und Eigenwerbung sperren"
+        "message": "Suchanzeigen und Eigenwerbung von Websites blockieren"
     },
     "options_block_acceptable_ads_desc": {
         "message": "<a>Eigenwerbung auf Websites und kontextbezogene Werbung in Suchergebnissen<\/a> entfernen."
@@ -612,7 +655,7 @@
         "message": "Sprachspezifische Filter werden je nach Seitensprache aktiviert."
     },
     "options_select_theme": {
-        "message": "Farbschema"
+        "message": "Design"
     },
     "options_theme_selector_system": {
         "message": "Systemvorgaben"
@@ -629,8 +672,14 @@
     "options_import_settings": {
         "message": "Einstellungen importieren"
     },
+    "options_report_bug": {
+        "message": "Fehler melden"
+    },
+    "options_leave_feedback": {
+        "message": "Feedback senden"
+    },
     "options_privacy": {
-        "message": "Privatsphären-Einstellungen"
+        "message": "Tracking-Schutz"
     },
     "options_update_antibanner_filters": {
         "message": "Alle Filter aktualisieren"
@@ -689,6 +738,90 @@
     "options_miscellaneous_settings": {
         "message": "Zusätzliche Einstellungen"
     },
+    "options_rule_limits": {
+        "message": "Regelbeschränkungen"
+    },
+    "options_rule_limits_description": {
+        "message": "Diese Erweiterung erfüllt die Anforderungen von Manifest V3"
+    },
+    "options_rule_limits_description_link": {
+        "message": "Erfahren Sie mehr über Manifest V3"
+    },
+    "options_rule_limits_dynamic": {
+        "message": "Dynamische Regeln"
+    },
+    "options_rule_limits_dynamic_user_rules": {
+        "message": "Vom Benutzer hinzugefügte Regeln, wie z. B. Benutzerregeln und benutzerdefinierte Filter"
+    },
+    "options_rule_limits_dynamic_regex": {
+        "message": "Regex-Regeln — in den oben genannten enthalten"
+    },
+    "options_rule_limits_static_rulesets": {
+        "message": "Statische Regelsätze"
+    },
+    "options_rule_limits_static_rulesets_builtin": {
+        "message": "Integrierte Filter, wie z. B. Sperren von Belästigungen oder sprachspezifische Filter"
+    },
+    "options_rule_limits_static_rules": {
+        "message": "Statische Regeln"
+    },
+    "options_rule_limits_static_rules_all": {
+        "message": "Regeln aus integrierten Filtern"
+    },
+    "options_rule_limits_static_rules_regex": {
+        "message": "Regex-Regeln — in den oben genannten enthalten"
+    },
+    "options_rule_limits_numbers": {
+        "message": "%current% von %maximum%"
+    },
+    "options_rule_limits_warning_title": {
+        "message": "Der Browser hat die Liste der aktiven Filter geändert"
+    },
+    "options_rule_limits_warning_explanation_title": {
+        "message": "Was ist passiert?"
+    },
+    "options_rule_limits_warning_explanation_description": {
+        "message": "Die Höchstzahl der aktiven integrierten Regeln wurde nach einer Aktualisierung oder dem Hinzufügen einer neuen Erweiterung überschritten. Gemäß Manifest V3 reagierte Ihr Chrome-Browser so, dass er alle integrierten Filter der Erweiterung (mit Ausnahme der Standardfilter) deaktivierte."
+    },
+    "options_rule_limits_warning_list_enabled_before_title": {
+        "message": "Vor der Aktualisierung aktivierte Filter"
+    },
+    "options_rule_limits_warning_list_enabled_now_title": {
+        "message": "Filter jetzt aktiviert"
+    },
+    "options_rule_limits_warning_actions_title": {
+        "message": "Ihre möglichen Aktionen"
+    },
+    "options_rule_limits_warning_actions_delete_filters": {
+        "message": "Löschen Sie unnötige Werbeblocker-Erweiterungen aus Ihrem Browser. Um die im Abschnitt „Vor dem Update aktivierte Filter“ genannten Filter wieder zu aktivieren, klicken Sie auf <a>Filter reaktivieren<\/a>."
+    },
+    "options_rule_limits_warning_actions_install_app": {
+        "message": "Option 2: Installieren Sie die AdGuard Werbeblocker-App: Sie hat keine Einschränkungen bei den Filterregeln. <a>Holen Sie sich AdGuard Werbeblocker<\/a>"
+    },
+    "options_rule_limits_warning_actions_close_warning_one_filter": {
+        "message": "Option 3. Wenn Sie mit dem derzeit aktivierten Standardfilter zufrieden sind, <a>schließen Sie diesen Warnhinweis.<\/a>"
+    },
+    "options_rule_limits_warning_actions_close_warning_multiple_filters": {
+        "message": "Option 3. Wenn Sie mit den derzeit aktivierten Standardfiltern zufrieden sind, <a>schließen Sie diese Warnung<\/a>."
+    },
+    "options_all_limits_exceeded_warning": {
+        "message": "Sie haben die maximale Anzahl der aktiven integrierten Regeln erreicht. Ihr Browser hat die Liste der aktiven integrierten Filter geändert. Die Anzahl der aktivierten Filter hat sich von %expected% zu %current% geändert."
+    },
+    "options_limits_warning_static_filters": {
+        "message": "Sie haben die maximale Anzahl der aktiven integrierten Regeln erreicht. %maximum% der %current% Filter sind aktiviert. Um neue Regeln zu aktivieren, deaktivieren Sie einige integrierte Filter."
+    },
+    "options_limits_warning_static_rules": {
+        "message": "Sie haben die maximale Anzahl der aktiven integrierten Regeln erreicht. %maximum% der %current% Regeln sind aktiviert. Um neue Regeln zu aktivieren, deaktivieren Sie einige integrierte Filter."
+    },
+    "options_limits_warning_static_regex_rules": {
+        "message": "Sie haben die maximale Anzahl aktiver integrierter Regex-Regeln erreicht. %maximum% der %current% Regex-Regeln sind aktiviert. Um neue Regeln zu aktivieren, deaktivieren Sie einige integrierte Filter."
+    },
+    "options_limits_warning_dynamic_rules": {
+        "message": "Sie haben die maximale Anzahl der vom Benutzer hinzugefügten Regeln erreicht. %maximum% der %current% Regeln sind aktiviert."
+    },
+    "options_limits_warning_dynamic_regex_rules": {
+        "message": "Sie haben die maximale Anzahl der vom Benutzer hinzugefügten Regex-Regeln erreicht. %maximum% der %current% Regex-Regeln sind aktiviert."
+    },
     "options_show_adguard_full_version_title": {
         "message": "Informationen zur AdGuard-Vollversion zeigen"
     },
@@ -714,10 +847,10 @@
         "message": "Fehler beim Zurücksetzen der Einstellungen"
     },
     "options_collect_hit_stats_title": {
-        "message": "Helfen Sie mit bei der Verbesserung der AdGuard-Filter"
+        "message": "Bei Verbesserung der AdGuard-Filter helfen"
     },
     "options_collect_hit_stats_desc": {
-        "message": "Senden Sie uns <a>anonymisierte Statistiken über die Nutzung von Werbefiltern<\/a>, die uns helfen, diese zu verbessern und zu optimieren."
+        "message": "<a>Anonyme AdGuard-Werbefilter-Statistiken senden<\/a>, um AdGuard bei ihrer Verbesserung zu helfen."
     },
     "options_show_context_menu_title": {
         "message": "AdGuard zum Browser-Kontextmenü hinzufügen"
@@ -726,16 +859,16 @@
         "message": "Optimierte Filter verwenden"
     },
     "options_use_optimized_filters_desc": {
-        "message": "Die Listen von Filtern, die für mobile Geräte optimiert sind"
+        "message": "Verwendet kürzere Versionen von Filtern mit nur den beliebtesten Regeln, um Datenverkehr zu sparen. Besser geeignet für mobile Browser"
     },
     "options_privacy_title": {
-        "message": "Privatsphären-Modus"
+        "message": "Tracking-Schutz"
     },
     "options_privacy_desc": {
         "message": "Schützen Sie Ihre Identität und Ihre sensiblen persönlichen Daten vor Tausenden von Online-Tracker, indem Sie die verbreitetsten Tracking-Methoden sperren."
     },
     "options_hide_referrer_title": {
-        "message": "Referrer vor Drittanbietern verbergen"
+        "message": "Referer vor Drittanbietern verbergen"
     },
     "options_hide_referrer_desc": {
         "message": "An Drittanbieter nicht übermitteln, welche Website Sie besuchen."
@@ -750,7 +883,7 @@
         "message": "Websites mitteilen, meine Aktivitäten nicht zu verfolgen"
     },
     "options_send_not_track_desc": {
-        "message": "Sendet besuchten Webseiten <gpc>Global Privacy Control<\/gpc>- und <dnt>Do Not Track<\/dnt>-Informationen."
+        "message": "<gpc>Global Privacy Control<\/gpc> und <dnt>Do-Not-Track<\/dnt>-Signale an Websites senden, die Sie besuchen."
     },
     "options_stripped_tracking_parameters": {
         "message": "Tracking-Parameter entfernt"
@@ -771,28 +904,28 @@
         "message": "WebRTC deaktivieren"
     },
     "options_disable_webrtc_desc": {
-        "message": "WebRTC kann Ihre IP-Adresse lecken, auch wenn Sie einen Proxy oder ein VPN verwenden. Das Deaktivieren von WebRTC kann einige Websites unterbrechen."
+        "message": "WebRTC kann Ihre IP-Adresse preisgeben, auch wenn Sie einen Proxy oder ein VPN verwenden. Das Deaktivieren von WebRTC kann einige Websites unterbrechen."
     },
     "options_strip_tracking_params_title": {
         "message": "Tracking-Parameter entfernen"
     },
     "options_strip_tracking_params_description": {
-        "message": "Wenn aktiviert, wird der AdGuard URL-Tracking-Filter Tracking-Parameter aus den URLs der Websites entfernen."
+        "message": "Entfernt Parameter aus Webanfragen mit AdGuard URL-Tracking-Filter."
     },
     "options_block_known_trackers_title": {
-        "message": "Bekannte Tracker sperren"
+        "message": "Tracker sperren"
     },
     "options_block_known_trackers_description": {
-        "message": "Wenn aktiviert, wird AdGuard Tracking-Schutzfilter bekannte Tracker sperren."
+        "message": "Sperren Sie Tracker und Webanalyse-Tools mit dem AdGuard Tracking-Schutz-Filter."
     },
     "options_third_party_title": {
-        "message": "Selbstzerstörung der Cookies von Drittanbietern"
+        "message": "Selbstzerstörung von Drittanbieter-Cookies"
     },
     "options_third_party_desc": {
         "message": "Laufzeit der Cookies von Drittanbietern begrenzen (Minuten)."
     },
     "options_first_party_title": {
-        "message": "Selbstzerstörung der Cookies von Erstanbietern (nicht empfohlen)"
+        "message": "Selbstzerstörung von Erstanbieter-Cookies (nicht empfohlen)"
     },
     "options_first_party_desc": {
         "message": "Laufzeit der Cookies von Erstanbietern begrenzen (Minuten)."
@@ -824,8 +957,11 @@
     "popup_switch_button": {
         "message": "Schutz-Schalter"
     },
+    "popup_limits_exceeded_warning": {
+        "message": "Ihr Browser hat die Liste der aktiven integrierten Filter geändert"
+    },
     "short_name": {
-        "message": "AdGuard Werbeblocker"
+        "message": "AdGuard"
     },
     "options_about": {
         "message": "Über uns"
@@ -852,19 +988,16 @@
         "message": "Entfernen"
     },
     "options_nav_better_than_extension": {
-        "message": "Warum ist AdGuard als vollwertige Anwendung besser als eine Erweiterung?"
+        "message": "Warum ist die AdGuard-App besser als die Erweiterung?"
     },
     "options_nav_compare": {
-        "message": "Wie sie verglichen werden"
-    },
-    "options_nav_hide": {
-        "message": "Ausblenden"
+        "message": "Vergleichen"
     },
     "options_filters_search": {
         "message": "Suchen"
     },
     "options_about_title": {
-        "message": "AdGuard-Browsererweiterung"
+        "message": "AdGuard Browsererweiterung"
     },
     "group_description_adblocking": {
         "message": "Sperren von Werbung konfigurieren, um lästige Banner, Pop-ups, Werbung in Videos usw. zu entfernen."
@@ -873,7 +1006,7 @@
         "message": "Schützen Sie Ihre Identität und sensible persönliche Daten vor Tausenden von Online-Trackern beim Sperren aller bekannten Tracking-Methoden."
     },
     "group_description_social": {
-        "message": "Unerwünschte Schaltflächen für „Gefällt mir”\/„Teilen” und andere Widgets für soziale Medien ausblenden."
+        "message": "Unerwünschte Schaltflächen für „Gefällt mir“\/„Teilen“ und andere Widgets für soziale Medien ausblenden."
     },
     "group_description_annoyances": {
         "message": "Popup-Fenster und andere störende Benachrichtigungen wie Cookie-Hinweise entfernen."
@@ -885,7 +1018,7 @@
         "message": "Weitere Einstellungen, um Ihr Surfen im Internet mit AdGuard noch weiter zu konfigurieren."
     },
     "group_description_custom": {
-        "message": "Eigene Filter erstellen, um die Webfilterung nach Ihren Wünschen zu optimieren."
+        "message": "Eigene Filter erstellen, um die Webfilterung nach Ihren Wünschen zu optimieren"
     },
     "group_description_lang": {
         "message": "Werbung auf Websites in beliebigen Sprachen sperren."
@@ -989,6 +1122,9 @@
     "options_stealth_miscellaneous_title": {
         "message": "Sonstiges"
     },
+    "options_coming_soon": {
+        "message": "Demnächst verfügbar"
+    },
     "blocking_pages_malware": {
         "message": "Diese Webseite unter <strong>%host%<\/strong> wurde als Webseite gemeldet die Malware enthält und wurde aufgrund Ihrer Sicherheitseinstellungen gesperrt."
     },
@@ -1018,5 +1154,22 @@
     },
     "blocking_pages_btn_proceed": {
         "message": "Trotzdem fortfahren"
+    },
+    "text_collapser_show_default": {
+        "message": "Vollständigen Text anzeigen"
+    },
+    "text_collapser_hide_default": {
+        "message": "Vollständigen Text ausblenden"
+    },
+    "close_button_title": {
+        "message": "Schließen"
+    },
+    "filtering_modal_applied_rules": {
+        "description": "WARNING: correct number of plural forms is required",
+        "message": "| Angewandte Regel | Angewandte Regeln"
+    },
+    "filtering_modal_original_rules": {
+        "description": "WARNING: correct number of plural forms is required",
+        "message": "| Originale Regel | Originale Regeln"
     }
 }

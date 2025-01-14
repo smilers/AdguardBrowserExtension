@@ -1,17 +1,58 @@
-import React, { useContext } from 'react';
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import React, {
+    useContext,
+    useState,
+    useRef,
+} from 'react';
 import { observer } from 'mobx-react';
+
+import cn from 'classnames';
 
 import { popupStore } from '../../stores/PopupStore';
 import { messenger } from '../../../services/messenger';
 import { Icon } from '../../../common/components/ui/Icon';
+import { addMinDurationTime } from '../../../../common/common-script';
+import { MIN_FILTERS_UPDATE_DISPLAY_DURATION_MS } from '../../../common/constants';
+import { reactTranslator } from '../../../../common/translators/reactTranslator';
 
 import './header.pcss';
-import { reactTranslator } from '../../../../common/translators/reactTranslator';
 
 export const Header = observer(() => {
     const store = useContext(popupStore);
+    const [filtersUpdating, setFiltersUpdating] = useState(false);
 
     const { applicationFilteringDisabled } = store;
+
+    const updateFiltersWithMinDuration = addMinDurationTime(
+        messenger.updateFilters,
+        MIN_FILTERS_UPDATE_DISPLAY_DURATION_MS,
+    );
+
+    const refUpdatingBtn = useRef(null);
+
+    const handleUpdateFiltersClick = async () => {
+        refUpdatingBtn.current.blur();
+        setFiltersUpdating(true);
+        await updateFiltersWithMinDuration();
+        setFiltersUpdating(false);
+    };
 
     const handleEnableClick = async () => {
         await store.changeApplicationFilteringDisabled(false);
@@ -36,6 +77,24 @@ export const Header = observer(() => {
                 />
             </div>
             <div className="popup-header__buttons">
+                <button
+                    className={cn(
+                        'button',
+                        'popup-header__button',
+                    )}
+                    ref={refUpdatingBtn}
+                    disabled={filtersUpdating}
+                    type="button"
+                    onClick={handleUpdateFiltersClick}
+                    title={reactTranslator.getMessage('popup_header_update_filters')}
+                >
+                    <Icon
+                        id="#update-filters"
+                        classname="icon--update-filters"
+                        animationCondition={filtersUpdating}
+                        animationClassname="icon--loading"
+                    />
+                </button>
                 {!applicationFilteringDisabled
                     && (
                         <button

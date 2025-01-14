@@ -1,7 +1,26 @@
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React from 'react';
 
-import { Checkbox } from './Checkbox';
+import { Checkbox } from '../../../common/components/ui/Checkbox';
 import { Select } from '../../../common/components/ui/Select';
+
 import { TextInput } from './TextInput';
 import { Textarea } from './Textarea';
 
@@ -24,6 +43,7 @@ export const Setting = (props) => {
                 value,
                 label,
                 className,
+                disabled,
             } = props;
             return (
                 <Checkbox
@@ -33,6 +53,7 @@ export const Setting = (props) => {
                     value={value}
                     label={label}
                     className={className}
+                    disabled={disabled}
                 />
             );
         }
@@ -57,12 +78,20 @@ export const Setting = (props) => {
                     handler={changeHandler}
                     options={options}
                     value={value}
+                    withContext
                 />
             );
         }
         case SETTINGS_TYPES.INPUT: {
             const {
-                id, value, handler, placeholder, disabled,
+                id,
+                value,
+                handler,
+                placeholder,
+                disabled,
+                required = false,
+                minValue,
+                step,
             } = props;
             return (
                 <TextInput
@@ -71,6 +100,9 @@ export const Setting = (props) => {
                     value={value}
                     handler={handler}
                     placeholder={placeholder}
+                    required={required}
+                    minValue={minValue}
+                    step={step}
                 />
             );
         }

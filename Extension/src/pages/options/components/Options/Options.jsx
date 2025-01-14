@@ -1,8 +1,27 @@
-import React, {
-    useContext,
-    useEffect,
-} from 'react';
-import { HashRouter, Route, Switch } from 'react-router-dom';
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import React, { useContext, useEffect } from 'react';
+import {
+    HashRouter,
+    Route,
+    Switch,
+} from 'react-router-dom';
 import { observer } from 'mobx-react';
 
 import { General } from '../General';
@@ -16,31 +35,30 @@ import { About } from '../About';
 import { Footer } from '../Footer';
 import { rootStore } from '../../stores/RootStore';
 import { Notifications } from '../Notifications';
+import { updateFilterDescription } from '../../../helpers';
 import { messenger } from '../../../services/messenger';
-import { log } from '../../../../common/log';
+import { logger } from '../../../../common/logger';
 import { Icons } from '../../../common/components/ui/Icons';
-import { NOTIFIER_TYPES } from '../../../../common/constants';
+import { NotifierType } from '../../../../common/constants';
 import { useAppearanceTheme } from '../../../common/hooks/useAppearanceTheme';
 
 import '../../styles/styles.pcss';
 
 const Options = observer(() => {
-    const { settingsStore } = useContext(rootStore);
+    const { settingsStore, uiStore } = useContext(rootStore);
 
     useAppearanceTheme(settingsStore.appearanceTheme);
 
     useEffect(() => {
         let removeListenerCallback = () => {};
 
-        (async () => {
-            await settingsStore.requestOptionsData(true);
-
+        const subscribeToMessages = async () => {
             const events = [
-                NOTIFIER_TYPES.REQUEST_FILTER_UPDATED,
-                NOTIFIER_TYPES.UPDATE_ALLOWLIST_FILTER_RULES,
-                NOTIFIER_TYPES.FILTERS_UPDATE_CHECK_READY,
-                NOTIFIER_TYPES.SETTING_UPDATED,
-                NOTIFIER_TYPES.FULLSCREEN_USER_RULES_EDITOR_UPDATED,
+                NotifierType.RequestFilterUpdated,
+                NotifierType.UpdateAllowlistFilterRules,
+                NotifierType.FiltersUpdateCheckReady,
+                NotifierType.SettingUpdated,
+                NotifierType.FullscreenUserRulesEditorUpdated,
             ];
 
             removeListenerCallback = await messenger.createEventListener(
@@ -49,41 +67,48 @@ const Options = observer(() => {
                     const { type } = message;
 
                     switch (type) {
-                        case NOTIFIER_TYPES.REQUEST_FILTER_UPDATED: {
+                        case NotifierType.RequestFilterUpdated: {
                             await settingsStore.requestOptionsData();
                             break;
                         }
-                        case NOTIFIER_TYPES.UPDATE_ALLOWLIST_FILTER_RULES: {
+                        case NotifierType.UpdateAllowlistFilterRules: {
                             await settingsStore.getAllowlist();
                             break;
                         }
-                        case NOTIFIER_TYPES.FILTERS_UPDATE_CHECK_READY: {
+                        case NotifierType.FiltersUpdateCheckReady: {
                             const [updatedFilters] = message.data;
                             settingsStore.refreshFilters(updatedFilters);
+                            uiStore.addNotification(updateFilterDescription(updatedFilters));
                             break;
                         }
-                        case NOTIFIER_TYPES.SETTING_UPDATED: {
+                        case NotifierType.SettingUpdated: {
                             await settingsStore.requestOptionsData();
                             break;
                         }
-                        case NOTIFIER_TYPES.FULLSCREEN_USER_RULES_EDITOR_UPDATED: {
+                        case NotifierType.FullscreenUserRulesEditorUpdated: {
                             const [isOpen] = message.data;
                             await settingsStore.setFullscreenUserRulesEditorState(isOpen);
                             break;
                         }
                         default: {
-                            log.debug('Undefined message type:', type);
+                            logger.debug('Undefined message type:', type);
                             break;
                         }
                     }
                 },
             );
+        };
+
+        (async () => {
+            await settingsStore.requestOptionsData(true);
+
+            await subscribeToMessages();
         })();
 
         return () => {
             removeListenerCallback();
         };
-    }, [settingsStore]);
+    }, [settingsStore, uiStore]);
 
     if (!settingsStore.optionsReadyToRender) {
         return null;

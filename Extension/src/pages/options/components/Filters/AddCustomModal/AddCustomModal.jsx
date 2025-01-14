@@ -1,14 +1,35 @@
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /* eslint-disable jsx-a11y/no-autofocus */
+
 import React, { useState, useContext } from 'react';
-import PropTypes from 'prop-types';
 import Modal from 'react-modal';
+
+import PropTypes from 'prop-types';
 
 import { messenger } from '../../../../services/messenger';
 import { reactTranslator } from '../../../../../common/translators/reactTranslator';
-import { log } from '../../../../../common/log';
-import { ModalContentWrapper } from './ModalContentWrapper';
+import { logger } from '../../../../../common/logger';
 import { rootStore } from '../../../stores/RootStore';
 import { Icon } from '../../../../common/components/ui/Icon';
+
+import { ModalContentWrapper } from './ModalContentWrapper';
 
 Modal.setAppElement('#root');
 
@@ -24,14 +45,13 @@ const customStyles = {
     },
     content: {
         border: 0,
-        width: '560px',
         height: 'auto',
         position: 'relative',
         top: 0,
         right: 0,
         bottom: 0,
         left: 0,
-        padding: '30px',
+        padding: 0,
         overflow: 'auto',
     },
 };
@@ -49,14 +69,17 @@ const AddCustomModal = ({
         ERROR: 'error',
     };
 
+    const [isLoading, setLoading] = useState(false);
     const [customUrlToAdd, setCustomUrlToAdd] = useState(initialUrl);
     const [stepToRender, setStepToRender] = useState(STEPS.INPUT);
     const [error, setError] = useState(reactTranslator.getMessage('options_popup_check_false_description'));
     const [filterToAdd, setFilterToAdd] = useState(null);
     const [filterToAddName, setFilterToAddName] = useState(initialTitle);
+    const customUrlToAddIsEmpty = customUrlToAdd.trim() === '';
 
     const closeModal = () => {
         closeModalHandler();
+        setLoading(false);
         setCustomUrlToAdd('');
         setStepToRender(STEPS.INPUT);
         setError('');
@@ -77,13 +100,23 @@ const AddCustomModal = ({
         filterToAdd.name = value;
     };
 
-    const handleSendUrlToCheck = async () => {
+    const handleSendUrlToCheck = async (e) => {
+        // If the input is empty, we do not send the form to prevent
+        // an error when loading HTML code instead of filter rules due
+        // to incorrect url
+        if (customUrlToAddIsEmpty) {
+            e.preventDefault();
+            return;
+        }
+
         setStepToRender(STEPS.CHECKING);
 
         try {
             const result = await messenger.checkCustomUrl(customUrlToAdd);
-            if (result.error) {
-                setError(result.error);
+            if (result === null) {
+                setStepToRender(STEPS.ERROR);
+            } else if (result.errorAlreadyExists) {
+                setError(reactTranslator.getMessage('options_antibanner_custom_filter_already_exists'));
                 setStepToRender(STEPS.ERROR);
             } else if (!result.filter) {
                 setStepToRender(STEPS.ERROR);
@@ -92,7 +125,7 @@ const AddCustomModal = ({
                 setStepToRender(STEPS.APPROVE);
             }
         } catch (e) {
-            log.error(e);
+            logger.error(e);
             setStepToRender(STEPS.ERROR);
         }
     };
@@ -118,13 +151,16 @@ const AddCustomModal = ({
                     {reactTranslator.getMessage('options_popup_description')}
                 </div>
             </form>
-            <button
-                className="button button--m button--green modal__btn"
-                type="button"
-                onClick={handleSendUrlToCheck}
-            >
-                {reactTranslator.getMessage('options_popup_next_button')}
-            </button>
+            <div className="modal__actions modal__actions--centered">
+                <button
+                    className="button button--m button--green modal__btn"
+                    type="button"
+                    onClick={handleSendUrlToCheck}
+                    disabled={customUrlToAddIsEmpty}
+                >
+                    {reactTranslator.getMessage('options_popup_next_button')}
+                </button>
+            </div>
         </ModalContentWrapper>
     );
 
@@ -133,14 +169,20 @@ const AddCustomModal = ({
     };
 
     const handleApprove = async () => {
+        setLoading(true);
         try {
             if (!filterToAdd.name) {
                 filterToAdd.name = filterToAddName || customUrlToAdd;
             }
+
+            if (!filterToAdd.trusted) {
+                filterToAdd.trusted = false;
+            }
+
             await settingsStore.addCustomFilter(filterToAdd);
         } catch (e) {
             setStepToRender(STEPS.ERROR);
-            log.error(e);
+            logger.error(e);
         }
         closeModal();
     };
@@ -149,6 +191,8 @@ const AddCustomModal = ({
         const {
             name, description, version, rulesCount, homepage, customUrl,
         } = filterToAdd;
+
+        const filterTitle = name || filterToAddName || customUrlToAdd;
 
         return (
             <ModalContentWrapper
@@ -159,11 +203,13 @@ const AddCustomModal = ({
                     <div className="modal__row">
                         <div className="modal__cell modal__cell--title">{reactTranslator.getMessage('options_popup_filter_title')}</div>
                         <input
+                            disabled={isLoading}
                             className="modal__input"
                             type="text"
                             placeholder={reactTranslator.getMessage('options_popup_title_placeholder')}
                             onChange={handleChangeFilterName}
-                            defaultValue={name || filterToAddName || customUrlToAdd}
+                            title={filterTitle}
+                            defaultValue={filterTitle}
                         />
                     </div>
                     <div className="modal__row">
@@ -191,6 +237,7 @@ const AddCustomModal = ({
                             <input
                                 id="trusted"
                                 type="checkbox"
+                                disabled={isLoading}
                                 onChange={handleTrustedCheckbox}
                             />
                             <div className="custom-checkbox">
@@ -199,17 +246,20 @@ const AddCustomModal = ({
                             {reactTranslator.getMessage('options_popup_trusted_filter_title')}
                         </label>
                     </div>
+                    <div className="modal__row modal__row--info">
+                        {reactTranslator.getMessage('options_popup_trusted_filter_description')}
+                    </div>
                 </form>
-                <div className="modal__row modal__row--info">
-                    {reactTranslator.getMessage('options_popup_trusted_filter_description')}
+                <div className="modal__actions modal__actions--centered">
+                    <button
+                        disabled={isLoading}
+                        type="button"
+                        onClick={handleApprove}
+                        className="button button--m button--green modal__btn"
+                    >
+                        {reactTranslator.getMessage('options_popup_subscribe_button')}
+                    </button>
                 </div>
-                <button
-                    type="button"
-                    onClick={handleApprove}
-                    className="button button--m button--green modal__btn"
-                >
-                    {reactTranslator.getMessage('options_popup_subscribe_button')}
-                </button>
             </ModalContentWrapper>
         );
     };
@@ -245,13 +295,15 @@ const AddCustomModal = ({
                             {error || reactTranslator.getMessage('options_popup_check_false_description')}
                         </div>
                     </form>
-                    <button
-                        type="button"
-                        onClick={tryAgainHandler}
-                        className="button button--m button--transparent modal__btn"
-                    >
-                        {reactTranslator.getMessage('options_popup_try_again_button')}
-                    </button>
+                    <div className="modal__actions modal__actions--centered">
+                        <button
+                            type="button"
+                            onClick={tryAgainHandler}
+                            className="button button--m button--transparent modal__btn"
+                        >
+                            {reactTranslator.getMessage('options_popup_try_again_button')}
+                        </button>
+                    </div>
                 </ModalContentWrapper>
             </>
         );

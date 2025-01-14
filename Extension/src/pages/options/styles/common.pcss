@@ -12,7 +12,8 @@ html,
 }
 
 body {
-    font-family: Roboto, "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Ubuntu, Arial, sans-serif;
+    font-family: 'Roboto Flex', 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Ubuntu, Arial, sans-serif;
+    font-optical-sizing: none;
     margin: 0;
     height: 100%;
     font-size: 16px;
@@ -33,11 +34,21 @@ h2 {
     font-size: inherit;
 }
 
+a {
+    &:focus-visible {
+        outline: 2px solid var(--outline);
+    }
+}
+
 button,
 input,
 textarea,
 select {
     font-family: inherit;
+
+    &:focus-visible {
+        outline: 2px solid var(--outline);
+    }
 }
 
 /* custom checkbox */
@@ -126,6 +137,34 @@ label.checkbox-label {
 .page {
     flex: 1 0 auto;
     display: flex;
+}
+
+.links-menu {
+    flex-direction: column;
+    align-items: flex-start;
+    display: flex;
+
+    &--section {
+        margin-left: 16px;
+    }
+
+    button {
+        background: none;
+        border: none;
+        padding: 0;
+    }
+
+    &__item {
+        color: var(--gray4a);
+        margin-bottom: 15px;
+        font-size: 16px;
+        text-decoration: underline;
+        cursor: pointer;
+
+        @media (prefers-color-scheme: dark) {
+            color: var(--gray300);
+        }
+    }
 }
 
 .footer {
@@ -222,7 +261,7 @@ label.checkbox-label {
         font-weight: 400;
         color: var(--gray700);
         margin-top: 8px;
-        
+
         &--back {
             cursor: pointer;
         }
@@ -298,7 +337,6 @@ label.checkbox-label {
     }
 
     &__btn {
-        outline: none;
         margin: 12px;
         position: relative;
 
@@ -317,6 +355,34 @@ label.checkbox-label {
             }
         }
     }
+
+    &__input-file {
+        position: absolute;
+        clip: rect(1px, 1px, 1px, 1px);
+
+        &:focus + .links-menu__item {
+            outline: 2px solid var(--outline);
+        }
+    }
+
+    &__label {
+        margin: 12px;
+        cursor: pointer;
+        display: inline-flex;
+        justify-content: flex-start;
+        align-content: center;
+    }
+
+    &__title {
+        display: none;
+        font-weight: 700;
+        font-size: 24px;
+        line-height: 28px;
+
+        @media (min-width: 640px) {
+            display: block;
+        }
+    }
 }
 
 select:focus {
@@ -326,6 +392,7 @@ select:focus {
 .ReactModal__Overlay {
     z-index: 10;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.5)!important;
@@ -338,6 +405,10 @@ select:focus {
     @media (prefers-color-scheme: dark) {
         background-color: var(--black)!important;
         border: 1px solid var(--gray900)!important;
+    }
+
+    @media (min-width: 640px) {
+        width: 560px;
     }
 }
 
@@ -410,6 +481,12 @@ select:focus {
     .actions__btn--active {
         background-color: var(--gray100);
     }
+
+    .links-menu {
+        &__item {
+            color: var(--gray4a);
+        }
+    }
 }
 
 .dark-mode {
@@ -465,5 +542,11 @@ select:focus {
 
     .actions__btn--active {
         background-color: var(--gray900);
+    }
+
+    .links-menu {
+        &__item {
+            color:  var(--gray300);
+        }
     }
 }

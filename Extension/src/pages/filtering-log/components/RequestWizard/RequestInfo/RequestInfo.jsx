@@ -1,54 +1,81 @@
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /*
 eslint-disable no-bitwise,
 jsx-a11y/click-events-have-key-events,
 jsx-a11y/no-static-element-interactions
 */
-import React, {
-    useState, useContext, useRef, useLayoutEffect,
-} from 'react';
+
 import { observer } from 'mobx-react';
-import identity from 'lodash/identity';
+import React, {
+    useState,
+    useContext,
+    useRef,
+    useLayoutEffect,
+} from 'react';
+
+import { identity } from 'lodash-es';
 import cn from 'classnames';
 
-import { getFilterName, getRequestEventType, getCookieData } from '../utils';
+import { StealthActions, ContentType as RequestType } from '@adguard/tswebextension';
+
+import {
+    getFilterName,
+    getRequestEventType,
+    getCookieData,
+} from '../utils';
 import { rootStore } from '../../../stores/RootStore';
 import { ADDED_RULE_STATES } from '../../../stores/WizardStore';
-import { messenger } from '../../../../services/messenger';
 import { reactTranslator } from '../../../../../common/translators/reactTranslator';
-import { ANTIBANNER_FILTERS_ID, STEALTH_ACTIONS } from '../../../../../common/constants';
+import { WindowsApi } from '../../../../../common/api/extension/windows';
+import { AntiBannerFiltersId } from '../../../../../common/constants';
 import { Icon } from '../../../../common/components/ui/Icon';
-import { CopyToClipboard } from '../../../../common/components/CopyToClipboard';
 import { NetworkStatus, FilterStatus } from '../../Status';
 import { StatusMode, getStatusMode } from '../../../filteringLogStatus';
-import { RequestTypes } from '../../../../../background/utils/request-types';
 import { useOverflowed } from '../../../../common/hooks/useOverflowed';
 import { optionsStorage } from '../../../../options/options-storage';
-import { measureTextWidth } from '../../../../helpers';
-import { DEFAULT_MODAL_WIDTH_PX } from '../constants';
+import { DEFAULT_MODAL_WIDTH_PX, LINE_COUNT_LIMIT } from '../constants';
+import { TextCollapser } from '../../../../common/components/TextCollapser/TextCollapser';
 
 import './request-info.pcss';
 
-const STEALTH_ACTIONS_NAMES = {
-    HIDE_REFERRER: reactTranslator.getMessage('filtering_log_hide_referrer'),
-    SEND_DO_NOT_TRACK: reactTranslator.getMessage('filtering_log_send_not_track'),
-    HIDE_SEARCH_QUERIES: reactTranslator.getMessage('filtering_log_hide_search_queries'),
-    FIRST_PARTY_COOKIES: reactTranslator.getMessage('options_modified_first_party_cookie'),
-    THIRD_PARTY_COOKIES: reactTranslator.getMessage('options_modified_third_party_cookie'),
-    BLOCK_CHROME_CLIENT_DATA: reactTranslator.getMessage('filtering_log_remove_client_data'),
-    STRIPPED_TRACKING_URL: reactTranslator.getMessage('options_stripped_tracking_parameters'),
+const StealthActionNames = {
+    [StealthActions.HideReferrer]: reactTranslator.getMessage('filtering_log_hide_referrer'),
+    [StealthActions.SendDoNotTrack]: reactTranslator.getMessage('filtering_log_send_not_track'),
+    [StealthActions.HideSearchQueries]: reactTranslator.getMessage('filtering_log_hide_search_queries'),
+    [StealthActions.FirstPartyCookies]: reactTranslator.getMessage('options_modified_first_party_cookie'),
+    [StealthActions.ThirdPartyCookies]: reactTranslator.getMessage('options_modified_third_party_cookie'),
+    [StealthActions.BlockChromeClientData]: reactTranslator.getMessage('filtering_log_remove_client_data'),
 };
 
 /**
  * Returns stealth actions names
+ *
  * @param actions
  * @returns {string[]|null}
  */
-const getStealthActionsNames = (actions) => {
-    const result = Object.keys(STEALTH_ACTIONS)
+const getStealthActionNames = (actions) => {
+    const result = Object.keys(StealthActions)
         .map((key) => {
-            const action = STEALTH_ACTIONS[key];
+            const action = StealthActions[key];
             if ((actions & action) === action) {
-                return STEALTH_ACTIONS_NAMES[key];
+                return StealthActionNames[action];
             }
             return null;
         })
@@ -59,63 +86,122 @@ const getStealthActionsNames = (actions) => {
 
 /**
  * Returns type of the event
+ *
  * @param selectedEvent
- * @return {String}
+ * @returns {string}
  */
 const getType = (selectedEvent) => {
     return getRequestEventType(selectedEvent);
 };
 
 /**
- * Returns rule text with conversion info
+ * Gets rules text data for the selected event.
  *
- * @param rule
+ * @param {FilteringEvent} event Event object to get the rule(s) from.
+ * @param {RegularFilterMetadata} filtersMetadata Filters metadata.
+ * @returns An object with the following properties:
+ * - `appliedRuleTexts` - an array of rule texts that were applied to the request.
+ *   If there are multiple rules, each rule text is followed by the filter name in parentheses.
+ * - `originalRuleTexts` - an array of original rule texts that were converted to the applied rule texts (if any)
+ *   If the rule was not converted, `appliedRuleTexts` contains the original rule text and `originalRuleTexts` is empty.
+ *   If there are multiple rules, each rule text is followed by the filter name in parentheses.
  */
-const getRuleText = (rule) => {
-    if (!rule) {
-        return null;
+const getRulesData = (event, filtersMetadata) => {
+    const {
+        requestRule,
+        replaceRules,
+        stealthAllowlistRules,
+    } = event;
+
+    const result = {
+        appliedRuleTexts: [],
+        originalRuleTexts: [],
+    };
+
+    const addRule = (rule, filterName) => {
+        const { appliedRuleText, originalRuleText } = rule;
+
+        if (appliedRuleText) {
+            result.appliedRuleTexts.push(filterName ? `${appliedRuleText} (${filterName})` : appliedRuleText);
+        }
+
+        if (originalRuleText) {
+            result.originalRuleTexts.push(filterName ? `${originalRuleText} (${filterName})` : originalRuleText);
+        }
+    };
+
+    const addRuleGroup = (rules) => {
+        if (!rules) {
+            return;
+        }
+
+        if (rules.length === 1) {
+            addRule(rules[0]);
+        } else {
+            // in this case add rule texts with filter name
+            rules.forEach((rule) => {
+                const filterName = filtersMetadata ? getFilterName(rule.filterId, filtersMetadata) : null;
+                addRule(rule, filterName);
+            });
+        }
+    };
+
+    if (replaceRules) {
+        addRuleGroup(replaceRules);
+        return result;
     }
 
-    if (!rule.appliedRuleText) {
-        return rule.ruleText;
+    if (stealthAllowlistRules) {
+        addRuleGroup(stealthAllowlistRules);
+        return result;
     }
 
-    return `${rule.ruleText} (${reactTranslator.getMessage('filtering_modal_converted_to')} ${rule.appliedRuleText})`;
-};
-
-/**
- * Returns rule text
- * @param selectedEvent
- * @return {string|null}
- */
-const getRule = (selectedEvent) => {
-    const replaceRules = selectedEvent?.replaceRules;
-    if (replaceRules && replaceRules.length > 0) {
-        return replaceRules.map((rule) => getRuleText(rule)).join('\n');
+    if (!requestRule) {
+        return result;
     }
 
-    const requestRule = selectedEvent?.requestRule;
+    // Handle allowlist rules
     if (
         requestRule?.allowlistRule
         && requestRule?.documentLevelRule
-        && requestRule?.filterId === ANTIBANNER_FILTERS_ID.ALLOWLIST_FILTER_ID
+        && requestRule?.filterId === AntiBannerFiltersId.AllowlistFilterId
     ) {
-        return null;
+        // Empty result
+        return result;
     }
-    return getRuleText(requestRule);
+
+    addRule(requestRule);
+
+    return result;
 };
 
 /**
- * Returns field title for one rule or many rules
- * @param selectedEvent
- * @return {string}
+ * Returns filter name for a rule
+ *
+ * @param selectedEvent filtering event
+ * @param {RegularFilterMetadata} filtersMetadata filters metadata
+ * @returns {string|null} filter name or null, if filter is not found or there are multiple rules
  */
-const getRuleFieldTitle = (selectedEvent) => {
-    const replaceRules = selectedEvent?.replaceRules;
-    if (replaceRules && replaceRules.length > 1) {
-        return reactTranslator.getMessage('filtering_modal_rules');
+const getRuleFilterName = (selectedEvent, filtersMetadata) => {
+    const {
+        requestRule,
+        replaceRules,
+        stealthAllowlistRules,
+    } = selectedEvent;
+
+    if (requestRule) {
+        return getFilterName(requestRule.filterId, filtersMetadata);
     }
-    return reactTranslator.getMessage('filtering_modal_rule');
+
+    if (replaceRules?.length === 1) {
+        return getFilterName(replaceRules[0]?.filterId, filtersMetadata);
+    }
+
+    if (stealthAllowlistRules?.length === 1) {
+        return getFilterName(stealthAllowlistRules[0]?.filterId, filtersMetadata);
+    }
+
+    return null;
 };
 
 const PARTS = {
@@ -124,7 +210,8 @@ const PARTS = {
     COOKIE: 'COOKIE',
     TYPE: 'TYPE',
     SOURCE: 'SOURCE',
-    RULE: 'RULE',
+    APPLIED_RULE: 'APPLIED_RULE',
+    ORIGINAL_RULE: 'ORIGINAL_RULE',
     FILTER: 'FILTER',
     STEALTH: 'STEALTH',
 };
@@ -133,7 +220,7 @@ const RequestInfo = observer(() => {
     const contentRef = useRef();
     const contentOverflowed = useOverflowed(contentRef);
 
-    const requestUrlRef = useRef(null);
+    const requestTextRef = useRef(null);
 
     const { logStore, wizardStore } = useContext(rootStore);
 
@@ -141,32 +228,14 @@ const RequestInfo = observer(() => {
 
     const { selectedEvent, filtersMetadata } = logStore;
 
-    /*
-        we consider that url is short enough and fits to RequestInfo modal
-        so we show full url and do not show 'Show/Hide full URL' button
-    */
-    const [isFullUrlShown, setFullUrlShown] = useState(true);
-    const [isLongUrlHandlerButtonShown, setLongUrlHandlerButtonShown] = useState(false);
+    const [textMaxWidth, setTextMaxWidth] = useState(DEFAULT_MODAL_WIDTH_PX);
 
     useLayoutEffect(() => {
         const MODAL_PADDINGS_PX = 70;
         const startModalWidth = optionsStorage.getItem(optionsStorage.KEYS.REQUEST_INFO_MODAL_WIDTH)
             || DEFAULT_MODAL_WIDTH_PX;
 
-        const urlWidth = measureTextWidth(requestUrlRef?.current?.innerText);
-
-        const LINE_COUNT_LIMIT = 3;
-        const urlWidthLimitPerLine = startModalWidth - MODAL_PADDINGS_PX;
-
-        const isLongRequestUrl = urlWidth > LINE_COUNT_LIMIT * urlWidthLimitPerLine;
-
-        if (isLongRequestUrl) {
-            setLongUrlHandlerButtonShown(true);
-            setFullUrlShown(false);
-        } else {
-            setLongUrlHandlerButtonShown(false);
-            setFullUrlShown(true);
-        }
+        setTextMaxWidth(startModalWidth - MODAL_PADDINGS_PX);
     }, [selectedEvent.eventId]);
 
     const eventPartsMap = {
@@ -190,20 +259,33 @@ const RequestInfo = observer(() => {
             title: reactTranslator.getMessage('filtering_modal_source'),
             data: selectedEvent.frameDomain,
         },
-        [PARTS.RULE]: {
-            title: getRuleFieldTitle(selectedEvent),
-            data: getRule(selectedEvent),
-        },
-        // TODO add converted rule text
         [PARTS.FILTER]: {
             title: reactTranslator.getMessage('filtering_modal_filter'),
-            data: getFilterName(selectedEvent.requestRule?.filterId, filtersMetadata),
+            data: getRuleFilterName(selectedEvent, filtersMetadata),
         },
         [PARTS.STEALTH]: {
             title: reactTranslator.getMessage('filtering_modal_privacy'),
-            data: getStealthActionsNames(selectedEvent.stealthActions),
+            data: getStealthActionNames(selectedEvent.stealthActions),
         },
     };
+
+    // Handle rule texts
+    const rulesData = getRulesData(selectedEvent, filtersMetadata);
+
+    eventPartsMap[PARTS.APPLIED_RULE] = {
+        title: reactTranslator.getPlural('filtering_modal_applied_rules', Math.max(rulesData.appliedRuleTexts.length, 1)),
+        data: rulesData.appliedRuleTexts.length > 0
+            ? rulesData.appliedRuleTexts.join('\n')
+            : null,
+    };
+
+    // Original rule texts contains elements only if the rule was converted
+    if (rulesData.originalRuleTexts.length > 0) {
+        eventPartsMap[PARTS.ORIGINAL_RULE] = {
+            title: reactTranslator.getPlural('filtering_modal_original_rules', Math.max(rulesData.originalRuleTexts.length, 1)),
+            data: rulesData.originalRuleTexts.join('\n'),
+        };
+    }
 
     let infoElements = [
         PARTS.URL,
@@ -211,7 +293,8 @@ const RequestInfo = observer(() => {
         PARTS.COOKIE,
         PARTS.TYPE,
         PARTS.SOURCE,
-        PARTS.RULE,
+        PARTS.APPLIED_RULE,
+        PARTS.ORIGINAL_RULE,
         PARTS.FILTER,
         PARTS.STEALTH,
     ];
@@ -221,19 +304,17 @@ const RequestInfo = observer(() => {
             PARTS.COOKIE,
             PARTS.TYPE,
             PARTS.SOURCE,
-            PARTS.STEALTH, // FIXME determine first/third-party
-            PARTS.RULE,
+            // TODO: determine first/third-party
+            PARTS.STEALTH,
+            PARTS.APPLIED_RULE,
+            PARTS.ORIGINAL_RULE,
             PARTS.FILTER,
         ];
     }
 
     const openInNewTabHandler = async () => {
         const url = selectedEvent.requestUrl;
-        await messenger.openTab(url, { inNewWindow: true });
-    };
-
-    const handleShowHideFullUrl = () => {
-        setFullUrlShown(!isFullUrlShown);
+        await WindowsApi.create({ url, focused: true });
     };
 
     const renderInfoUrlButtons = (event) => {
@@ -243,10 +324,6 @@ const RequestInfo = observer(() => {
             || event.cookieName
             || event.script
         );
-
-        const showHideButtonText = isFullUrlShown
-            ? reactTranslator.getMessage('filtering_modal_hide_full_url')
-            : reactTranslator.getMessage('filtering_modal_show_full_url');
 
         return (
             <>
@@ -259,55 +336,62 @@ const RequestInfo = observer(() => {
                         {reactTranslator.getMessage('filtering_modal_open_in_new_tab')}
                     </div>
                 )}
-                {isLongUrlHandlerButtonShown && (
-                    <div
-                        className="request-modal__url-button"
-                        type="button"
-                        onClick={handleShowHideFullUrl}
-                    >
-                        {showHideButtonText}
-                    </div>
-                )}
             </>
         );
     };
 
     const renderedInfo = infoElements
         .map((elementId) => eventPartsMap[elementId])
+        // original rule text can be undefined which cause runtime error while destructuring
+        .filter((el) => !!el)
         .map(({ data, title }) => {
             if (!data) {
                 return null;
             }
 
             const isRequestUrl = data === selectedEvent.requestUrl;
-            const isRule = data === selectedEvent.ruleText;
+            const isRule = data === selectedEvent.appliedRuleText;
             const isFilterName = data === selectedEvent.filterName;
-
+            const isElement = data === selectedEvent.element;
             const canCopyToClipboard = isRequestUrl || isRule || isFilterName;
+
+            let lineCountLimit = LINE_COUNT_LIMIT.REQUEST_URL;
+            if (isRule) {
+                lineCountLimit = LINE_COUNT_LIMIT.RULE;
+            }
+
+            let showMessage;
+            let hideMessage;
+            if (isRequestUrl) {
+                showMessage = 'filtering_modal_show_full_url';
+                hideMessage = 'filtering_modal_hide_full_url';
+            } else if (isRule) {
+                showMessage = 'filtering_modal_show_full_rule';
+                hideMessage = 'filtering_modal_hide_full_rule';
+            } else if (isElement) {
+                showMessage = 'filtering_modal_show_full_element';
+                hideMessage = 'filtering_modal_hide_full_element';
+            }
+            const collapserButtonMessages = {
+                showMessage,
+                hideMessage,
+            };
 
             return (
                 <div key={title} className="request-info">
                     <div className="request-info__key">{title}</div>
                     <div className="request-info__value">
-                        {canCopyToClipboard
-                            ? (
-                                <>
-                                    <CopyToClipboard
-                                        ref={isRequestUrl ? requestUrlRef : null}
-                                        wrapperClassName="request-info__copy-to-clipboard-wrapper"
-                                        className={cn(
-                                            'request-info__copy-to-clipboard',
-                                            isRequestUrl && !isFullUrlShown
-                                                ? 'request-info__url-short'
-                                                : 'request-info__url-full',
-                                        )}
-                                    >
-                                        {data}
-                                    </CopyToClipboard>
-                                    {isRequestUrl && renderInfoUrlButtons(selectedEvent)}
-                                </>
-                            )
-                            : data}
+                        <TextCollapser
+                            text={data}
+                            ref={isRequestUrl || isRule ? requestTextRef : null}
+                            width={textMaxWidth}
+                            lineCountLimit={lineCountLimit}
+                            collapserButtonMessages={collapserButtonMessages}
+                            collapsed
+                            canCopy={canCopyToClipboard}
+                        >
+                            {isRequestUrl && renderInfoUrlButtons(selectedEvent)}
+                        </TextCollapser>
                     </div>
                 </div>
             );
@@ -340,6 +424,7 @@ const RequestInfo = observer(() => {
 
         return (
             <button
+                disabled={wizardStore.isActionSubmitted}
                 className={buttonClass}
                 type="button"
                 onClick={onClick}
@@ -394,11 +479,11 @@ const RequestInfo = observer(() => {
         let buttonProps = BUTTON_MAP.BLOCK;
 
         const previewableTypes = [
-            RequestTypes.IMAGE,
-            RequestTypes.DOCUMENT,
-            RequestTypes.SUBDOCUMENT,
-            RequestTypes.SCRIPT,
-            RequestTypes.STYLESHEET,
+            RequestType.Image,
+            RequestType.Document,
+            RequestType.Subdocument,
+            RequestType.Script,
+            RequestType.Stylesheet,
         ];
 
         const showPreviewButton = previewableTypes.includes(event.requestType)
@@ -417,7 +502,7 @@ const RequestInfo = observer(() => {
 
         if (!requestRule) {
             buttonProps = BUTTON_MAP.BLOCK;
-        } else if (requestRule.filterId === ANTIBANNER_FILTERS_ID.USER_FILTER_ID) {
+        } else if (requestRule.filterId === AntiBannerFiltersId.UserFilterId) {
             buttonProps = BUTTON_MAP.USER_FILTER;
             if (requestRule.isStealthModeRule) {
                 buttonProps = BUTTON_MAP.UNBLOCK;
@@ -431,7 +516,7 @@ const RequestInfo = observer(() => {
                     </>
                 );
             }
-        } else if (requestRule.filterId === ANTIBANNER_FILTERS_ID.ALLOWLIST_FILTER_ID) {
+        } else if (requestRule.filterId === AntiBannerFiltersId.AllowlistFilterId) {
             buttonProps = BUTTON_MAP.ALLOWLIST;
         } else if (!requestRule.allowlistRule) {
             buttonProps = BUTTON_MAP.UNBLOCK;
@@ -466,10 +551,13 @@ const RequestInfo = observer(() => {
                     type="button"
                     onClick={closeModal}
                     className="request-modal__navigation request-modal__navigation--button"
+                    aria-label={reactTranslator.getMessage('close_button_title')}
                 >
-                    <Icon id="#cross" classname="icon--contain" />
+                    <Icon id="#cross" classname="icon--24" />
                 </button>
-                <span className="request-modal__header">{reactTranslator.getMessage('filtering_modal_info_title')}</span>
+                <span className="request-modal__header">
+                    {reactTranslator.getMessage('filtering_modal_info_title')}
+                </span>
             </div>
             <div ref={contentRef} className="request-modal__content">
                 {selectedEvent.method && (

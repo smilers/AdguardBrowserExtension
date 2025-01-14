@@ -17,11 +17,32 @@
     "options_antibanner_custom_filter_already_exists": {
         "message": "Vlastný filter už bol pridaný"
     },
+    "options_filters_annoyances_consent_title": {
+        "message": "Pred povolením filtrov obťažovania si pozorne prečítajte"
+    },
+    "options_filters_annoyances_consent_description": {
+        "message": "Chystáte sa povoliť jeden alebo viacero filtrov obťažovania. Blokujú prvky, ktoré buď nesúvisia s obsahom webových stránok, alebo súvisia, ale obťažujú Vašu používateľskú skúsenosť. Vlastníci webových stránok môžu považovať tieto prvky za povinné: ak ich zablokujete, môžete porušiť ich podmienky; niektoré funkcie webových stránok nemusia byť dostupné alebo nemusia správne fungovať. Rozumiete a súhlasíte s tým, že ste výhradne zodpovedný za dodržiavanie podmienok používania webových stránok, ktoré navštívite, a že AdGuard nezodpovedá za Vaše dodržiavanie podmienok používania webových stránok, ktoré navštevujete."
+    },
+    "options_filters_annoyances_consent_question": {
+        "message": "Zapnúť tieto filtre?"
+    },
+    "options_filters_annoyances_consent_filter_policy": {
+        "message": "Podrobnosti o tom, čo blokujú filtre obťažovania AdGuard, nájdete v časti <a>Politika filtrácíe<\/a>"
+    },
+    "options_filters_annoyances_consent_enable_button": {
+        "message": "Zapnúť"
+    },
     "popup_header_cta_link": {
-        "message": "Chcete zablokovať viac?"
+        "message": "Ako zvýšiť ochranu"
+    },
+    "popup_header_update_filters": {
+        "message": "Skontrolovať aktualizácie filtrov"
     },
     "options_popup_import_settings_wrong_file_ext": {
         "message": "Rozšírenie súboru musí byť %extension%"
+    },
+    "popup_resume_protection_button": {
+        "message": "Pokračovať"
     },
     "popup_adguard_for_ios": {
         "message": "AdGuard pre iOS"
@@ -42,7 +63,7 @@
         "message": "Vypnúť oznámenia"
     },
     "popup_adguard_footer_title": {
-        "message": "Získajte AdGuard pre Váš mobil"
+        "message": "Chráňte svoje mobilné zariadenie"
     },
     "options_popup_call_to_action": {
         "message": "Zadajte platnú URL adresu alebo umiestnenie súboru s filtrom do poľa vyššie."
@@ -96,7 +117,8 @@
         "message": "AdGuard blokovač reklamy"
     },
     "description": {
-        "message": "Neprekonané rozšírenie proti reklamám a vyskakovacím oknám. Blokuje reklamy na Facebooku, YouTube a všetkých ostatných webových stránkach."
+        "description": "TEXT MAX LENGTH: 132",
+        "message": "Neprekonané rozšírenie proti reklamám a vyskakovacím oknám. Blokuje reklamy na Facebooku, YouTube a na ostatných webových stránkach."
     },
     "background_tab_title": {
         "message": "Karta na pozadí"
@@ -120,16 +142,19 @@
         "message": "Používateľský filter"
     },
     "filtering_log_modified_rules": {
-        "message": "Modifikované pravidlá:"
+        "message": "Modifikované pravidlá: %rules_count%"
+    },
+    "filtering_log_stealth_rules": {
+        "message": "Pravidlá ochrany pred sledovaním: %rules_count%"
     },
     "filtering_log_privacy_applied_rules": {
-        "message": "Použili sa pravidlá ochrany osobných údajov"
+        "message": "Ochrana pred sledovaním zapnutá"
     },
     "filtering_log_in_allowlist": {
         "message": "Stránka je povolená"
     },
     "filtering_log_hide_referrer": {
-        "message": "Odkazovač skrytý pred tretími stranami"
+        "message": "Referer skrytý pred tretími stranami"
     },
     "filtering_log_hide_search_queries": {
         "message": "Vaše požiadavky vyhľadávania skryté"
@@ -185,17 +210,29 @@
     "options_filters_filter_trusted_tag_desc": {
         "message": "Zvolili ste si dôverovať tomuto filtru"
     },
+    "options_filters_info_mv3_total_rules": {
+        "message": "Celkové pravidlá: %num%"
+    },
+    "options_filters_info_mv3_specs": {
+        "message": "Špecifikácie na Githube"
+    },
     "options_add_custom_filter": {
         "message": "Pridať vlastný filter"
     },
     "options_empty_custom_filter": {
         "message": "Zatiaľ nemáte žiadne vlastné filtre"
     },
+    "options_loader_applying_changes": {
+        "message": "Uplatnenie zmien..."
+    },
     "options_editor_indicator_saving": {
         "message": "Ukladanie..."
     },
     "options_editor_indicator_saved": {
         "message": "Uložené"
+    },
+    "options_popup_import_error_required_privacy_permission": {
+        "message": "Ak chcete importovať tento súbor nastavení, povoľte AdGuardu zmeniť Vaše nastavenia týkajúce sa ochrany osobných údajov."
     },
     "options_popup_import_success_title": {
         "message": "Nastavenie importované úspešne"
@@ -210,22 +247,37 @@
         "message": "Dôveryhodný"
     },
     "options_popup_trusted_filter_description": {
-        "message": "Dôveryhodné filtre môžu používať silné modifikátory pravidiel filtrovania, ktoré môžu byť nebezpečné v nesprávnych rukách. Toto políčko nezačiarknite, ak mu nedôverujete."
-    },
-    "popup_site_filtering_state": {
-        "message": "Ochrana na tejto stránke"
+        "message": "Dôveryhodné filtre môžu používať silné modifikátory pravidiel filtrácie, ktoré môžu byť nebezpečné v nesprávnych rukách. Toto políčko nezačiarknite, ak mu nedôverujete."
     },
     "popup_site_filtering_state_secure_page": {
         "message": "Bezpečná stránka"
     },
+    "popup_site_filtering_state_loading": {
+        "message": "Načítavam..."
+    },
+    "popup_site_filtering_state_enabling": {
+        "message": "Zapnutie ochrany ..."
+    },
     "popup_site_filtering_state_enabled": {
         "message": "Ochrana je zapnutá"
+    },
+    "popup_site_filtering_state_disabling": {
+        "message": "Vypnutie ochrany ..."
     },
     "popup_site_filtering_state_disabled": {
         "message": "Ochrana je vypnutá"
     },
+    "popup_site_filtering_state_pausing": {
+        "message": "Pozastavenie ochrany ..."
+    },
     "popup_site_filtering_state_paused": {
         "message": "Ochrana je pozastavená"
+    },
+    "popup_site_filtering_state_resuming": {
+        "message": "Obnovenie ochrany ..."
+    },
+    "popup_site_filtering_state_subtitle_all_websites": {
+        "message": "pre všetky webové stránky"
     },
     "popup_site_exception_information": {
         "message": "Filtrácia je vypnutá, pretože môže interferovať s funkciami webovej stránky."
@@ -335,32 +387,11 @@
     "popup_security_report": {
         "message": "Kontrola bezpečnosti stránky"
     },
-    "popup_reset_custom_rules": {
-        "message": "Vymazať všetky používateľské pravidlá pre túto stránku"
-    },
-    "popup_open_settings": {
-        "message": "Nastavenia AdGuard"
-    },
-    "popup_block_site_ads_android": {
-        "message": "Blokovať reklamu na stránke"
-    },
-    "popup_security_report_android": {
-        "message": "Bezpečnostná správa"
-    },
-    "popup_in_allowlist_android": {
-        "message": "V zozname povolení"
-    },
-    "popup_site_protection_disabled_android": {
-        "message": "Ochrana je pozastavená"
-    },
-    "popup_open_log_android": {
-        "message": "Denník filtrácie"
+    "popup_reset_page_user_rules": {
+        "message": "Odstrániť používateľské pravidlá pre túto webovú stránku"
     },
     "context_block_site_ads": {
         "message": "Blokovať reklamy na tejto stránke..."
-    },
-    "context_block_site_element": {
-        "message": "Blokovanie prvku..."
     },
     "context_security_report": {
         "message": "Skontrolovať bezpečnosť stránky..."
@@ -465,7 +496,7 @@
         "message": "<reset>Vypnite filtre<\/reset> alebo <refresh>obnovte stránku<\/refresh> na prezretie denníka."
     },
     "filtering_modal_info_title": {
-        "message": "Podrobnosti požiadavky"
+        "message": "Podrobnosti dopytu"
     },
     "filtering_modal_preview_title": {
         "message": "Náhľad"
@@ -483,7 +514,7 @@
         "message": "Pravidlá:"
     },
     "filtering_modal_privacy": {
-        "message": "Súkromie:"
+        "message": "Ochrana pred sledovaním:"
     },
     "filtering_modal_filter": {
         "message": "Filter:"
@@ -496,6 +527,9 @@
     },
     "filtering_modal_unblock": {
         "message": "Odblokovať"
+    },
+    "filtering_modal_remove_user": {
+        "message": "Odstrániť pravidlo"
     },
     "filtering_modal_preview_request_button": {
         "message": "Náhľad"
@@ -531,7 +565,7 @@
         "message": "Použiť pravidlo na všetky stránky"
     },
     "filtering_modal_third_party": {
-        "message": "Použiť len na požiadavky tretích strán"
+        "message": "Použiť len na dopyty tretích strán"
     },
     "filtering_modal_remove_param": {
         "message": "Odstrániť parametre dopytu"
@@ -550,6 +584,18 @@
     },
     "filtering_modal_hide_full_url": {
         "message": "Skryť úplnú URL adresu"
+    },
+    "filtering_modal_show_full_rule": {
+        "message": "Zobraziť celé pravidlo"
+    },
+    "filtering_modal_hide_full_rule": {
+        "message": "Skryť celé pravidlo"
+    },
+    "filtering_modal_show_full_element": {
+        "message": "Ukázať celý prvok"
+    },
+    "filtering_modal_hide_full_element": {
+        "message": "Skryť celý prvok"
     },
     "filtering_modal_copy_to_clipboard": {
         "message": "Skopírovať do pamäťovej schránky"
@@ -626,8 +672,14 @@
     "options_import_settings": {
         "message": "Import nastavení"
     },
+    "options_report_bug": {
+        "message": "Nahlásiť chybu"
+    },
+    "options_leave_feedback": {
+        "message": "Zanechať spätnú väzbu"
+    },
     "options_privacy": {
-        "message": "Súkromie"
+        "message": "Ochrana pred sledovaním"
     },
     "options_update_antibanner_filters": {
         "message": "Skontrolovať aktualizácie filtrov"
@@ -654,7 +706,7 @@
         "message": "Import"
     },
     "options_userfilter_description_key": {
-        "message": "Tu môžete pridať svoje vlastné pravidlá. Táto možnosť sa odporúča pre pokročilých používateľov, ktorí poznajú HTML\/CSS. Prečítajte si <a>príručku pravidiel filtrovania<\/a>, kde sa dozviete, ako vytvoriť vlastné filtračné pravidlá."
+        "message": "Tu môžete pridať svoje vlastné pravidlá. Táto možnosť sa odporúča pre pokročilých používateľov, ktorí poznajú HTML\/CSS. Prečítajte si <a>príručku pravidiel filtrácie<\/a>, kde sa dozviete, ako vytvoriť vlastné filtračné pravidlá."
     },
     "options_userfilter_line_break_off": {
         "message": "Zalamovanie riadkov: Vyp."
@@ -685,6 +737,90 @@
     },
     "options_miscellaneous_settings": {
         "message": "Ďalšie nastavenia"
+    },
+    "options_rule_limits": {
+        "message": "Limity počtu pravidiel"
+    },
+    "options_rule_limits_description": {
+        "message": "Toto rozšírenie je v súlade s Manifestom V3"
+    },
+    "options_rule_limits_description_link": {
+        "message": "Zistite viac o Manifest V3"
+    },
+    "options_rule_limits_dynamic": {
+        "message": "Dynamické pravidlá"
+    },
+    "options_rule_limits_dynamic_user_rules": {
+        "message": "Pravidlá pridané používateľom, ako sú pravidlá používateľa a vlastné filtre"
+    },
+    "options_rule_limits_dynamic_regex": {
+        "message": "Pravidlá regulárneho výrazu – zahrnuté vyššie"
+    },
+    "options_rule_limits_static_rulesets": {
+        "message": "Statické sady pravidiel"
+    },
+    "options_rule_limits_static_rulesets_builtin": {
+        "message": "Zabudované filtre, napríklad Blokovať nepríjemnosti alebo Filtre pre jednotlivé jazyky"
+    },
+    "options_rule_limits_static_rules": {
+        "message": "Statické pravidlá"
+    },
+    "options_rule_limits_static_rules_all": {
+        "message": "Pravidlá zo zabudovaných filtrov"
+    },
+    "options_rule_limits_static_rules_regex": {
+        "message": "Pravidlá regulárneho výrazu – zahrnuté vyššie"
+    },
+    "options_rule_limits_numbers": {
+        "message": "%current% z %maximum%"
+    },
+    "options_rule_limits_warning_title": {
+        "message": "Prehliadač upravil zoznam aktívnych filtrov"
+    },
+    "options_rule_limits_warning_explanation_title": {
+        "message": "Čo sa stalo?"
+    },
+    "options_rule_limits_warning_explanation_description": {
+        "message": "Po aktualizácii alebo pridaní nového rozšírenia bol prekročený limit počtu aktívnych vstavaných pravidiel. Podľa Manifestu V3 Váš prehliadač Chrome reagoval vypnutím všetkých vstavaných filtrov rozšírenia okrem predvolených."
+    },
+    "options_rule_limits_warning_list_enabled_before_title": {
+        "message": "Filtre zapnuté pred aktualizáciou"
+    },
+    "options_rule_limits_warning_list_enabled_now_title": {
+        "message": "Filtre zapnuté teraz"
+    },
+    "options_rule_limits_warning_actions_title": {
+        "message": "Vaše možné akcie"
+    },
+    "options_rule_limits_warning_actions_delete_filters": {
+        "message": "Možnosť 1. Odstráňte z prehliadača nepotrebné rozšírenia na blokovanie reklamy. Ak chcete opätovne aktivovať filtre uvedené v časti \"Filtre povolené pred aktualizáciou\", kliknite na tlačidlo <a>opätovne aktivovať filtre.<\/a>"
+    },
+    "options_rule_limits_warning_actions_install_app": {
+        "message": "Možnosť 2. Nainštalujte si aplikáciu AdGuard: nemá žiadne obmedzenia pravidiel filtrácie. <a>Získajte aplikáciu AdGuard<\/a>"
+    },
+    "options_rule_limits_warning_actions_close_warning_one_filter": {
+        "message": "Možnosť 3. Ak ste spokojní s aktuálne povoleným predvoleným filtrom, <a>zatvorte toto upozornenie.<\/a>"
+    },
+    "options_rule_limits_warning_actions_close_warning_multiple_filters": {
+        "message": "Možnosť 3. Ak ste spokojní s aktuálne povolenými predvolenými filtrami, <a>zatvorte toto upozornenie.<\/a>"
+    },
+    "options_all_limits_exceeded_warning": {
+        "message": "Dosiahli ste limit aktívnych vstavaných pravidiel. Váš prehliadač upravil zoznam aktívnych vstavaných filtrov. Počet povolených filtrov sa zmenil z %expected% na %current%."
+    },
+    "options_limits_warning_static_filters": {
+        "message": "Dosiahli ste limit aktívnych zabudovaných filtrov. %maximum% z %current% filtre sú povolené. Ak chcete aktivovať nové pravidlá, vypnite niektoré zabudované filtre."
+    },
+    "options_limits_warning_static_rules": {
+        "message": "Dosiahli ste limit aktívnych zabudovaných pravidiel. %maximum% z %current% pravidlá sú povolené. Ak chcete aktivovať nové pravidlá, vypnite niektoré zabudované filtre."
+    },
+    "options_limits_warning_static_regex_rules": {
+        "message": "Dosiahli ste limit aktívnych zabudovaných regex pravidiel. %maximum% z %current% regex pravidiel sú povolené. Ak chcete aktivovať nové pravidlá, vypnite niektoré zabudované filtre."
+    },
+    "options_limits_warning_dynamic_rules": {
+        "message": "Dosiahli ste limit pravidiel pridaných používateľom. %maximum% pravidiel %current% sú povolené."
+    },
+    "options_limits_warning_dynamic_regex_rules": {
+        "message": "Dosiahli ste limit regex pravidiel pridaných používateľom. %maximum% z %current% regex pravidiel sú povolené."
     },
     "options_show_adguard_full_version_title": {
         "message": "Zobraziť informáciu o plnej verzii AdGuard"
@@ -723,10 +859,10 @@
         "message": "Použiť optimalizované filtre"
     },
     "options_use_optimized_filters_desc": {
-        "message": "Zoznam filtrov optimalizovaných pre mobilné zariadenia"
+        "message": "Používa kratšie verzie filtrov iba s najpopulárnejšími pravidlami na obmedzenie komunikácie. Vhodnejšie pre mobilné prehliadače"
     },
     "options_privacy_title": {
-        "message": "Súkromie"
+        "message": "Ochrana pred sledovaním"
     },
     "options_privacy_desc": {
         "message": "Chráňte svoju identitu a citlivé osobné informácie od tisícok online sledovateľov blokovaním najpopulárnejších metód sledovania."
@@ -744,10 +880,10 @@
         "message": "Skrýva dopyty na webové stránky navštívené z vyhľadávača."
     },
     "options_send_not_track_title": {
-        "message": "Odosiela stránkam požiadavku, aby ste neboli sledovaný"
+        "message": "Požiadajte webové stránky, aby vás nesledovali"
     },
     "options_send_not_track_desc": {
-        "message": "Pošlite signály <gpc>Globálna kontrola súkromia<\/gpc> a <dnt>Nesledovať<\/dnt> webovým stránkam, ktoré navštevujete."
+        "message": "Odoslať signály <gpc>Globálna kontrola ochrany osobných údajov<\/gpc> a <dnt>Nesledovať<\/dnt> na webové stránky, ktoré navštívite."
     },
     "options_stripped_tracking_parameters": {
         "message": "Parametre sledovania boli odstránené"
@@ -774,13 +910,13 @@
         "message": "Odstrániť parametre sledovania"
     },
     "options_strip_tracking_params_description": {
-        "message": "Ak je zapnuté, AdGuard filter sledovania URL adries sa používa na odstránenie parametrov sledovania z URL adries."
+        "message": "Odstránenie parametrov z webových dopytov pomocou filtra AdGuard URL Tracking."
     },
     "options_block_known_trackers_title": {
         "message": "Blokuje známe sledovače"
     },
     "options_block_known_trackers_description": {
-        "message": "Ak je zapnuté, AdGuard filter proti sledovaniu sa použije na blokovanie známych sledovačov."
+        "message": "Blokovať nástroje na sledovanie a webovú analýzu pomocou filtra AdGuard Tracking Protection."
     },
     "options_third_party_title": {
         "message": "Automatická deštrukcia cookie súborov tretích strán"
@@ -821,8 +957,11 @@
     "popup_switch_button": {
         "message": "Vypnutie ochrany"
     },
+    "popup_limits_exceeded_warning": {
+        "message": "Váš prehliadač upravil zoznam aktívnych zabudovaných filtrov"
+    },
     "short_name": {
-        "message": "AdGuard blokovač reklamy"
+        "message": "AdGuard"
     },
     "options_about": {
         "message": "O"
@@ -849,13 +988,10 @@
         "message": "Odstrániť"
     },
     "options_nav_better_than_extension": {
-        "message": "Prečo je plnohodnotný program AdGuard lepší ako rozšírenie?"
+        "message": "Prečo je aplikácia AdGuard lepšia ako rozšírenie?"
     },
     "options_nav_compare": {
-        "message": "Vzájomné porovnanie"
-    },
-    "options_nav_hide": {
-        "message": "Skryť"
+        "message": "Porovnanie"
     },
     "options_filters_search": {
         "message": "Hľadať"
@@ -875,11 +1011,14 @@
     "group_description_annoyances": {
         "message": "Odstráňte kontextové okná a ďalšie nepríjemné upozornenia, ako sú oznámenia o súboroch cookie."
     },
+    "group_description_security": {
+        "message": "Chráňte sa pred malvérom, phishingom a inými online hrozbami."
+    },
     "group_description_miscellaneous": {
         "message": "Ďalšie nastavenia na konfiguráciu Vášho surfovania na webe s AdGuardom ešte ďalej."
     },
     "group_description_custom": {
-        "message": "Vytvorte si vlastné filtre, ktoré doladia filtrovanie webu podľa Vašich preferencií."
+        "message": "Vytvorte si vlastné filtre, ktoré doladia filtráciu webu podľa Vašich preferencií."
     },
     "group_description_lang": {
         "message": "Neobmedzujte sa - blokujte reklamy na webových stránkach v akýchkoľvek jazykoch."
@@ -933,7 +1072,7 @@
         "message": "Iba dopyty spracované bez filtrácie"
     },
     "filtering_log_tag_tooltip_allowed": {
-        "message": "Len pobolené a neblokované dopyty"
+        "message": "Len povolené a neblokované dopyty"
     },
     "filtering_log_tag_tooltip_blocked": {
         "message": "Len zablokované dopyty"
@@ -983,6 +1122,9 @@
     "options_stealth_miscellaneous_title": {
         "message": "Rôzne"
     },
+    "options_coming_soon": {
+        "message": "Už čoskoro"
+    },
     "blocking_pages_malware": {
         "message": "Stránka <strong>%host%<\/strong> bola nahlásená ako stránka so škodlivým kódom a bola zablokovaná na základe Vašich bezpečnostných nastavení."
     },
@@ -1002,7 +1144,7 @@
         "message": "AdGuard zablokoval prístup k tejto stránke"
     },
     "blocking_pages_rule_header_title": {
-        "message": "Blokované AdGuardom"
+        "message": "Zablokované AdGuardom"
     },
     "blocking_pages_rule_content_title": {
         "message": "AdGuard zabránil načítaniu tejto stránky kvôli nasledujúcemu filtračnému pravidlu"
@@ -1012,5 +1154,22 @@
     },
     "blocking_pages_btn_proceed": {
         "message": "Aj tak pokračovať"
+    },
+    "text_collapser_show_default": {
+        "message": "Zobraziť celý text"
+    },
+    "text_collapser_hide_default": {
+        "message": "Skryť celý text"
+    },
+    "close_button_title": {
+        "message": "Zavrieť"
+    },
+    "filtering_modal_applied_rules": {
+        "description": "WARNING: correct number of plural forms is required",
+        "message": "| Aplikované pravidlo | Aplikované pravidlá | Aplikované pravidlá"
+    },
+    "filtering_modal_original_rules": {
+        "description": "WARNING: correct number of plural forms is required",
+        "message": "| Pôvodné pravidlo | Pôvodné pravidlá | Pôvodné pravidlá"
     }
 }

@@ -1,18 +1,47 @@
-import React, { useContext, useState, useEffect } from 'react';
+/**
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import React, {
+    useContext,
+    useState,
+    useEffect,
+} from 'react';
 import { observer } from 'mobx-react';
+
 import { useMachine } from '@xstate/react';
+
+import { ContentType as RequestType } from '@adguard/tswebextension';
 
 import { Icon } from '../../../../common/components/ui/Icon';
 import { reactTranslator } from '../../../../../common/translators/reactTranslator';
-import { fetchMachine, FetchEvents, FetchStates } from '../../../../common/machines/fetchMachine';
+import {
+    fetchMachine,
+    FetchEvents,
+    FetchStates,
+} from '../../../../common/machines/fetchMachine';
 import { rootStore } from '../../../stores/RootStore';
-import { RequestTypes } from '../../../../../background/utils/request-types';
+
 import { ImageRequest } from './ImageRequest';
 import { TextRequest } from './TextRequest';
 import { fetchText, fetchImage } from './fetchers';
 
-import './request-preview.pcss';
 import '../RequestInfo/request-image.pcss';
+import './request-preview.pcss';
 
 export const RequestPreview = observer(() => {
     const {
@@ -24,12 +53,12 @@ export const RequestPreview = observer(() => {
 
     const { requestType, requestUrl } = selectedEvent;
 
-    const isText = requestType === RequestTypes.DOCUMENT
-        || requestType === RequestTypes.SUBDOCUMENT
-        || requestType === RequestTypes.SCRIPT
-        || requestType === RequestTypes.STYLESHEET;
+    const isText = requestType === RequestType.Document
+        || requestType === RequestType.Subdocument
+        || requestType === RequestType.Script
+        || requestType === RequestType.Stylesheet;
 
-    const isImage = requestType === RequestTypes.IMAGE;
+    const isImage = requestType === RequestType.Image;
 
     const getFetcher = () => {
         if (isText) {
@@ -126,11 +155,11 @@ export const RequestPreview = observer(() => {
                     onClick={handleBackToRequestClick}
                     className="request-modal__navigation request-modal__navigation--button"
                 >
-                    <Icon id="#arrow-left" classname="icon--contain" />
+                    <Icon id="#arrow-left" classname="icon--24" />
+                    <span className="request-modal__header">
+                        {reactTranslator.getMessage('filtering_modal_preview_title')}
+                    </span>
                 </button>
-                <span className="request-modal__header">
-                    {reactTranslator.getMessage('filtering_modal_preview_title')}
-                </span>
             </div>
             <div className="request-modal__content request-preview">
                 {renderContent()}

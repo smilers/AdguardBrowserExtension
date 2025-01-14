@@ -3,10 +3,28 @@
         "message": "Թույլատրված"
     },
     "options_filters_list_search_display_option_disabled": {
-        "message": "Անջատված է"
+        "message": "Անջատված"
     },
-    "popup_header_cta_link": {
-        "message": "Ավելի՞ն արգելափակել:"
+    "options_filters_annoyances_consent_title": {
+        "message": "Խնդրում ենք ուշադիր կարդալ նախքան նյարդայնացնող ֆիլտրեր հնարավորություն տալը"
+    },
+    "options_filters_annoyances_consent_description": {
+        "message": "Դուք պատրաստվում եք միացնել մեկ կամ մի քանի անհանգստացնող զտիչներ: Նրանք արգելափակում են տարրերը, որոնք կամ կապված չեն կայքի բովանդակության հետ կամ առնչվում են, բայց նյարդայնացնում են ձեր օգտատիրոջ փորձին: Կայքերի սեփականատերերը կարող են պարտադիր համարել այս տարրերը. եթե դուք արգելափակեք դրանք, ապա դուք կարող եք խախտել դրանց պայմանները. վեբկայքերի որոշ գործառույթներ կարող են հասանելի չլինել կամ ճիշտ չաշխատեն: Դուք հասկանում և համաձայն եք, որ բացառապես պատասխանատվություն եք կրում ձեր այցելած կայքերի օգտագործման պայմանների պահպանման համար, և որ AdGuard-ը պատասխանատվություն չի կրում ձեր այցելած կայքերի օգտագործման պայմաններին ձեր համապատասխանության համար:"
+    },
+    "options_filters_annoyances_consent_question": {
+        "message": "Միացնե՞լ այս զտիչները:"
+    },
+    "options_filters_annoyances_consent_filter_policy": {
+        "message": "Մանրամասների համար, թե AdGuard-ի անհանգստացնող զտիչները արգելափակում են, տե՛ս <a>Զտիչ քաղաքականություն<\/a>"
+    },
+    "options_filters_annoyances_consent_enable_button": {
+        "message": "Միացնել"
+    },
+    "popup_header_update_filters": {
+        "message": "Ստուգել զտիչի թարմացումները"
+    },
+    "options_popup_url_title": {
+        "message": "Նոր զտիչի բաժանորդագրություն"
     },
     "options_popup_next_button": {
         "message": "Հաջորդը"
@@ -24,16 +42,20 @@
         "message": "URL:"
     },
     "description": {
-        "message": "Անգերազանցելի ad-block ընդլայնում՝ ընդդեմ գովազդի և ելնող պատուհանների: Արգելափակում է գովազդները Facebook-ում, Youtube-ում և այլ կայքերում."
+        "description": "TEXT MAX LENGTH: 132",
+        "message": "Անգերազանցելի ընդլայնում՝ ընդդեմ գովազդի և ելնող պատուհանների: Արգելափակում է գովազդները Facebook-ում, Youtube-ում և այլ կայքերում."
     },
     "options_userfilter": {
         "message": "Օգտվողի զտիչ"
+    },
+    "filtering_log_hide_referrer": {
+        "message": "Referer-ը թաքցված է երրորդ կողմից"
     },
     "options_select_update_period_default": {
         "message": "Հիմնական"
     },
     "options_select_update_period_disabled": {
-        "message": "Անջատված է"
+        "message": "Անջատված"
     },
     "options_filters": {
         "message": "Զտիչներ"
@@ -44,14 +66,14 @@
     "options_add_custom_filter": {
         "message": "Ավելացնել հարմարեցված զտիչ"
     },
-    "popup_site_filtering_state": {
-        "message": "Պաշտպանություն այս կայքում"
+    "popup_site_filtering_state_loading": {
+        "message": "Բեռնում է..."
     },
     "popup_site_filtering_state_enabled": {
         "message": "Պաշտպանությունը ակտիվ է"
     },
     "popup_site_filtering_state_disabled": {
-        "message": "Պաշտպանությունը անջատված է: Թարմացումները անհասանելի են:"
+        "message": "Պաշտպանությունն անջատված է"
     },
     "options_popup_update_not_found": {
         "message": "Թարմացումներ չկան"
@@ -59,26 +81,8 @@
     "options_popup_update_error": {
         "message": "Հնարավոր չեղավ ստանալ թարմացում: Խնդրում ենք կրկին փորձել:"
     },
-    "popup_open_settings": {
-        "message": "AdGuard-ի կարգավորումներ"
-    },
-    "popup_block_site_ads_android": {
-        "message": "Արգելել գովազդը այս կայքից"
-    },
-    "popup_security_report_android": {
-        "message": "Անվտանգության զեկույց"
-    },
-    "popup_site_protection_disabled_android": {
-        "message": "Պաշտպանությունը դադարեցված է"
-    },
-    "popup_open_log_android": {
-        "message": "Զտիչների մատյան"
-    },
     "context_block_site_ads": {
         "message": "Արգելափակել գովազդը այս կայքում..."
-    },
-    "context_block_site_element": {
-        "message": "Տարրի արգելափակում..."
     },
     "context_site_filtering_disabled": {
         "message": "AdGuard-ը չի կարող մեկնարկվել այս տիրույթում"
@@ -161,9 +165,6 @@
     "filtering_modal_unblock": {
         "message": "Ապաարգելափակել"
     },
-    "filtering_modal_remove_user": {
-        "message": "Հեռացնել օգտվողի զտիչից"
-    },
     "filtering_modal_preview_request_button": {
         "message": "Նախատեսք"
     },
@@ -233,9 +234,6 @@
     "options_import_settings": {
         "message": "Ներմուծել կարգավորումները"
     },
-    "options_privacy": {
-        "message": "Թաքնված եղանակ"
-    },
     "options_update_antibanner_filters": {
         "message": "Ստուգել զտիչի թարմացումները"
     },
@@ -265,9 +263,6 @@
     },
     "options_use_optimized_filters": {
         "message": "Կիրառեք օպտիմիզացված զտիչներ"
-    },
-    "options_privacy_title": {
-        "message": "Թաքնված եղանակ"
     },
     "options_hide_search_queries_title": {
         "message": "Թաքցնել որոնման հարցումները"
@@ -314,10 +309,13 @@
     "blocking_pages_advanced_button": {
         "message": "Ընդլայնված"
     },
+    "close_button_title": {
+        "message": "Փակել"
+    },
     "name": {
         "message": "AdGuard AdBlocker"
     },
     "short_name": {
-        "message": "AdGuard AdBlocker"
+        "message": "AdGuard"
     }
 }

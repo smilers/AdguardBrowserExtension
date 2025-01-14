@@ -1,9 +1,10 @@
-! Checksum: ui8+l26RlveRJgLZ3VwqYw
+! Checksum: QlVQ1LfflP0dKfsRU57ncQ
+! Diff-Path: ../patches/5/5-s-1729488991-3600.patch
 ! Title: AdGuard Experimental filter
 ! Description: Filter designed to test certain hazardous filtering rules before they are added to the basic filters.
-! Version: 2.0.0.96
-! TimeUpdated: 2022-03-17T07:31:25+00:00
-! Expires: 4 days (update frequency)
+! Version: 2.0.1.61
+! TimeUpdated: 2024-10-21T05:32:55+00:00
+! Expires: 10 days (update frequency)
 ! Homepage: https://github.com/AdguardTeam/AdGuardFilters
 ! License: https://github.com/AdguardTeam/AdguardFilters/blob/master/LICENSE
 !
@@ -137,23 +138,29 @@
 ! !#if (!adguard_app_ios && !adguard_ext_android_cb)
 ! @@||youtube.com/get_video_info
 ! !#endif
-! This one handles an XHR request for YT player data
-! smart JSON override: https://gist.github.com/ameshkov/0c5148f243ffe9d8e40fd9ee11f142f4
-! smartJSONParseOverride('adPlacements', [], /.*/);
-! smartJSONParseOverride('playerAds', [], /.*/);
-! youtube-nocookie.com,youtube.com#%#(function(){var overrideObject=function(obj,propertyName,overrideValue){var overriden=false;for(var key in obj)if(obj.hasOwnProperty(key)&&key===propertyName){obj[key]=overrideValue;overriden=true}else if(obj.hasOwnProperty(key)&&typeof obj[key]==="object")if(overrideObject(obj[key],propertyName,overrideValue))overriden=true;return overriden};var smartJSONParseOverride=function(propertyName,overrideValue,reStack){var realParse=JSON.parse;JSON.parse=function(text,reviver){var obj=realParse(text,reviver);if(!obj)return obj;var stackTrace=(new Error).stack;if(reStack.test(stackTrace))if(overrideObject(obj,propertyName,overrideValue));return obj}};smartJSONParseOverride("adPlacements",[],/.*/);smartJSONParseOverride("playerAds",[],/.*/)})();
 !
 ! Rules that are restricted to one or more domains.
 ! This section contain any type of rule grouped by domain.
 !
+! remove anti-adb
+! !#if (!adguard_ext_firefox)
+! www.youtube.com#%#(()=>{const wrapper=(target,thisArg,args)=>{let result=Reflect.apply(target,thisArg,args);try{const decoded=atob(result);if(decoded.includes('bkaEnforcementMessage')){const modifiedContent=decoded.replace(/\n.\n.auxiliaryUi\.messageRenderers\.bkaEnforcementMessageViewModel\.displayType.\dENFORCEMENT_MESSAGE_VIEW_MODEL_DISPLAY_TYPE_[A-Z]+\n.\n.auxiliaryUi\.messageRenderers\.bkaEnforcementMessageViewModel\.isVisible.{2}(?:tru|fals)e/,'');const encodeToBase64=btoa(modifiedContent);return encodeToBase64}}catch(e){} return result};const handler={apply:wrapper};window.Array.prototype.join=new Proxy(window.Array.prototype.join,handler)})();
+! www.youtube.com#%#//scriptlet('trusted-replace-fetch-response', '/"auxiliaryUi":\{"messageRenderers":\{"bkaEnforcementMessageViewModel.*?e\}\}\}\,/', '', 'player?')
+! www.youtube.com#%#//scriptlet('trusted-replace-xhr-response', '/"auxiliaryUi":\{"messageRenderers":\{"bkaEnforcementMessageViewModel.*?e\}\}\}\,/', '', '/playlist\?list=|player\?|watch\?[tv]=/')
+! www.youtube.com#%#//scriptlet('set-constant', 'ytInitialPlayerResponse.auxiliaryUi.messageRenderers.bkaEnforcementMessageViewModel', 'undefined')
+! !#endif
 ! main youtube page - changing view for the first row of elements
-www.youtube.com#$?##contents ytd-rich-grid-row:has(> div[id="contents"] > ytd-rich-item-renderer[style="display: none !important;"]) > #contents:first-child { max-width: unset !important; }
-www.youtube.com#$?##contents ytd-rich-grid-row:has(> div[id="contents"] > ytd-rich-item-renderer[style="display: none !important;"]) ytd-rich-grid-media { max-width: unset !important; }
-www.youtube.com#$?##contents ytd-rich-grid-row:has(> div[id="contents"] > ytd-rich-item-renderer[style="display: none !important;"]) { --ytd-rich-grid-items-per-row: 1 !important; }
+www.youtube.com#$##contents ytd-rich-grid-row:has(> div[id="contents"] > ytd-rich-item-renderer[style="display: none !important;"]) > #contents:first-child { max-width: unset !important; }
+www.youtube.com#$##contents ytd-rich-grid-row:has(> div[id="contents"] > ytd-rich-item-renderer[style="display: none !important;"]) ytd-rich-grid-media { max-width: unset !important; }
+www.youtube.com#$##contents ytd-rich-grid-row:has(> div[id="contents"] > ytd-rich-item-renderer[style="display: none !important;"]) { --ytd-rich-grid-items-per-row: 1 !important; }
 ! https://github.com/AdguardTeam/AdguardFilters/issues/96262
 developer.android.com,adssettings.google.com##sc-survey-survey-manager
 !
-! Whitelist
+! https://github.com/AdguardTeam/AdguardFilters/issues/174701#issuecomment-1991730425
+foxtel.com.au#%#//scriptlet('xml-prune', 'xpath(//*[name()="MPD"]/@mediaPresentationDuration | //*[name()="Period"]/@start | //*[name()="Period"][.//*[name()="BaseURL" and contains(text(),"/adease/")]])', '', '.mpd')
+foxtel.com.au#%#//scriptlet('json-prune', 'adease adeaseBlob vmap')
+!
+! Allowlist
 ! http://adguard.com/filterrules.html#exclusionRules
 ! http://adguard.com/filterrules.html#hideRulesExceptions
 ! http://adguard.com/filterrules.html#cssInjectionExceptions
@@ -167,12 +174,6 @@ developer.android.com,adssettings.google.com##sc-survey-survey-manager
 !
 ! This file contains all experimental rules for Spyware filter.
 !
-/fbevents.js^
-/ads/beacon-
-/AppMeasurement-$script,domain=~mlb.com
-!
-||welcoming-carpets.tk^$third-party
-||creative-banana.tk^$third-party
 !-------------------------------------------------------------------!
 !------- Experimental rules for Social filter ----------------------!
 !-------------------------------------------------------------------!
@@ -243,10 +244,9 @@ developer.android.com,adssettings.google.com##sc-survey-survey-manager
 ! Rules which are restricted to one or more domains.
 ! This section contain any type of rule grouped by domain.
 !
-! https://github.com/AdguardTeam/AdguardFilters/issues/105359#issuecomment-1069375715
-ozerki.ru#?#header > div.popup:has(> div.popup__container div.rkf_popup_button > a[href="https://express.superapteka.ru/"])
+mail.yandex.ru#?#.modal:has(> div[data-lego] div[class^="mail-SubscriptionsPopup"])
 !
-! Whitelist
+! Allowlist
 !
 ! This section contains all kinds of exception rules.
 !
@@ -257,10 +257,25 @@ ozerki.ru#?#header > div.popup:has(> div.popup__container div.rkf_popup_button >
 ! This file contains all filters other than English, Social, Spyware and Russian.
 ! Also filters by platforms https://github.com/AdguardTeam/AdguardBrowserExtension/issues/917
 !
+! https://github.com/AdguardTeam/AdguardFilters/issues/169842
+/videojs8/nuevo.min.js
+/videojs/plugins/vastpro.js
+! https://github.com/AdguardTeam/AdguardFilters/issues/142875
+imdb.com#?#div[data-testid="promptable"]:has(.ipc-rating-display-with-poster__image)
+imdb.com#$?#body:has(div[data-testid="promptable"] .ipc-rating-display-with-poster__image) { overflow: auto !important; }
 !
+! Special rules for AdGuard websites' test pages. The only purpose of these
+! rules is to make test pages work so that users could verify that AdGuard
+! is properly working.
 !
-! Filters for adguard without safari
-||chrome.test.filter.com^$third-party
+!+ NOT_OPTIMIZED
+adguard.info,adguard.com,adguard.app##.hello_from_adguard_experimental
+! Detect of using AdGuard products
+!+ NOT_PLATFORM(windows, mac, android, ios, ext_ublock) NOT_OPTIMIZED
+adguard.info,adguard.com,adguard.app##.hello_from_adguard_ext
+! Detect HTTPS filtering
+! Detect Advanced Protection of AdGuard for iOS
+!
 !-------------------------------------------------------------------!
 !------- Experimental rules for Mobile ads filter-------------------!
 !-------------------------------------------------------------------!
@@ -268,7 +283,6 @@ ozerki.ru#?#header > div.popup:has(> div.popup__container div.rkf_popup_button >
 ! Mobile advertising networks known rotator domains
 ! Used to show ads in mobile apps and websites
 !
-reddit.com##.CommentsPage > article[id][class][style*="z-index: 1;"]
 !-------------------------------------------------------------------!
 !---------------------- Dangerous rules ----------------------------!
 !-------------------------------------------------------------------!
@@ -279,8 +293,7 @@ reddit.com##.CommentsPage > article[id][class][style*="z-index: 1;"]
 !################## For advertisement ##################
 !
 ! https://github.com/AdguardTeam/AdguardFilters/issues/64754
-! https://github.com/AdguardTeam/AdguardFilters/issues/63128
-tumblr.com###base-container div[style="height:0;display:flex;flex-direction:column;overflow:hidden"] + div:not([class]):not([id]) > div[class]:not([data-id]):not([class*=" "])
+!
 !
 !################## For tracking ##################
 ||uim.tifbs.net/js/2048.js
