@@ -5,7 +5,7 @@
 
     &__section {
         white-space: nowrap;
-        border-right: 1px solid var(--gray300);
+        border-right: 1px solid var(--stroke-dividers-item-divider-default);
         margin-right: 8px;
     }
 
@@ -14,16 +14,9 @@
         width: auto;
         min-width: 160px;
         position: static;
-        z-index: 2;
+        z-index: var(--z-idx-filtering-log-base);
         right: 30px;
         top: 10px;
-        background: var(--bgColor);
         font-size: 13px;
-    }
-}
-
-.light-mode {
-    .miscellaneous-filters__filters {
-        border: 0;
     }
 }

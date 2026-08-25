@@ -1,0 +1,134 @@
+/**
+ * Copyright (c) 2015-2026 Adguard Software Ltd.
+ *
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import {
+    action,
+    makeObservable,
+    observable,
+    override,
+} from 'mobx';
+import { type GetOptionsDataResponse } from 'settings-types';
+
+import { messenger } from '../../../services/messenger';
+import { MIN_UPDATE_DISPLAY_DURATION_MS } from '../../../../common/constants';
+import { type RootStore } from '../RootStore';
+import { eventPauseController, ChangeType } from '../../../services/EventPauseController-mv2';
+
+import { SettingsStoreCommon } from './SettingsStore-common';
+
+export class SettingsStore extends SettingsStoreCommon {
+    /**
+     * Whether filters are currently being updated.
+     * Used to show loading state during filter updates.
+     */
+    @observable
+    filtersUpdating = false;
+
+    /**
+     * Total count of active filtering rules.
+     * Updated after each options data request.
+     */
+    @observable
+    rulesCount = 0;
+
+    constructor(rootStore: RootStore) {
+        super(rootStore);
+
+        makeObservable(this);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    @override
+    protected override applyOptionsData(data: GetOptionsDataResponse, firstRender?: boolean): void {
+        super.applyOptionsData(data, firstRender);
+        this.rulesCount = data.filtersInfo.rulesCount;
+    }
+
+    /**
+     * Triggers filters update and refreshes local filters metadata.
+     */
+    @action
+    async updateFilters() {
+        this.setFiltersUpdating(true);
+        try {
+            const filtersUpdates = await messenger.updateFilters();
+            this.refreshFilters(filtersUpdates);
+            setTimeout(() => {
+                this.setFiltersUpdating(false);
+            }, MIN_UPDATE_DISPLAY_DURATION_MS);
+            return filtersUpdates;
+        } catch (error) {
+            this.setFiltersUpdating(false);
+            throw error;
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    @action
+    async updateFilterSetting(filterId: number, enabled: boolean): Promise<void> {
+        eventPauseController.registerPendingChange(ChangeType.Filter, filterId, enabled);
+
+        this.setFilterEnabledState(filterId, enabled);
+
+        try {
+            const success = await this.updateFilterSettingCore(filterId, enabled);
+
+            if (success) {
+                eventPauseController.confirmChange(ChangeType.Filter, filterId, enabled);
+            } else {
+                this.setFilterEnabledState(filterId, !enabled);
+                eventPauseController.cancelChange(ChangeType.Filter, filterId);
+            }
+        } catch (error) {
+            this.setFilterEnabledState(filterId, !enabled);
+            eventPauseController.cancelChange(ChangeType.Filter, filterId);
+            throw error;
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    @override
+    override async updateGroupSetting(groupId: number, enabled: boolean): Promise<void> {
+        eventPauseController.registerPendingChange(ChangeType.Group, groupId, enabled);
+
+        this.updateGroupStateUI(groupId, enabled);
+
+        try {
+            await super.updateGroupSetting(groupId, enabled);
+
+            eventPauseController.confirmChange(ChangeType.Group, groupId, enabled);
+        } catch (error) {
+            this.updateGroupStateUI(groupId, !enabled);
+            eventPauseController.cancelChange(ChangeType.Group, groupId);
+            throw error;
+        }
+    }
+
+    @action
+    setFiltersUpdating(value: boolean): void {
+        this.filtersUpdating = value;
+    }
+}

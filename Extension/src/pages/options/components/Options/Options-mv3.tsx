@@ -1,0 +1,149 @@
+/**
+ * Copyright (c) 2015-2026 Adguard Software Ltd.
+ *
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import React from 'react';
+import { Route } from 'react-router-dom';
+
+import { type SettingsStore } from 'settings-store';
+
+import { General } from '../General';
+import { Filters } from '../Filters';
+import { Stealth } from '../Stealth';
+import { Allowlist } from '../Allowlist';
+import { UserRules } from '../UserRules';
+import { Miscellaneous } from '../Miscellaneous';
+import { About } from '../About';
+import { RulesLimits } from '../RulesLimits/RulesLimits-mv3';
+import { type LongLivedConnectionCallbackMessage } from '../../../services/messenger';
+import { logger } from '../../../../common/logger';
+import { NotifierType } from '../../../../common/constants';
+import { OptionsPageSections } from '../../../../common/nav';
+import { translator } from '../../../../common/translators/translator';
+import type UiStore from '../../stores/UiStore';
+
+import { COMMON_EVENTS, createCommonMessageHandler } from './Options-common';
+import { OptionsLayout } from './Options-layout';
+
+/**
+ * Creates a message handler for the options page
+ * Handles incoming messages from the background script
+ *
+ * @param settingsStore Settings store instance
+ * @param uiStore UI store instance
+ *
+ * @returns Async function that handles LongLivedConnectionCallbackMessage events including update state changes
+ */
+export const createMessageHandler = (
+    settingsStore: SettingsStore,
+    uiStore: UiStore,
+) => {
+    return async (message: LongLivedConnectionCallbackMessage) => {
+        const { type } = message;
+
+        switch (type) {
+            case NotifierType.ExtensionUpdateStateChange: {
+                const [eventData] = message.data;
+                settingsStore.handleExtensionUpdateStateChange(eventData);
+                break;
+            }
+            default: {
+                createCommonMessageHandler(settingsStore, uiStore)(message);
+                break;
+            }
+        }
+    };
+};
+
+/**
+ * Initializes the options page with filter limits checking
+ * Loads options data, checks for filter limits exceeded, and validates rule limitations
+ *
+ * @param settingsStore Settings store instance
+ * @param uiStore UI store instance for displaying limit notifications
+ *
+ * @returns Promise resolving to true if initialization succeeded, false otherwise
+ */
+export const initialize = async (
+    settingsStore: SettingsStore,
+    uiStore: UiStore,
+): Promise<boolean> => {
+    const optionsData = await settingsStore.requestOptionsData();
+
+    if (!optionsData) {
+        logger.error('[ext.Options-mv3]: Failed to get options data');
+
+        return false;
+    }
+    const { runtimeInfo } = optionsData;
+
+    // applyRuntimeInfo() is already called by requestOptionsData(), which
+    // sets extensionUpdateState from the FSM snapshot and adds post-reload notifications.
+    // No need to call configureExtensionUpdates again here.
+
+    // Show notification about changed filter list by browser only once.
+    if (runtimeInfo?.areFilterLimitsExceeded) {
+        uiStore.addRuleLimitsNotification(translator.getMessage('popup_limits_exceeded_warning'));
+    }
+
+    // Note: Is it important to check the limits after the request for
+    // options data is completed, because the request for options data
+    // will wait until the background service worker wakes up.
+    await settingsStore.checkLimitations();
+
+    return true;
+};
+
+/**
+ * Array of all events that options page listens to
+ * Includes common events plus ExtensionUpdateStateChange
+ */
+export const EVENTS = [
+    ...COMMON_EVENTS,
+    NotifierType.ExtensionUpdateStateChange,
+];
+
+/**
+ * Cleanup function for MV3 - no-op since MV3 doesn't use event pause controller.
+ */
+export const disposeEventPauseController = (): void => {
+    // No cleanup needed for MV3
+};
+
+/**
+ * Returns the route configuration for options page
+ * Includes all standard pages without Rules Limits section
+ *
+ * @returns JSX Route element with nested routes for all option pages
+ */
+export const getOptionRoute = () => {
+    return (
+        <Route path="/" element={<OptionsLayout />}>
+            <Route index element={<General />} />
+            <Route path={OptionsPageSections.filters} element={<Filters />} />
+            <Route path={OptionsPageSections.stealth} element={<Stealth />} />
+            <Route path={OptionsPageSections.allowlist} element={<Allowlist />} />
+            <Route path={OptionsPageSections.userFilter} element={<UserRules />} />
+            <Route path={OptionsPageSections.miscellaneous} element={<Miscellaneous />} />
+            <Route path={OptionsPageSections.ruleLimits} element={<RulesLimits />} />
+            <Route path={OptionsPageSections.about} element={<About />} />
+            <Route path="*" element={<General />} />
+        </Route>
+    );
+};

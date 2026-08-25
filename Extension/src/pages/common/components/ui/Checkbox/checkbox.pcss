@@ -1,0 +1,99 @@
+.checkbox {
+    position: relative;
+    height: 100%;
+
+    &__in {
+        position: absolute;
+        right: 14px;
+        top: -3px;
+        height: 20px;
+        width: 40px;
+        overflow: hidden;
+        clip: rect(1px, 1px, 1px, 1px);
+
+        &:focus-visible + .checkbox__label:after {
+            outline: 2px solid var(--outline);
+        }
+
+        &:checked + .checkbox__label {
+            &:after {
+                background-color: var(--stroke-icons-product-icon-default);
+            }
+
+            &:before {
+                transform: translate(38px, 18px);
+            }
+        }
+    }
+
+    &__label {
+        cursor: pointer;
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-end;
+        position: relative;
+        width: 72px;
+        height: 100%;
+        font-size: 0;
+        padding: 0 16px;
+        border-radius: 8px;
+        transition: 0.3s ease background-color;
+
+        &:before {
+            content: "";
+            position: absolute;
+            top: -16px;
+            left: 0;
+            transform: translate(18px, 18px);
+            z-index: 1;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: var(--gray-0);
+            transition: var(--t3) transform;
+        }
+
+        &:after {
+            content: "";
+            font-size: 0;
+            display: block;
+            width: 40px;
+            height: 20px;
+            border-radius: 10px;
+            background-color: var(--fills-switch-dns-adg-switch-off-default);
+            cursor: pointer;
+        }
+    }
+}
+
+@media (forced-colors: active) {
+    .checkbox {
+        &__label {
+            &:before {
+                forced-color-adjust: none;
+                background-color: CanvasText;
+                border: 1px solid Canvas;
+            }
+
+            &:after {
+                forced-color-adjust: none;
+                background-color: Canvas;
+                border: 1px solid CanvasText;
+            }
+        }
+
+        &__in {
+            &:checked + .checkbox__label {
+                &:before {
+                    background-color: HighlightText;
+                    border-color: Highlight;
+                }
+
+                &:after {
+                    background-color: Highlight;
+                    border-color: Highlight;
+                }
+            }
+        }
+    }
+}

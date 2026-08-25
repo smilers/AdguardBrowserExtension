@@ -1,0 +1,474 @@
+/**
+ * Copyright (c) 2015-2026 Adguard Software Ltd.
+ *
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+// TODO remove no-explicit-any disabling
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/ban-ts-comment */
+
+import React, {
+    useContext,
+    useRef,
+    useState,
+} from 'react';
+import { observer } from 'mobx-react';
+
+import browser from 'webextension-polyfill';
+
+import { useTelemetryPageViewEvent } from '../../../common/telemetry';
+import { TelemetryScreenName } from '../../../../common/telemetry';
+import { SettingsSection } from '../Settings/SettingsSection';
+import { SettingsSetCheckbox } from '../Settings/SettingsSetCheckbox';
+import { SettingSetSelect } from '../Settings/SettingSetSelect';
+import { ConfirmModal } from '../../../common/components/ConfirmModal';
+import { rootStore } from '../../stores/RootStore';
+import { messenger } from '../../../services/messenger';
+import { handleFileUpload } from '../../../helpers';
+import {
+    ACCEPTABLE_ADS_LEARN_MORE_URL,
+    SAFEBROWSING_LEARN_MORE_URL,
+    BUG_REPORT_URL,
+    BUG_REPORT_MV3_URL,
+} from '../../constants';
+import { FILE_WRONG_EXTENSION_CAUSE } from '../../../common/constants';
+import { addMinDelayLoader } from '../../../common/components/helpers';
+import { exportData, ExportTypes } from '../../../common/utils/export';
+import { NotificationType } from '../../../common/types';
+import { type SettingHandler } from '../../types';
+import { ensurePermission } from '../../ensure-permission';
+import { reactTranslator } from '../../../../common/translators/reactTranslator';
+import { translator } from '../../../../common/translators/translator';
+import { Unknown } from '../../../../common/unknown';
+import { AppearanceTheme, FiltersUpdateTime } from '../../../../common/constants';
+import { StaticFiltersLimitsWarning } from '../Warnings';
+import { logger } from '../../../../common/logger';
+import { ExtensionUsageDataModal } from '../Miscellaneous/ExtensionUsageDataModal/ExtensionUsageDataModal';
+import { Permissions } from '../../../../common/permissions';
+
+import { DesktopAppPromo } from './DesktopAppPromo';
+
+const filtersUpdatePeriodOptions = [
+    {
+        value: FiltersUpdateTime.Default,
+        title: translator.getMessage('options_select_update_period_default'),
+    },
+    {
+        value: FiltersUpdateTime.FortyEightHours,
+        title: translator.getMessage('options_select_update_period_48h'),
+    },
+    {
+        value: FiltersUpdateTime.TwentyFourHours,
+        title: translator.getMessage('options_select_update_period_24h'),
+    },
+    {
+        value: FiltersUpdateTime.TwelveHours,
+        title: translator.getMessage('options_select_update_period_12h'),
+    },
+    {
+        value: FiltersUpdateTime.SixHours,
+        title: translator.getMessage('options_select_update_period_6h'),
+    },
+    {
+        value: FiltersUpdateTime.OneHour,
+        title: translator.getMessage('options_select_update_period_1h'),
+    },
+    {
+        value: FiltersUpdateTime.Disabled,
+        title: translator.getMessage('options_select_update_period_disabled'),
+    },
+];
+
+const APPEARANCE_THEMES_OPTIONS = [
+    {
+        value: AppearanceTheme.System,
+        title: translator.getMessage('options_theme_selector_system'),
+    },
+    {
+        value: AppearanceTheme.Light,
+        title: translator.getMessage('options_theme_selector_light'),
+    },
+    {
+        value: AppearanceTheme.Dark,
+        title: translator.getMessage('options_theme_selector_dark'),
+    },
+];
+
+const AllowAcceptableAds = 'allowAcceptableAds';
+
+/**
+ * Extracts the WebRTC blocking setting from exported settings.
+ *
+ * @param content JSON string content to parse
+ *
+ * @returns Whether WebRTC blocking is enabled
+ *
+ * @throws Error if the setting cannot be parsed
+ */
+const getBlockWebRtcSetting = (content: string): boolean => {
+    const json: unknown = JSON.parse(content);
+
+    const blockWebRtc = Unknown.get(json, 'stealth.stealth-block-webrtc');
+
+    if (typeof blockWebRtc !== 'boolean') {
+        throw new Error('Was not able to parse file content');
+    }
+
+    return blockWebRtc;
+};
+
+export const General = observer(() => {
+    const {
+        settingsStore,
+        uiStore,
+        telemetryStore,
+    } = useContext(rootStore);
+
+    useTelemetryPageViewEvent(telemetryStore, TelemetryScreenName.GeneralSettings);
+
+    const { settings, allowAcceptableAds }: any = settingsStore;
+
+    const importInputRef = useRef<HTMLInputElement>(null);
+    const [isUsageDataModalOpen, setIsUsageDataModalOpen] = useState(false);
+    const [pendingImportContent, setPendingImportContent] = useState<string | null>(null);
+
+    if (!settings) {
+        return null;
+    }
+
+    const handleExportSettings = () => {
+        exportData(ExportTypes.Settings);
+    };
+
+    const handleShareSettings = async () => {
+        try {
+            const url = await messenger.generateShareUrl();
+            await browser.tabs.create({ url, active: true });
+        } catch (e) {
+            logger.error('[ext.General]: ', e);
+        }
+    };
+
+    const handleImportSettings = () => {
+        if (!importInputRef.current) {
+            return;
+        }
+        importInputRef.current.click();
+    };
+
+    const applySettings = async (content: string): Promise<boolean> => {
+        const result = await messenger.applySettingsJson(content);
+
+        if (result && __IS_MV3__) {
+            await settingsStore.checkLimitations();
+        }
+
+        return result;
+    };
+
+    const inputChangeHandler = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        event.persist();
+        const file = event.target.files?.[0];
+
+        if (!file) {
+            return;
+        }
+
+        let isSucceeded = true;
+
+        try {
+            const content = await handleFileUpload(file, 'json');
+            if (getBlockWebRtcSetting(content)) {
+                const hasPrivacyPermission = await Permissions.hasPrivacy();
+                if (!hasPrivacyPermission) {
+                    setPendingImportContent(content);
+                    event.target.value = '';
+                    return;
+                }
+            }
+
+            if (!await applySettings(content)) {
+                isSucceeded = false;
+            }
+        } catch (e) {
+            logger.error('[ext.General]: error:', e);
+            if (e instanceof Error && e.cause === FILE_WRONG_EXTENSION_CAUSE) {
+                uiStore.addNotification({
+                    type: NotificationType.Error,
+                    text: e.message,
+                });
+            }
+            isSucceeded = false;
+        }
+
+        if (isSucceeded) {
+            uiStore.addNotification({
+                type: NotificationType.Success,
+                text: translator.getMessage('options_popup_import_success_title'),
+            });
+        } else {
+            uiStore.addNotification({
+                type: NotificationType.Error,
+                text: translator.getMessage('options_popup_import_error_title'),
+            });
+        }
+
+        // eslint-disable-next-line no-param-reassign
+        event.target.value = '';
+    };
+
+    /**
+     * Confirms the pending WebRTC-enabling import and applies it.
+     *
+     * Must be invoked directly from a user gesture handler (e.g. a modal
+     * button's `onClick`), with `ensurePermission` as the first `await`.
+     * `browser.permissions.request()` requires an active user gesture to show
+     * its prompt; any `await` before calling it (e.g. reading the imported
+     * file) loses that gesture context, causing the permission request to be
+     * silently skipped or rejected.
+     */
+    const handlePendingImportConfirm = async () => {
+        if (!pendingImportContent) {
+            return;
+        }
+
+        let isSucceeded = true;
+
+        try {
+            const permissionGranted = await ensurePermission(true);
+            if (!permissionGranted) {
+                uiStore.addNotification({
+                    type: NotificationType.Error,
+                    text: translator.getMessage('options_popup_import_error_required_privacy_permission'),
+                });
+                return;
+            }
+
+            if (!await applySettings(pendingImportContent)) {
+                isSucceeded = false;
+            }
+        } catch (e) {
+            logger.error('[ext.General]: error:', e);
+            isSucceeded = false;
+        }
+
+        uiStore.addNotification({
+            type: isSucceeded ? NotificationType.Success : NotificationType.Error,
+            text: isSucceeded
+                ? translator.getMessage('options_popup_import_success_title')
+                : translator.getMessage('options_popup_import_error_title'),
+        });
+    };
+
+    const inputChangeHandlerWrapper = addMinDelayLoader(
+        uiStore.setShowLoader,
+        inputChangeHandler,
+    );
+
+    const handleLeaveFeedback = async () => {
+        await messenger.openExtensionStore();
+    };
+
+    const allowAcceptableAdsChangeHandler: SettingHandler = async ({ data }) => {
+        await addMinDelayLoader(
+            uiStore.setShowLoader,
+            settingsStore.setAllowAcceptableAdsState,
+        )(data);
+    };
+
+    const settingChangeHandler: SettingHandler = async ({ id, data }) => {
+        await settingsStore.updateSetting(id, data);
+    };
+
+    const appearanceChangeHandler: SettingHandler = async (payload) => {
+        await settingChangeHandler(payload);
+
+        // no need to wait for the result so no await for message sending
+        await messenger.updateFullscreenUserRulesTheme(payload.data as AppearanceTheme);
+    };
+
+    const {
+        DisableDetectFilters,
+        FiltersUpdatePeriod,
+        DisableSafebrowsing,
+        AppearanceTheme,
+        AllowAnonymizedUsageData,
+    } = settings.names;
+
+    return (
+        <>
+            <SettingsSection title={translator.getMessage('options_general_settings')}>
+                <StaticFiltersLimitsWarning />
+                { /* TODO fix type error when SettingsSection be rewritten in typescript */}
+                {/* @ts-ignore */}
+                <SettingSetSelect
+                    title={translator.getMessage('options_select_theme')}
+                    id={AppearanceTheme}
+                    options={APPEARANCE_THEMES_OPTIONS}
+                    value={settings.values[AppearanceTheme]}
+                    handler={appearanceChangeHandler}
+                />
+                <SettingsSetCheckbox
+                    title={translator.getMessage('options_block_acceptable_ads')}
+                    description={reactTranslator.getMessage('options_block_acceptable_ads_desc', {
+                        a: (chunks: string) => (
+                            <a
+                                href={ACCEPTABLE_ADS_LEARN_MORE_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                {chunks}
+                            </a>
+                        ),
+                    })}
+                    disabled={allowAcceptableAds}
+                    id={AllowAcceptableAds}
+                    value={!allowAcceptableAds}
+                    label={translator.getMessage('options_block_acceptable_ads')}
+                    handler={allowAcceptableAdsChangeHandler}
+                />
+                <SettingsSetCheckbox
+                    title={translator.getMessage('options_anonymized_usage_data_title')}
+                    description={reactTranslator.getMessage('options_anonymized_usage_data_description', {
+                        button: (chunks: string) => (
+                            <button
+                                type="button"
+                                className="button button--link button--link--underlined button--link--green"
+                                onClick={() => setIsUsageDataModalOpen(true)}
+                            >
+                                {chunks}
+                            </button>
+                        ),
+                    })}
+                    id={AllowAnonymizedUsageData}
+                    label={translator.getMessage('options_anonymized_usage_data_title')}
+                    value={settings.values[AllowAnonymizedUsageData]}
+                    handler={settingChangeHandler}
+                />
+                {!__IS_MV3__ && (
+                    <SettingsSetCheckbox
+                        title={translator.getMessage('options_safebrowsing_enabled')}
+                        description={reactTranslator.getMessage('options_safebrowsing_enabled_desc', {
+                            a: (chunks: string) => (
+                                <a
+                                    href={SAFEBROWSING_LEARN_MORE_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    {chunks}
+                                </a>
+                            ),
+                        })}
+                        disabled={settings.values[DisableSafebrowsing]}
+                        id={DisableSafebrowsing}
+                        inverted
+                        label={translator.getMessage('options_safebrowsing_enabled')}
+                        value={settings.values[DisableSafebrowsing]}
+                        handler={settingChangeHandler}
+                    />
+                )}
+                {!__IS_MV3__ && (
+                    <SettingsSetCheckbox
+                        title={translator.getMessage('options_enable_autodetect_filter')}
+                        description={translator.getMessage('options_enable_autodetect_filter_desc')}
+                        disabled={settings.values[DisableDetectFilters]}
+                        id={DisableDetectFilters}
+                        inverted
+                        label={translator.getMessage('options_enable_autodetect_filter')}
+                        handler={settingChangeHandler}
+                        // eslint-disable-next-line react/jsx-boolean-value
+                        value={settings.values[DisableDetectFilters]}
+                    />
+                )}
+                {!__IS_MV3__ && (
+                    <SettingSetSelect
+                        title={translator.getMessage('options_set_update_interval')}
+                        description={translator.getMessage('options_set_update_interval_desc')}
+                        id={FiltersUpdatePeriod}
+                        options={filtersUpdatePeriodOptions}
+                        value={settings.values[FiltersUpdatePeriod]}
+                        handler={settingChangeHandler}
+                    />
+                )}
+            </SettingsSection>
+            <ExtensionUsageDataModal
+                closeModalHandler={() => setIsUsageDataModalOpen(false)}
+                isOpen={isUsageDataModalOpen}
+            />
+            <ConfirmModal
+                isOpen={pendingImportContent !== null}
+                setIsOpen={(isOpen) => {
+                    if (!isOpen) {
+                        setPendingImportContent(null);
+                    }
+                }}
+                onConfirm={handlePendingImportConfirm}
+                title={translator.getMessage('options_import_configuration_confirm_title')}
+                subtitle={translator.getMessage('options_import_configuration_confirm_subtitle')}
+                customConfirmTitle={translator.getMessage('options_import_configuration_confirm_button')}
+                isConsent
+            />
+            <div className="links-menu links-menu--section">
+                <button
+                    type="button"
+                    className="links-menu__item button--link--green"
+                    onClick={handleShareSettings}
+                >
+                    {translator.getMessage('options_share_settings')}
+                </button>
+                <button
+                    type="button"
+                    className="links-menu__item button--link--green"
+                    onClick={handleExportSettings}
+                >
+                    {translator.getMessage('options_export_settings')}
+                </button>
+                <input
+                    ref={importInputRef}
+                    type="file"
+                    accept="application/json"
+                    onChange={inputChangeHandlerWrapper}
+                    className="actions__input-file"
+                />
+                <button
+                    type="button"
+                    className="links-menu__item button--link--green"
+                    onClick={handleImportSettings}
+                >
+                    {translator.getMessage('options_import_settings')}
+                </button>
+                <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={__IS_MV3__ ? BUG_REPORT_MV3_URL : BUG_REPORT_URL}
+                    className="links-menu__item button--link--green"
+                >
+                    {translator.getMessage('options_report_bug')}
+                </a>
+                <button
+                    role="link"
+                    type="button"
+                    className="links-menu__item button--link--green"
+                    onClick={handleLeaveFeedback}
+                >
+                    {translator.getMessage('options_leave_feedback')}
+                </button>
+            </div>
+            <DesktopAppPromo />
+        </>
+    );
+});

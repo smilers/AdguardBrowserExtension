@@ -1,3 +1,23 @@
+/**
+ * Copyright (c) 2015-2026 Adguard Software Ltd.
+ *
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, {
     useContext,
     useState,
@@ -6,13 +26,15 @@ import React, {
     forwardRef,
 } from 'react';
 import { observer } from 'mobx-react';
+
 import cn from 'classnames';
 import { nanoid } from 'nanoid';
 
-import { reactTranslator } from '../../../../common/translators/reactTranslator';
+import { translator } from '../../../../common/translators/translator';
 import { Tooltip } from '../ui/Tooltip';
-import { copyToClipboardStore } from './copyToClipboardStore';
 import { AttachmentPortal } from '../AttachmentPortal';
+
+import { copyToClipboardStore } from './copyToClipboardStore';
 
 import './copy-to-clipboard.pcss';
 
@@ -21,6 +43,7 @@ const TOOLTIP_MOUSE_PADDING_PX = 4;
 export const CopyToClipboard = observer(forwardRef(({
     children,
     className,
+    style,
     wrapperClassName,
 }, ref) => {
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -67,15 +90,19 @@ export const CopyToClipboard = observer(forwardRef(({
         <div className={cn('copy-to-clipboard-wrapper', wrapperClassName)}>
             {(containerRef.current === currentContainerId) && (
                 <AttachmentPortal rootId="root-portal" position={tooltipPosition}>
-                    <Tooltip text={reactTranslator.getMessage('filtering_modal_copied')} />
+                    <Tooltip
+                        text={translator.getMessage('filtering_modal_copied')}
+                        visible
+                    />
                 </AttachmentPortal>
             )}
             <div
                 ref={ref}
                 className={cn('copy-to-clipboard', className)}
+                style={style}
                 role="button"
-                tabIndex="0"
-                title={reactTranslator.getMessage('filtering_modal_copy_to_clipboard')}
+                tabIndex={0}
+                title={translator.getMessage('filtering_modal_copy_to_clipboard')}
                 onClick={handleClick}
                 onKeyUp={handleKeyUp}
             >

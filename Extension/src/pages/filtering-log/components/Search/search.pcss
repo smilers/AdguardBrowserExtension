@@ -2,32 +2,41 @@
     display: flex;
     align-items: center;
     position: relative;
-    z-index: 20;
+    z-index: var(--z-idx-filtering-log-search);
     width: 100%;
+    background-color: var(--fills-inputs-input-background-disabled);
+    border: 1px solid var(--stroke-inputs-inactive-input-stroke-default);
+    border-radius: 8px;
 
-    @media (max-width: 640px) {
+    @media (--to-mobile) {
         margin-right: 0;
     }
 
     & input {
         border: none;
         width: 100%;
-        height: 32px;
-        padding: 0 25px 0 34px;
-        background-color: transparent;
+        height: 40px;
+        padding: 0 24px 0 56px;
+        background: none;
         text-overflow: ellipsis;
+        color: var(--text-main-text-main-default);
+        font-size: 14px;
+        line-height: 18px;
 
-        @media (prefers-color-scheme: dark) {
-            color: var(--gray300);
+        &:placeholder {
+            opacity: 1;
+            color: var(--text-placeholder-placeholder-default);
         }
 
-        &::placeholder {
-            color: var(--gey6a);
-
-            @media (prefers-color-scheme: dark) {
-                color: var(--gray700);
-            }
+        @media (--to-mobile) {
+            padding-left: 16px;
+            height: 56px;
+            font-size: 16px;
         }
+    }
+
+    &__input {
+        border-radius: 8px;
 
         &:focus {
             outline: none;
@@ -39,30 +48,14 @@
         background-color: transparent;
         cursor: pointer;
         position: absolute;
-        left: -8px;
-        top: calc(50% - 13px);
-
-        &:focus {
-            outline: none;
-        }
-    }
-
-    &__cross {
-        width: 24px;
-        height: 24px;
-        color: var(--gray700);
-
-        @media (prefers-color-scheme: dark) {
-            color: var(--gray400);
-        }
+        top: 8px;
+        left: 16px;
+        max-height: 24px;
     }
 
     &__ico {
-        width: 24px;
-        height: 24px;
-        color: var(--gray700);
         position: absolute;
-        left: 0;
+        left: 16px;
         top: calc(50% - 12px);
     }
 
@@ -72,41 +65,14 @@
 
     &__btn {
         cursor: pointer;
-        outline: none;
         background-color: transparent;
         border: 0;
         padding: 0;
     }
-}
 
-.light-mode {
-    .search {
-        & input {
-            color: var(--gray-base);
-
-            &::placeholder {
-                color: var(--gey6a);
-            }
-        }
-
-        &__cross {
-            color: var(--gray700);
-        }
-    }
-}
-
-.dark-mode {
-    .search {
-        & input {
-            color: var(--gray300);
-
-            &::placeholder {
-                color: var(--gray700);
-            }
-        }
-
-        &__cross {
-            color: var(--gray400);
+    &__control {
+        @media (--to-mobile) {
+            display: none;
         }
     }
 }

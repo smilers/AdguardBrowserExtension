@@ -1,12 +1,14 @@
 &nbsp;
 <p align="center">
-  <img src="https://cdn.adguard.com/public/Adguard/Common/adguard_extension.svg" width="300px" alt="AdGuard Browser Extension" />
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://cdn.adguard.com/public/Adguard/Common/Logos/ext_logo_dark.svg" width="300px" alt="AdGuard Browser Extension" />
+        <img src="https://cdn.adguard.com/public/Adguard/Common/Logos/ext_logo.svg" width="300px" alt="AdGuard Browser Extension"/>
+    </picture>
 </p>
 <h3 align="center">Ad blocker with advanced privacy protection features</h3>
 <p align="center">
-  AdGuard is a fast and lightweight ad blocking browser extension<br/>that effectively blocks all types of ads and trackers.
+    AdGuard is a fast and lightweight ad blocking browser extension<br/>that effectively blocks all types of ads and trackers.
 </p>
-
 
 <p align="center">
     <a href="https://adguard.com/">AdGuard.com</a> |
@@ -14,195 +16,195 @@
     <a href="https://twitter.com/AdGuard">Twitter</a> |
     <a href="https://t.me/adguard_en">Telegram</a>
     <br /><br />
-    </a>
     <a href="https://github.com/AdguardTeam/AdguardBrowserExtension/releases">
         <img src="https://img.shields.io/github/release/AdguardTeam/AdguardBrowserExtension/all.svg" alt="Latest release" />
+    </a>
+    <a href="https://addons.mozilla.org/en-US/firefox/addon/adguard-adblocker/">
+        <img src="https://img.shields.io/amo/v/adguard-adblocker?labelColor=orange" alt="Mozilla Add-on Version" />
     </a>
 </p>
 
 <br />
 
 <p align="center">
-    <img src="https://cdn.adguard.com/public/Adguard/Common/adguard_extension_4_settings.png" width="800" />
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://cdn.adguard.com/public/Adguard/Common/adguard_extension_settings_dark.png" width="900px" alt="AdGuard Browser Extension" />
+        <img src="https://cdn.adguard.com/public/Adguard/Common/adguard_extension_settings_white.png" width="900px" alt="AdGuard Browser Extension"/>
+    </picture>
 </p>
-
-<hr />
 
 AdGuard is a fast and lightweight ad blocking browser extension that effectively blocks all types of ads and trackers on all web pages. We focus on advanced privacy protection features to not just block known trackers, but prevent web sites from building your shadow profile. Unlike its standalone counterparts (AG for Windows, Mac), the browser extension is completely free and open source. You can learn more about [the difference](https://adguard.com/compare.html) here.
 
 > AdGuard does not collect any information about you, and does not participate in any acceptable ads program. The only source of income we have is selling premium versions of our software, and we intend to keep it that way.
 
-* [Installation](#installation)
-  * [Chrome and Chromium-based browsers](#installation-chrome)
-  * [Firefox](#installation-firefox)
-  * [Opera](#installation-opera)
-  * [Microsoft Edge](#installation-edge)
-* [Contribution](#contribution)
-  * [Translating AdGuard](#contribution-translating)
-  * [Testing AdGuard](#contribution-testing)
-  * [Reporting issues](#contribution-reporting)
-  * [Other options](#contribution-other)
-* [Development](#dev)
-  * [Requirements](#dev-requirements)
-  * [How to build](#dev-build)
-  * [Linter](#dev-linter)
-  * [Update localizations](#dev-localizations)
-* [Minimum supported browser versions](#minimum-supported-browser-versions)
+- [Installation](#installation)
+    - [Chrome and Chromium-based browsers](#installation-chrome)
+    - [Firefox](#installation-firefox)
+    - [Opera](#installation-opera)
+    - [Microsoft Edge](#installation-edge)
+- [Contribution](#contribution)
+    - [Translating AdGuard](#contribution-translating)
+    - [Testing AdGuard](#contribution-testing)
+    - [Reporting issues](#contribution-reporting)
+    - [Other options](#contribution-other)
+- [Development](DEVELOPMENT.md)
+- [Deployment](DEPLOYMENT.md)
+- [Getting Started](#getting-started)
+- [Permissions](#permissions-required)
+- [Auto-publish builds](#auto-publish-builds)
+- [Versioning Schema](#versioning-schema)
+- [Minimum supported browser versions](#browser-compatibility)
+- [Documentation](#documentation)
+<!-- TOC:AMO_REVIEW -->
 
-<a id="installation"></a>
-## Installation
+## <a name="installation"></a> Installation
 
-<a id="installation-chrome"></a>
-### Chrome and Chromium-based browsers
-You can get the latest available AdGuard Extension version from the [Chrome Web Store](https://agrd.io/extension_chrome).
+### <a name="installation-chrome"></a> Chrome and Chromium-based browsers
 
-<a id="installation-firefox"></a>
-### Firefox
-You can get the latest version of AdGuard Extension from the [Mozilla Add-ons website](https://agrd.io/extension_firefox).
+Install from the [Chrome Web Store](https://agrd.io/extension_chrome).
 
-<a id="installation-opera"></a>
-### Opera
-Opera is basically a Chromium browser, but it maintains its own add-ons store. You can get AdGuard Extension [from there](https://agrd.io/extension_opera).
+### <a name="installation-firefox"></a> Firefox
 
-<a id="installation-edge"></a>
-### Microsoft Edge
-The latest stable version of AdGuard browser extension is available in [Microsoft Store](https://agrd.io/extension_edge).
+Install from the [Mozilla Add-ons website](https://agrd.io/extension_firefox).
 
-<a id="contribution"></a>
-## Contribution
+### <a name="installation-opera"></a> Opera
 
-We are blessed to have a community that does not only love AdGuard, but also gives back. A lot of people volunteer in various ways to make other users' experience with AdGuard better, and you can join them!
+Install from the [Opera Add-ons store](https://agrd.io/extension_opera).
 
-We, on our part, can only be happy to reward the most active members of the community. So, what can you do?
+### <a name="installation-edge"></a> Microsoft Edge
 
-<a id="contribution-translating"></a>
-### Translating AdGuard
+Install from the [Microsoft Store](https://agrd.io/extension_edge).
 
-If you want to help with AdGuard translations, please learn more about translating our products here: https://kb.adguard.com/en/general/adguard-translations
+## <a name="contribution"></a> Contribution
 
-<a id="contribution-testing"></a>
-### Testing AdGuard
+We are blessed to have a community that does not only love AdGuard, but also
+gives back. A lot of people volunteer in various ways to make other users'
+experience with AdGuard better, and you can join them!
 
-You can get a beta version of AdGuard Browser Extension for any browser. All necessary information on this topic can be found on a [dedicated page on our website](https://adguard.com/beta.html).
+We, on our part, can only be happy to reward the most active members of the
+community. So, what can you do?
 
-<a id="contribution-reporting"></a>
-### Reporting issues
+### <a name="contribution-translating"></a> Translating AdGuard
 
-GitHub can be used to report a bug or to submit a feature request. To do so, go to [this page](https://github.com/AdguardTeam/AdguardBrowserExtension/issues) and click the *New issue* button.
+If you want to help with AdGuard translations, please learn more about
+translating our products here: <https://adguard.com/kb/miscellaneous/contribute/translate/program/>
 
->**Note:** for the filter-related issues (missed ads, false positives etc.) use the [dedicated repository](https://github.com/AdguardTeam/AdguardFilters).
+### <a name="contribution-testing"></a> Testing AdGuard
 
-<a id="contribution-other"></a>
-### Other options
+You can get a beta version of AdGuard Browser Extension for any browser.
+All necessary information on this topic can be found on a
+[dedicated page on our website](https://adguard.com/beta.html).
 
-Here is a [dedicated page](https://adguard.com/contribute.html) for those who are willing to contribute.
+### <a name="contribution-reporting"></a> Reporting issues
 
-<a id="dev"></a>
-## Development
+GitHub can be used to report a bug or to submit a feature request. To do so, go
+to [this page](https://github.com/AdguardTeam/AdguardBrowserExtension/issues)
+and click the *New issue* button.
 
-> Since version 4.0, Adguard browser extension uses opensource [tsurlfilter](https://github.com/AdguardTeam/tsurlfilter) library for implementing content blocking rules.
+> [!NOTE]
+> For the filter-related issues (missed ads, false positives etc.) use
+> the [dedicated repository](https://github.com/AdguardTeam/AdguardFilters).
 
-<a id="dev-requirements"></a>
-### Requirements
+### <a name="contribution-other"></a> Other options
 
-- [node.js LTS](https://nodejs.org/en/download/)
-- NPM v8
-- [yarn v1.22](https://yarnpkg.com/en/docs/install/)
+Here is a [dedicated page](https://adguard.com/contribute.html) for those who
+are willing to contribute.
 
-Install local dependencies by running:
+## <a name="getting-started"></a> Getting Started
+
+After installing the extension from your browser's store:
+
+1. **Click the AdGuard icon** in the browser toolbar to open the popup. Ad blocking is enabled by default with a recommended set of filter lists.
+2. **Toggle protection** on or off for the current website using the main switch in the popup.
+3. **Open settings** by clicking the gear icon in the popup to access the full options page.
+4. **Use the Assistant** — click the AdGuard icon, then select "Block an element on this page" to visually pick and block unwanted page elements.
+
+The extension works out of the box with sensible defaults.
+
+## <a name="permissions-required"></a> Permissions required
+
+### Common permissions for all browsers and manifest versions
+
+- `tabs`                          - required to get the URL of the options page tab
+- `webRequest`                    - required to apply cosmetic rules, detect and remove tracking cookies, and count blocked resources
+- `cookies`                       - required to delete cookies from requests or change their lifetime
+- `contextMenus`                  - required to create a context menu
+- `storage`                       - required to save user settings, user rules, and custom filters
+- `unlimitedStorage`              - required to save large filter lists
+- `webNavigation`                 - required to catch the moment for injecting scriptlets
+- `privacy`                       - allows access to browser privacy settings; required in Firefox, optional in Chrome/Edge/Opera
+
+### Permissions for MV2 only
+
+- `<all_urls>`                    - grants access to all websites to apply content scripts and filtering rules
+- `webRequestBlocking`            - required to block or modify HTTP requests synchronously
+
+### Permissions for MV3 only
+
+- `host_permissions`              - grants access to all websites (MV3 uses this instead of `<all_urls>`)
+- `userScripts`                   - required to let the user subscribe to custom filter lists and evaluate rules from these lists
+- `scripting`                     - required to inject the assistant script into pages
+- `declarativeNetRequest`         - required to block, redirect, and modify URL requests
+- `declarativeNetRequestFeedback` - required to create a log of the blocked, redirected, or modified URL requests
+
+## <a name="auto-publish-builds"></a> Auto-publish builds
+
+Due to the transition from MV2 to MV3, we cannot update our filters remotely. To keep the filters as fresh as possible, we have configured automated tasks in our CI plans. These tasks will build a new version of the extension with only the updated `@adguard/dnr-rulesets` package, which contains new static rulesets.
+
+### Auto-update cycle
+
+We have set up an automated update cycle that regularly syncs with fresh releases from the [`@adguard/dnr-rulesets`](https://www.npmjs.com/package/@adguard/dnr-rulesets) npm package. The update frequency is configured in our [CI build schedule](../bamboo-specs/auto-build.yaml). This ensures our extension stays up-to-date with the latest filter rules.
+
+To deploy new releases as soon as possible, we have implemented all the steps outlined in Chrome's [Skip Review documentation](https://developer.chrome.com/docs/webstore/skip-review). This allows us to publish updates to the Chrome Web Store without waiting for the full review cycle.
+
+### Skip review restrictions
+
+However, there is an important restriction when using the "skip review" option: **we cannot update the extension with skip review if it contains changes to filtering script rules**. This is because all script rules are collected during build time into a file called `local_script_rules.js` (for safe use them with the scripting API).
+
+Therefore, any updates that include changes to script rules will require the full review cycle in the Chrome Web Store as usual.
+
+### Build process
+
+These automated tasks will run all necessary checks: unit tests, translation checks, and linter. After that, they will update resources, including filters and local script rules, create a build, and run integration tests to ensure the update is safe.
+
+Finally, the new version of the extension will be published to the Chrome Web Store.
+
+## <a name="versioning-schema"></a> Versioning Schema
+
+The extension uses the following versioning schema:
+
 ```
-  yarn install
-```
-
-<a id="dev-build"></a>
-### How to build
-
-**How to run tests**
-```
-  yarn test
-```
-
-**Building the dev version**
-
-Run the following command:
-```
-  yarn dev
-```
-
-This will create a build directory with unpacked extensions for all browsers:
-```
-  build/dev/chrome
-  build/dev/edge
-  build/dev/firefox-amo
-  build/dev/firefox-standalone
-  build/dev/opera
-```
-
-**Building the beta and release versions**
-
-Before building the release version, you should manually download necessary resources: filters and public suffix list.
-
-```
-  yarn resources
-```
-
-```
-  CREDENTIALS_PASSWORD=<password> yarn beta
-  CREDENTIALS_PASSWORD=<password> yarn release
-```
-You will need to put certificate.pem and mozilla_credentials.json files to the `./private` directory. This build will create unpacked extensions and then pack them (crx for Chrome, xpi for Firefox).
-
-**Building the sample extension with API**
-
-Run the following command:
-```
-yarn adguard-api
-```
-This will create a build directory with unpacked sample extension for chromium browsers:
-
-```
-build/dev/adguard-api
-```
-
-<a id="dev-linter"></a>
-### Linter
-Despite our code may not currently comply with new style configuration,
-please, setup `eslint` in your editor to follow up with it `.eslintrc`
-
-<a id="dev-localizations"></a>
-### Update localizations
-
-To download and append localizations run:
-```
-  yarn locales:download
+major.minor.patch+autoBuildIncrementVersion.buildTag.dnrRulesetsVersion
 ```
 
-To upload new phrases to crowdin you need the file with phrases `./Extension/_locales/en/messages.json`. Then run:
-```
-  yarn locales:upload
-```
+- **major.minor.patch**: Standard semantic versioning for the extension codebase.
+- **autoBuildIncrementVersion**: An incrementing number used as the fourth part of the manifest version (e.g., `88` in `5.2.1.88`).
+- **buildTag**: A delimiter indicating the build's readiness.
+- **dnrRulesetsVersion**: The patch version of the DNR rulesets, which includes the build date for those rulesets.
 
-To remove old messages from locale messages run:
-```
-  yarn locales:renew
-```
+Example: `5.2.1+88.beta.20251014`
 
-To validate translations run:
-```
-  yarn locales:validate
-```
+But for build versions we will use following format: `major.minor.patch.autoBuildIncrementVersion` to comply with the browser requirements for version.
 
-To show locales info run:
-```
-  yarn locales:info
-```
+## <a name="browser-compatibility"></a> Minimum supported browser versions
 
-<a id="minimum-supported-browser-versions"></a>
+The extension supports both Manifest V2 (MV2) and Manifest V3 (MV3) platforms. MV3 is the newer extension platform required by Chrome and other Chromium-based browsers going forward.
 
-## Minimum supported browser versions
-| Browser                 	| Version 	 |
-|-------------------------	|:---------:|
-| Chromium Based Browsers 	|  79   	   |
-| Firefox                 	|  78   	   |
-| Opera                   	|  66   	   |
-| Edge                    	|  79   	   |
+<!-- NOTE: see MIN_SUPPORTED_VERSION in ./constants.ts -->
+
+| Browser                     | Version |
+|---------------------------- |---------|
+| Chromium-based browsers MV2 | ✅ 106  |
+| Chromium-based browsers MV3 | ✅ 121  |
+| Firefox                     | ✅ 78   |
+| Firefox Mobile              | ✅ 113  |
+| Opera                       | ✅ 67   |
+| Opera MV3                   | ✅ 107  |
+| Edge Chromium               | ✅ 80   |
+| Edge Legacy                 | ❌      |
+
+## <a name="documentation"></a> Documentation
+
+- [Development](DEVELOPMENT.md) — development setup and build instructions
+- [Changelog](CHANGELOG.md) — version history
+- [LLM agent rules](AGENTS.md) — guidance for AI coding assistants

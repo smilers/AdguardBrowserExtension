@@ -1,0 +1,488 @@
+/**
+ * Copyright (c) 2015-2026 Adguard Software Ltd.
+ *
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* eslint-disable no-console */
+
+/**
+ * By the rules of AMO, we cannot use remote scripts (and our JS rules can be counted as such).
+ * Because of that, we use the following approach (that was accepted by AMO reviewers):
+ *
+ * 1. We pre-build JS rules from AdGuard filters into the add-on (see the file called "local_script_rules.json").
+ * 2. At runtime we check every JS rule if it is included into "local_script_rules.json".
+ *    If it is included we allow this rule to work since it is pre-built. Other rules are discarded.
+ * 3. We also allow "User rules" and "Custom filters" to work since those rules are added manually by the user.
+ *    This way filters maintainers can test new rules before including them in the filters.
+ */
+import { promises as fs } from 'node:fs';
+import { exec as execCallback } from 'node:child_process';
+import { promisify } from 'node:util';
+import assert from 'node:assert';
+import path from 'node:path';
+import crypto from 'node:crypto';
+
+import { minify } from 'terser';
+import { some } from 'lodash-es';
+
+import {
+    type AnyRule,
+    CosmeticRuleType,
+    type JsInjectionRule,
+    RuleCategory,
+} from '@adguard/agtree';
+import {
+    CosmeticRuleParser,
+    defaultParserOptions,
+    FilterListParser,
+} from '@adguard/agtree/parser';
+import { CosmeticRuleBodyGenerator } from '@adguard/agtree/generator';
+
+import { ADGUARD_FILTERS_IDS } from '../../constants';
+import {
+    AssetsFiltersBrowser,
+    DEFAULT_REGISTERED_SCRIPT_TEXT,
+    FILTERS_DEST,
+    LOCAL_SCRIPT_RULES_COMMENT_CHROME_MV3,
+    LOCAL_SCRIPT_RULES_COMMENT,
+    type Mv3AssetsFiltersBrowser,
+} from '../constants';
+
+import { extractPreprocessedFilterContent, readMetadataRuleset } from './filter-extractor';
+import { TESTCASES_RULES } from './testcases-rules';
+
+const exec = promisify(execCallback);
+
+/**
+ * Checks if the given rule node is a JS injection rule.
+ *
+ * @param ruleNode Rule node to check.
+ *
+ * @returns True if the rule node is a JS injection rule.
+ */
+const isJsRule = (
+    ruleNode: AnyRule | null,
+): ruleNode is JsInjectionRule => {
+    return !!ruleNode
+        && ruleNode.category === RuleCategory.Cosmetic
+        && ruleNode.type === CosmeticRuleType.JsInjectionRule;
+};
+
+// Add these helper functions after imports
+const AG_FUNCTION_REGEX = /var\s+(AG_[a-zA-Z0-9_]+)\s*=\s*function/;
+const AG_USAGE_REGEX = /AG_[a-zA-Z0-9_]+/g;
+
+const LF = '\n';
+
+/**
+ * File where JS rules from the pre-built filters are saved.
+ */
+const LOCAL_SCRIPT_RULES_FILE_NAME = 'local_script_rules.js';
+
+/**
+ * Extracts AG_ function name from the code.
+ *
+ * @param code JavaScript code.
+ *
+ * @returns Function name or null if not found.
+ */
+const extractAgFunctionName = (code: string): string | null => {
+    const match = code.match(AG_FUNCTION_REGEX);
+
+    if (!match) {
+        return null;
+    }
+
+    return match[1] || null;
+};
+
+/**
+ * Finds all AG_ function usages in the code.
+ *
+ * @param code JavaScript code.
+ *
+ * @returns Array of AG_ function names.
+ */
+const findAgFunctionUsages = (code: string): string[] => {
+    const matches = code.match(AG_USAGE_REGEX) || [];
+    return [...new Set(matches)];
+};
+
+/**
+ * Updates `local_script_rules.json` for the specified browser based on rules form the pre-built filters.
+ *
+ * @param browser Browser name.
+ */
+const updateLocalScriptRulesForBrowser = async (browser: AssetsFiltersBrowser) => {
+    const folder = FILTERS_DEST.replace('%browser', browser);
+    const rules: {
+        comment: string;
+        rules: {
+            [key: string]: {
+                permittedDomains: string[];
+                restrictedDomains: string[];
+            }[];
+        };
+    } = {
+        comment: LOCAL_SCRIPT_RULES_COMMENT,
+        rules: {},
+    };
+
+    // Pre-fill predefined scripts that must always be present in the bundle,
+    // regardless of filter contents. These help with CSP and Trusted Types
+    // testing on testcases.agrd.dev and distinguish different script sources.
+    rules.rules[DEFAULT_REGISTERED_SCRIPT_TEXT] = [
+        { permittedDomains: [], restrictedDomains: [] },
+    ];
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const filterId of ADGUARD_FILTERS_IDS) {
+        const rawFilterList = (await fs.readFile(`${folder}/filter_${filterId}.txt`)).toString();
+        const filterListNode = FilterListParser.parse(rawFilterList, {
+            ...defaultParserOptions,
+            includeRaws: false,
+            isLocIncluded: false,
+            tolerant: true,
+        });
+
+        filterListNode.children.forEach((ruleNode) => {
+            if (isJsRule(ruleNode)) {
+                // Re-generate raw body to make it consistent with TSUrlFilter rule instances
+                // (TSUrlFilter also re-generates body from AST in the cosmetic rule constructor)
+                const rawBody = CosmeticRuleBodyGenerator.generate(ruleNode);
+                const permittedDomains: string[] = [];
+                const restrictedDomains: string[] = [];
+
+                ruleNode.domains.children.forEach((domainNode) => {
+                    if (domainNode.exception) {
+                        restrictedDomains.push(domainNode.value);
+                    } else {
+                        permittedDomains.push(domainNode.value);
+                    }
+                });
+
+                const toPush = {
+                    permittedDomains,
+                    restrictedDomains,
+                };
+
+                if (rules.rules[rawBody] === undefined) {
+                    rules.rules[rawBody] = [toPush];
+                } else if (!some(rules.rules[rawBody], toPush)) {
+                    rules.rules[rawBody].push(toPush);
+                }
+            }
+        });
+    }
+
+    // Add testcases rules to allow integration tests to work with custom filters
+    TESTCASES_RULES.forEach((rawRule) => {
+        const ruleNode = CosmeticRuleParser.parse(rawRule);
+        if (!isJsRule(ruleNode)) {
+            throw new Error(`Invalid testcases rule, expected JS injection rule: ${rawRule}`);
+        }
+
+        const rawBody = CosmeticRuleBodyGenerator.generate(ruleNode);
+        const permittedDomains: string[] = [];
+        const restrictedDomains: string[] = [];
+
+        ruleNode.domains.children.forEach((domainNode) => {
+            if (domainNode.exception) {
+                restrictedDomains.push(domainNode.value);
+            } else {
+                permittedDomains.push(domainNode.value);
+            }
+        });
+
+        const toPush = {
+            permittedDomains,
+            restrictedDomains,
+        };
+
+        if (rules.rules[rawBody] === undefined) {
+            rules.rules[rawBody] = [toPush];
+        } else if (!some(rules.rules[rawBody], toPush)) {
+            rules.rules[rawBody].push(toPush);
+        }
+    });
+
+    await fs.writeFile(
+        `${FILTERS_DEST.replace('%browser', browser)}/local_script_rules.json`,
+        JSON.stringify(rules, null, 4),
+    );
+};
+
+/**
+ * Beautifies a raw comment into a JS multi-line comment.
+ *
+ * @param rawComment Raw comment.
+ *
+ * @returns Beautified comment.
+ */
+const beautifyComment = (rawComment: string): string => {
+    return `/**
+${rawComment.split(LF).map((line) => (line ? ` * ${line}` : ' *')).join(LF)}
+ */`;
+};
+
+/**
+ * Calculates unique ID for the text.
+ *
+ * @param text Text to calculate unique ID for.
+ *
+ * @returns Unique ID.
+ */
+const calculateUniqueId = (text: string): string => {
+    return crypto.createHash('md5').update(text).digest('hex');
+};
+
+/**
+ * Wraps the script code with a try-catch block and a check to avoid multiple executions of it.
+ *
+ * @param uniqueId Unique ID for the script.
+ * @param code Script code.
+ *
+ * @returns Wrapped script code.
+ */
+const wrapScriptCode = (uniqueId: string, code: string): string => {
+    return `
+        try {
+            const flag = 'done';
+            if (Window.prototype.toString["${uniqueId}"] === flag) {
+                return;
+            }
+            ${code}
+            Object.defineProperty(Window.prototype.toString, "${uniqueId}", {
+                value: flag,
+                enumerable: false,
+                writable: false,
+                configurable: false
+            });
+        } catch (error) {
+            console.error('Error executing AG js rule with uniqueId "${uniqueId}" due to: ' + error);
+        }
+    `;
+};
+
+/**
+ * Beautifies a raw js-file content, saves it to the file and runs validation.
+ *
+ * @param rawContent Raw content.
+ * @param fileName JS file name.
+ * @param browser Target browser.
+ */
+const saveToJsFile = async (
+    rawContent: string,
+    fileName: string,
+    browser: Mv3AssetsFiltersBrowser,
+): Promise<void> => {
+    const beautifiedJsContent = (await minify(rawContent, {
+        mangle: false,
+        compress: false,
+        format: {
+            beautify: true,
+            comments: true,
+            indent_level: 4,
+        },
+    })).code;
+
+    if (!beautifiedJsContent) {
+        throw new Error(`Failed to minify JS content for saving to ${fileName}`);
+    }
+
+    try {
+        await fs.writeFile(
+            `${FILTERS_DEST.replace('%browser', browser)}/${fileName}`,
+            beautifiedJsContent,
+        );
+
+        // --no-update-notifier suppresses npm's "new version available" notice
+        // that npx writes to stderr in clean environments (e.g. Docker).
+        const result = await exec(
+            `npx --no-update-notifier tsx ${FILTERS_DEST.replace('%browser', browser)}/${fileName}`,
+        );
+        if (result.stdout) {
+            console.log(`tsx stdout for ${fileName}:\n${result.stdout}`);
+        }
+        // Filter out npm warnings about unknown env configs leaked from pnpm
+        const significantStderr = result.stderr
+            .split('\n')
+            .filter((line) => !line.startsWith('npm warn'))
+            .join('\n')
+            .trim();
+        if (result.stderr) {
+            console.warn(`tsx stderr for ${fileName}:\n${result.stderr}`);
+        }
+        assert.ok(significantStderr === '', `Errors during execution:\n${result.stderr}`);
+        assert.ok(result.stdout === '', 'No output during execution');
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
+};
+
+/**
+ * Updates `local_script_rules.js` for MV3 based target on JS rules from the
+ * pre-built filters.
+ *
+ * It is possible to follow all places using this logic by searching
+ * `JS_RULES_EXECUTION`.
+ *
+ * @param jsRules Set of unique JS rules collected from the pre-built filters.
+ * @param browser Target browser.
+ */
+const updateLocalScriptRulesForMv3 = async (
+    jsRules: Set<string>,
+    browser: Mv3AssetsFiltersBrowser,
+) => {
+    // Pre-fill predefined scripts that must always be present in the bundle.
+    // These are added first so they appear at the top of the generated file,
+    // and help with CSP and Trusted Types testing on testcases.agrd.dev.
+    jsRules.add(DEFAULT_REGISTERED_SCRIPT_TEXT);
+
+    // First, process testcases rules
+    TESTCASES_RULES.forEach((rawRule) => {
+        const ruleNode = CosmeticRuleParser.parse(rawRule);
+        if (!isJsRule(ruleNode)) {
+            throw new Error('Invalid test rule, expected JS rule');
+        }
+        const rawBody = CosmeticRuleBodyGenerator.generate(ruleNode);
+        jsRules.add(rawBody);
+    });
+
+    const processedRules: string[] = [];
+    const errors: string[] = [];
+    const agFunctions: Map<string, string> = new Map();
+
+    // First pass: extract AG_ functions
+    jsRules.forEach((rule) => {
+        const agFunctionName = extractAgFunctionName(rule);
+        if (agFunctionName) {
+            agFunctions.set(agFunctionName, rule);
+            // Remove this rule from further processing as it's a utility function
+            jsRules.delete(rule);
+        }
+    });
+
+    // Second pass: process remaining rules
+    // eslint-disable-next-line no-restricted-syntax
+    for (const rule of jsRules) {
+        try {
+            const ruleKey = JSON.stringify(rule);
+            let processedCode = rule;
+
+            // Check if this rule uses any AG_ functions
+            const usedAgFunctions = findAgFunctionUsages(rule);
+            if (usedAgFunctions.length > 0) {
+                // Simply prepend the required AG functions to the rule
+                const requiredFunctions: string[] = [];
+                usedAgFunctions.forEach((funcName) => {
+                    const code = agFunctions.get(funcName);
+                    if (code) {
+                        requiredFunctions.push(code);
+                    }
+                });
+
+                // insert required functions before the rule to make sure they are available
+                processedCode = `${requiredFunctions.join(LF)}${LF}${rule}`;
+            }
+
+            /**
+             * Unique ID is needed to prevent multiple execution of the same script.
+             *
+             * It may happen when script rules are being applied on WebRequest.onResponseStarted
+             * and WebNavigation.onCommitted events which are independent of each other,
+             * so we need to make sure that the script is executed only once.
+             */
+            const uniqueId = calculateUniqueId(rule);
+
+            // wrap the code with a try-catch block with extra checking to avoid multiple executions
+            processedCode = wrapScriptCode(uniqueId, processedCode);
+
+            const minified = await minify(processedCode, {
+                compress: {
+                    sequences: false,
+                },
+                parse: {
+                    bare_returns: true,
+                },
+                format: {
+                    beautify: true,
+                    indent_level: 4,
+                },
+            });
+
+            if (minified.code) {
+                processedRules.push(`${ruleKey}: () => {${minified.code}}`);
+            } else {
+                errors.push(`Was not able to minify rule: ${rule}`);
+            }
+        } catch (error) {
+            errors.push(
+                `Skipping invalid rule: ${rule}; Error: ${error instanceof Error ? error.message : String(error)}`,
+            );
+        }
+    }
+
+    const jsFileContent = `${beautifyComment(LOCAL_SCRIPT_RULES_COMMENT_CHROME_MV3)}
+export const localScriptRules = { ${processedRules.join(`,${LF}`)} };${LF}`;
+
+    await saveToJsFile(jsFileContent, LOCAL_SCRIPT_RULES_FILE_NAME, browser);
+};
+
+/**
+ * Updates `local_script_rules.js` based on the rules from the pre-built filters
+ * and testcases rules for MV3 target.
+ *
+ * @param browser Target browser.
+ */
+export const updateLocalResourcesForMv3 = async (browser: Mv3AssetsFiltersBrowser) => {
+    const folder = path.join(
+        FILTERS_DEST.replace('%browser', browser),
+        'declarative',
+    );
+
+    const metadataRuleset = await readMetadataRuleset(folder);
+    const rulesetIds = metadataRuleset.getRulesetIds();
+
+    const jsRules: Set<string> = new Set();
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const rulesetId of rulesetIds) {
+        const filterContent = await extractPreprocessedFilterContent(rulesetId, folder);
+        const filterListNode = FilterListParser.parse(filterContent, {
+            ...defaultParserOptions,
+            includeRaws: false,
+            isLocIncluded: false,
+            tolerant: true,
+        });
+
+        filterListNode.children.forEach((ruleNode) => {
+            if (isJsRule(ruleNode)) {
+                const rawBody = CosmeticRuleBodyGenerator.generate(ruleNode);
+                jsRules.add(rawBody);
+            }
+        });
+    }
+
+    await updateLocalScriptRulesForMv3(jsRules, browser);
+};
+
+export const updateLocalScriptRulesForFirefox = async () => {
+    await updateLocalScriptRulesForBrowser(AssetsFiltersBrowser.Firefox);
+};

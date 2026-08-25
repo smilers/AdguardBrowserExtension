@@ -107,7 +107,7 @@
         var matchedData;
         var queryStr = rawQueryStr.substring(1);
         while (matchedData = pattern.exec(queryStr)) {
-          if (neededParams.indexOf(matchedData[1]) > -1) {
+          if (neededParams.includes(matchedData[1])) {
             res[matchedData[1]] = matchedData[2];
           }
           queryStr = queryStr.substring(matchedData[0]);
@@ -202,7 +202,7 @@
         if (originUrl.substring(questionMarkIndex).length === 1) {
           divider = '';
         }
-        return "".concat(originUrl).concat(divider).concat(unblockTokenName).concat(SEARCH_PARAMS_DIVIDER).concat(unblockTokenValue);
+        return `${originUrl}${divider}${unblockTokenName}${SEARCH_PARAMS_DIVIDER}${unblockTokenValue}`;
       };
       var extRun = function extRun() {
         var replaceUrl = getReplaceUrl(originUrl, EXT_UNBLOCK_PARAM, extUnblockToken);
@@ -236,7 +236,7 @@
         var FRAME_MARKER = 'frame';
         var SUBDOCUMENT_MARKER = 'subdocument';
         var ruleModifiers = substringAfter(rule, '$').split(',');
-        return ruleModifiers.indexOf(FRAME_MARKER) > -1 || ruleModifiers.indexOf(SUBDOCUMENT_MARKER) > -1;
+        return ruleModifiers.includes(FRAME_MARKER) || ruleModifiers.includes(SUBDOCUMENT_MARKER);
       };
       var isInsideFrame = function isInsideFrame() {
         return window.self !== window.top;
@@ -247,7 +247,7 @@
     }
     clickToLoad();
 
-}());
+})();
 </script>
   </body>
 </html>

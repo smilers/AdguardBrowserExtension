@@ -1,107 +1,69 @@
-(function(source, args){
-function preventPopadsNet(source) {
-    var rid = randomId();
-
-    var throwError = function throwError() {
-      throw new ReferenceError(rid);
-    };
-
-    delete window.PopAds;
-    delete window.popns;
-    Object.defineProperties(window, {
-      PopAds: {
-        set: throwError
-      },
-      popns: {
-        set: throwError
-      }
-    });
-    window.onerror = createOnErrorHandler(rid).bind();
-    hit(source);
-  }
-function createOnErrorHandler(rid) {
-    // eslint-disable-next-line consistent-return
-    var nativeOnError = window.onerror;
-    return function onError(error) {
-      if (typeof error === 'string' && error.indexOf(rid) !== -1) {
-        return true;
-      }
-
-      if (nativeOnError instanceof Function) {
-        for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-          args[_key - 1] = arguments[_key];
+(function(source, args) {
+    const flag = "done";
+    const uniqueIdentifier = source.uniqueId + source.name + "_" + (Array.isArray(args) ? args.join("_") : "");
+    if (source.uniqueId) {
+        if (Window.prototype.toString[uniqueIdentifier] === flag) {
+            return;
         }
-
-        return nativeOnError.apply(this, [error].concat(args));
-      }
-
-      return false;
-    };
-  }
-function randomId() {
-    return Math.random().toString(36).substr(2, 9);
-  }
-function hit(source, message) {
-    if (source.verbose !== true) {
-      return;
     }
-
+    function preventPopadsNet(source) {
+        var rid = randomId();
+        var throwError = function throwError() {
+            throw new ReferenceError(rid);
+        };
+        delete window.PopAds;
+        delete window.popns;
+        Object.defineProperties(window, {
+            PopAds: {
+                set: throwError
+            },
+            popns: {
+                set: throwError
+            }
+        });
+        window.onerror = createOnErrorHandler(rid).bind();
+        hit(source);
+    }
+    function createOnErrorHandler(r) {
+        var n = window.onerror;
+        return function(e) {
+            if ("string" == typeof e && e.includes(r)) return !0;
+            if (n instanceof Function) {
+                for (var t = arguments.length, o = new Array(t > 1 ? t - 1 : 0), i = 1; i < t; i++) o[i - 1] = arguments[i];
+                return n.apply(window, [ e, ...o ]);
+            }
+            return !1;
+        };
+    }
+    function randomId() {
+        return Math.random().toString(36).slice(2, 9);
+    }
+    function hit(e) {
+        if (e.verbose) {
+            try {
+                var n = console.trace.bind(console), i = "[AdGuard] ";
+                "corelibs" === e.engine ? i += e.ruleText : (e.domainName && (i += `${e.domainName}`), 
+                e.args ? i += `#%#//scriptlet('${e.name}', '${e.args.join("', '")}')` : i += `#%#//scriptlet('${e.name}')`), 
+                n && n(i);
+            } catch (e) {}
+            "function" == typeof window.__debug && window.__debug(e);
+        }
+    }
+    const updatedArgs = args ? [].concat(source).concat(args) : [ source ];
     try {
-      var log = console.log.bind(console);
-      var trace = console.trace.bind(console); // eslint-disable-line compat/compat
-
-      var prefix = source.ruleText || '';
-
-      if (source.domainName) {
-        var AG_SCRIPTLET_MARKER = '#%#//';
-        var UBO_SCRIPTLET_MARKER = '##+js';
-        var ruleStartIndex;
-
-        if (source.ruleText.indexOf(AG_SCRIPTLET_MARKER) > -1) {
-          ruleStartIndex = source.ruleText.indexOf(AG_SCRIPTLET_MARKER);
-        } else if (source.ruleText.indexOf(UBO_SCRIPTLET_MARKER) > -1) {
-          ruleStartIndex = source.ruleText.indexOf(UBO_SCRIPTLET_MARKER);
-        } // delete all domains from ruleText and leave just rule part
-
-
-        var rulePart = source.ruleText.slice(ruleStartIndex); // prepare applied scriptlet rule for specific domain
-
-        prefix = "".concat(source.domainName).concat(rulePart);
-      } // Used to check if scriptlet uses 'hit' function for logging
-
-
-      var LOG_MARKER = 'log: ';
-
-      if (message) {
-        if (message.indexOf(LOG_MARKER) === -1) {
-          log("".concat(prefix, " message:\n").concat(message));
-        } else {
-          log(message.slice(LOG_MARKER.length));
+        preventPopadsNet.apply(this, updatedArgs);
+        if (source.uniqueId) {
+            Object.defineProperty(Window.prototype.toString, uniqueIdentifier, {
+                value: flag,
+                enumerable: false,
+                writable: false,
+                configurable: false
+            });
         }
-      }
-
-      log("".concat(prefix, " trace start"));
-
-      if (trace) {
-        trace();
-      }
-
-      log("".concat(prefix, " trace end"));
-    } catch (e) {// try catch for Edge 15
-      // In according to this issue https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/14495220/
-      // console.log throws an error
-    } // This is necessary for unit-tests only!
-
-
-    if (typeof window.__debug === 'function') {
-      window.__debug(source);
+    } catch (e) {
+        console.log(e);
     }
-  };
-        const updatedArgs = args ? [].concat(source).concat(args) : [source];
-        try {
-            preventPopadsNet.apply(this, updatedArgs);
-        } catch (e) {
-            console.log(e);
-        }
-    
-})({"name":"prevent-popads-net","args":[]}, []);
+})({
+    name: "prevent-popads-net",
+    args: []
+}, []);

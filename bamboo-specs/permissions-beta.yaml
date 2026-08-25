@@ -9,13 +9,19 @@ deployment-permissions:
     permissions:
       - view
 environment-permissions:
-  - static.adguard.com:
+  - static.adtidy.org:
       - groups:
           - extensions-developers
         permissions:
           - view
           - deploy
-  - Chrome WebStore:
+  - Chrome WebStore MV3:
+      - groups:
+          - extensions-developers
+        permissions:
+          - view
+          - deploy
+  - GitHub:
       - groups:
           - extensions-developers
         permissions:

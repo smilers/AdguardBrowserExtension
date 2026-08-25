@@ -2,7 +2,9 @@
     display: flex;
     max-width: 100%;
     height: 100%;
-    overflow-x: auto;
+    overflow: hidden;
+    user-select: none;
+    color: var(--text-main-text-main-default);
 
     * {
         box-sizing: border-box;
@@ -11,91 +13,146 @@
     &__inner {
         table-layout: fixed;
         width: 100%;
-        height: calc(100% - 30px);
+        height: 100%;
+
+        & .thead {
+            min-width: 100%;
+            position: sticky;
+            z-index: var(--z-idx-filtering-log-thead);
+            background-color: var(--fills-backgrounds-page-background-default);
+            border-bottom: 1px solid var(--stroke-dividers-item-divider-default);
+        }
 
         & .thead .th {
-            position: sticky;
-            top: 0;
-            background-color: var(--white);
+            background-color: var(--fills-backgrounds-page-background-default);
+            border-bottom: 1px solid var(--stroke-dividers-item-divider-default);
+        }
 
-            @media (prefers-color-scheme: dark) {
-                background-color: var(--bgColor);
+        & .tbody {
+            z-index: var(--z-idx-filtering-log-base);
+        }
+
+        & .tr--tbody {
+            border: 0;
+            border-bottom: 1px solid var(--stroke-dividers-item-divider-default);
+            background-color: transparent;
+            text-align: left;
+            padding: 0;
+            width: 100%;
+            outline-offset: -2px;
+
+            /* Use `focus-within` because button to open details is located inside of row */
+            &:focus-within {
+                outline: 2px solid var(--outline);
+            }
+
+            &:focus {
+                z-index: var(--z-idx-filtering-log-base);
+            }
+
+            &:hover {
+                cursor: pointer;
+                background: var(--fills-backgrounds-page-background-hovered);
+            }
+
+            &:active {
+                background: var(--fills-backgrounds-page-background-pressed);
+            }
+
+            /* blocked */
+            &.red {
+                background-color: var(--fills-backgrounds-recent-activity-request-blocked-default);
+
+                &:hover {
+                    background-color: var(--fills-backgrounds-recent-activity-request-blocked-hovered);
+                }
+
+                &:active {
+                    background-color: var(--fills-backgrounds-recent-activity-request-blocked-pressed);
+                }
+            }
+
+            /* stealth exceptions */
+            &.green {
+                background-color: var(--fills-backgrounds-recent-activity-request-allowlisted-default);
+
+                &:hover {
+                    background-color: var(--fills-backgrounds-recent-activity-request-allowlisted-hovered);
+                }
+
+                &:active {
+                    background-color: var(--fills-backgrounds-recent-activity-request-allowlisted-pressed);
+                }
+            }
+
+            /* allowlist (non-stealth) exceptions */
+            &.light-green {
+                background-color: var(--fills-backgrounds-recent-activity-request-allowlisted-default);
+
+                &:hover {
+                    background-color: var(--fills-backgrounds-recent-activity-request-allowlisted-hovered);
+                }
+
+                &:active {
+                    background-color: var(--fills-backgrounds-recent-activity-request-allowlisted-pressed);
+                }
+            }
+
+            /* mofidied */
+            &.yellow {
+                background-color: var(--fills-backgrounds-recent-activity-request-changed-default);
+
+                &:hover {
+                    background-color: var(--fills-backgrounds-recent-activity-request-changed-hovered);
+                }
+
+                &:active {
+                    background-color: var(--fills-backgrounds-recent-activity-request-changed-pressed);
+                }
+            }
+        }
+
+        & .tr--active, & .tr--active:hover {
+            background: var(--fills-backgrounds-page-background-pressed);
+
+            &.red, &.red:hover {
+                background-color: var(--fills-backgrounds-recent-activity-request-blocked-pressed);
+            }
+
+            &.green, &.green:hover {
+                background-color: var(--green-row-active);
+            }
+
+            &.light-green, &.light-green:hover {
+                background-color: var(--fills-backgrounds-recent-activity-request-allowlisted-pressed);
+            }
+
+            &.yellow, &.yellow:hover {
+                background-color: var(--fills-backgrounds-recent-activity-request-changed-pressed);
             }
         }
 
         & .thead .tr {
-            box-shadow: 0 1px 0 0 var(--thColor);
-        }
-
-        & .tbody {
-            z-index: 1;
-        }
-
-        & .tbody .tr {
-            border-top: 1px solid var(--borderColor);
-
-            &:hover {
-                cursor: pointer;
-                background: var(--regular-row-hover);
-            }
-
-            &:active {
-                background: var(--regular-row-active);
-            }
-
-            &.red {
-                background-color: var(--red-row);
-
-                &:hover {
-                    background-color: var(--red-row-hover);
-                }
-
-                &:active {
-                    background-color: var(--red-row-active);
-                }
-            }
-
-            &.green {
-                background-color: var(--green-row);
-
-                &:hover {
-                    background-color: var(--green-row-hover);
-                }
-
-                &:active {
-                    background-color: var(--green-row-active);
-                }
-            }
-
-            &.yellow {
-                background-color: var(--orange-row);
-
-                &:hover {
-                    background-color: var(--orange-row-hover);
-                }
-
-                &:active {
-                    background-color: var(--orange-row-active);
-                }
-            }
+            border-top: 0;
         }
 
         & .list {
-            z-index: 1;
+            width: 100vw;
+            z-index: var(--z-idx-filtering-log-base);
+            scrollbar-width: thin;
+            scrollbar-color: var(--stroke-inputs-inactive-input-stroke-default) var(--fills-backgrounds-page-background-default);
         }
 
         & .th {
             text-align: left;
             padding: 7px 10px;
-            font-weight: normal;
             font-size: 14px;
-            color: var(--darkText);
             position: relative;
 
             &:first-child {
                 width: 40%;
 
-                @media (max-width: 640px) {
+                @media (--to-mobile) {
                     padding-left: 16px;
                 }
             }
@@ -116,13 +173,11 @@
             text-overflow: ellipsis;
             overflow: hidden;
             padding: 8px 10px;
-            color: var(--textColor);
+            color: var(--text-main-text-main-default);
             font-size: 14px;
 
             &:first-child {
-                color: var(--darkText);
-
-                @media (max-width: 640px) {
+                @media (--to-mobile) {
                     padding-left: 16px;
                 }
             }
@@ -138,53 +193,47 @@
         /* do not remove "position" and "z-index" */
         /* due to AG-10446 */
         position: relative;
-        z-index: 10;
+        z-index: var(--z-idx-filtering-log-content);
     }
 
     &__empty-in {
-        width: 182px;
+        width: 340px;
         display: flex;
         flex-direction: column;
+        color: var(--text-description-description-default);
     }
 
     &__empty-img {
-        width: 48px;
-        height: 48px;
-        margin: 0 auto 18px;
-        color: var(--gray900);
-
-        @media (prefers-color-scheme: dark) {
-            color: var(--white);
-        }
+        width: 64px;
+        height: 64px;
+        margin: 0 auto;
     }
 
     &__desc {
         text-align: center;
-        font-size: 12px;
-        line-height: 18px;
+        font-size: 16px;
+        line-height: 21px;
 
-        @media (prefers-color-scheme: dark) {
-            color: var(--gray300);
+        & button {
+            text-decoration: underline;
+        }
+
+        @media (--to-mobile) {
+            padding: 0 50px;
         }
     }
 
-    &__refresh {
-        font-size: 12px;
-        display: inline;
-        background: transparent;
-        border: 0;
-        cursor: pointer;
-        padding: 0;
-        color: var(--green400);
-
-        @media (prefers-color-scheme: dark) {
-            color: var(--green700);
-        }
+    &__th {
+        line-height: 30px;
     }
 
     & .table {
         & .tr {
             height: 30px;
+            display: flex;
+            flex-wrap: nowrap;
+            width: auto!important;
+            min-width: 100%;
         }
 
         & .resizer {
@@ -195,7 +244,7 @@
             position: absolute;
             right: 0;
             top: 0;
-            z-index: 1;
+            z-index: var(--z-idx-filtering-log-base);
             /* prevents from scrolling while dragging on touch devices */
             touch-action: none;
 
@@ -203,15 +252,16 @@
                 content: "";
                 display: block;
                 position: absolute;
+                top: calc(50% - 10px);
                 right: 50%;
                 width: 1px;
-                height: 70%;
-                background-color: var(--gray400);
+                height: 20px;
+                background-color: var(--stroke-dividers-item-divider-default);
             }
         }
 
         & .th, & .td {
-            padding: 0 10px;
+            flex-shrink: 0;
             height: 30px;
             display: inline-block;
             width: 20%;
@@ -220,177 +270,14 @@
             overflow: hidden;
         }
 
+        & .th {
+            padding: 7px 10px;
+            font-weight: 450;
+        }
+
         & .td {
+            padding: 0 10px;
             line-height: 30px;
-        }
-    }
-}
-
-.list {
-    div div {
-        left: -1px!important;
-        cursor: pointer;
-    }
-}
-
-.third-party {
-    &__label {
-        font-family: var(--font-roboto);
-        color: var(--gray400);
-        font-size: 14px;
-
-        @media (prefers-color-scheme: dark) {
-            color: var(--gray700);
-        }
-    }
-
-    &__icon {
-        margin: -11px 4px -5px 8px;
-        width: 18px;
-        height: 18px;
-    }
-}
-
-.light-mode {
-    & .filtering-log {
-        &__desc {
-            color: var(--gray-base);
-        }
-
-        &__refresh {
-            color: var(--green400);
-        }
-
-        &__inner .thead .th {
-            background-color: var(--white);
-        }
-
-        &__inner .tbody .tr {
-            &:hover {
-                background: var(--regular-row-hover);
-            }
-
-            &:active {
-                background: var(--regular-row-active);
-            }
-
-            &.red {
-                background-color: var(--red-row);
-
-                &:hover {
-                    background-color: var(--red-row-hover);
-                }
-
-                &:active {
-                    background-color: var(--red-row-active);
-                }
-            }
-
-            &.green {
-                background-color: var(--green-row);
-
-                &:hover {
-                    background-color: var(--green-row-hover);
-                }
-
-                &:active {
-                    background-color: var(--green-row-active);
-                }
-            }
-
-            &.yellow {
-                background-color: var(--orange-row);
-
-                &:hover {
-                    background-color: var(--orange-row-hover);
-                }
-
-                &:active {
-                    background-color: var(--orange-row-active);
-                }
-            }
-        }
-
-        &__empty-img {
-            color: var(--gray900);
-        }
-    }
-
-    & .third-party {
-        &__label {
-            color: var(--gray400);
-        }
-    }
-}
-
-.dark-mode {
-    & .filtering-log {
-        &__desc {
-            color: var(--gray300);
-        }
-
-        &__refresh {
-            color: var(--green700);
-        }
-
-        &__inner .thead .th {
-            background-color: var(--bgColor);
-        }
-
-        &__inner .tbody .tr {
-            &:hover {
-                background: var(--regular-row-hover);
-            }
-
-            &:active {
-                background: var(--regular-row-active);
-            }
-
-            &.red {
-                background-color: var(--red-row);
-
-                &:hover {
-                    background-color: var(--red-row-hover);
-                }
-
-                &:active {
-                    background-color: var(--red-row-active);
-                }
-            }
-
-            &.green {
-                background-color: var(--green-row);
-
-                &:hover {
-                    background-color: var(--green-row-hover);
-                }
-
-                &:active {
-                    background-color: var(--green-row-active);
-                }
-            }
-
-            &.yellow {
-                background-color: var(--orange-row);
-
-                &:hover {
-                    background-color: var(--orange-row-hover);
-                }
-
-                &:active {
-                    background-color: var(--orange-row-active);
-                }
-            }
-        }
-
-        &__empty-img {
-            color: var(--white);
-        }
-    }
-
-    & .third-party {
-        &__label {
-            color: var(--gray700);
         }
     }
 }

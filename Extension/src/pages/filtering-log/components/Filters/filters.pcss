@@ -7,7 +7,7 @@
         box-sizing: border-box;
         width: 360px;
 
-        @media (max-width: 640px) {
+        @media (--to-mobile) {
             padding-bottom: 12px;
         }
 
@@ -15,7 +15,7 @@
             width: 55%;
         }
 
-        @media (max-width: 640px) {
+        @media (--to-mobile) {
             width: 100%;
         }
     }
@@ -25,7 +25,7 @@
         box-sizing: border-box;
         width: 400px;
 
-        @media (max-width: 640px) {
+        @media (--to-mobile) {
             padding-top: 12px;
         }
 
@@ -33,7 +33,7 @@
             width: 45%;
         }
 
-        @media (max-width: 640px) {
+        @media (--to-mobile) {
             width: 100%;
         }
     }
@@ -41,43 +41,44 @@
     &__events-tags {
         overflow-x: hidden;
         position: relative;
-        padding: 0 25px 0 25px;
+        padding: 0 24px;
 
-        @media (max-width: 640px) {
-            padding: 0 21px 0 21px;
+        @media (--to-mobile) {
+            padding: 0 20px;
         }
     }
 
     &__arrow {
-        width: 32px;
-        height: 32px;
+        width: 24px;
+        height: 24px;
         position: absolute;
-        top: -6px;
-        color: var(--gray700);
-        outline: none;
+        top: -4px;
+        color: var(--stroke-icons-gray-icons-default);
         background-color: transparent;
         border: 0;
         padding: 0;
         cursor: pointer;
 
         &__icon {
-            width: 32px;
-            height: 32px;
+            width: 24px;
+            height: 24px;
         }
 
         &--left {
-            left: -5px;
-            transform: rotate(180deg);
+            top: 6px;
+            left: -2px;
 
-            @media (min-width: 640px) {
+            @media (--from-tablet) {
                 left: 0;
             }
         }
 
         &--right {
-            right: -5px;
+            top: 6px;
+            right: -2px;
+            transform: rotate(180deg);
 
-            @media (min-width: 640px) {
+            @media (--from-tablet) {
                 right: 0;
             }
         }
@@ -87,7 +88,7 @@
         scroll-behavior: smooth;
         display: flex;
         overflow-x: auto;
-        padding: 0 0 16px 0;
+        padding: 8px 0;
         -ms-overflow-style: none;
         scrollbar-width: none;
 
@@ -106,7 +107,7 @@
         margin: 4px 20px 0 auto;
         font-size: 13px;
 
-        @media (max-width: 640px) {
+        @media (--to-mobile) {
             margin: 4px 8px 0 auto;
         }
     }

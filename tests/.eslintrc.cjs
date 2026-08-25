@@ -1,0 +1,37 @@
+/**
+ * Copyright (c) 2015-2026 Adguard Software Ltd.
+ *
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+module.exports = {
+    extends: [
+        '../.eslintrc.cjs',
+    ],
+    parserOptions: {
+        project: '../tsconfig.eslint.json',
+        tsconfigRootDir: __dirname,
+        sourceType: 'module',
+    },
+    'rules': {
+        'jsdoc/require-file-overview': 'off',
+        '@typescript-eslint/no-non-null-assertion': 'off',
+        // Disable JSX-specific indentation rules in favor of the base indent rule
+        'react/jsx-indent': 'off',
+        'react/jsx-indent-props': 'off',
+    },
+};

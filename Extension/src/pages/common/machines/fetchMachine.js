@@ -1,4 +1,24 @@
-import { createMachine, assign } from 'xstate';
+/**
+ * Copyright (c) 2015-2026 Adguard Software Ltd.
+ *
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import { assign, setup } from 'xstate';
 
 export const FetchStates = {
     IDLE: 'idle',
@@ -12,8 +32,10 @@ export const FetchEvents = {
     RETRY: 'RETRY',
 };
 
+const FETCH_MACHINE_ID = 'fetchMachine';
+
 const fetchMachineConfig = {
-    id: 'fetch',
+    id: FETCH_MACHINE_ID,
     initial: FetchStates.IDLE,
     context: {
         data: null,
@@ -28,13 +50,14 @@ const fetchMachineConfig = {
         [FetchStates.LOADING]: {
             invoke: {
                 src: 'fetchData',
+                input: ({ event }) => event,
                 onDone: {
                     target: FetchStates.SUCCESS,
-                    actions: ['setData'],
+                    actions: 'setData',
                 },
                 onError: {
                     target: FetchStates.FAILURE,
-                    actions: ['setError'],
+                    actions: 'setError',
                 },
             },
         },
@@ -51,13 +74,13 @@ const fetchMachineConfig = {
 
 const fetchMachineOptions = {
     actions: {
-        setData: assign((ctx, event) => ({
-            data: event.data,
+        setData: assign(({ event }) => ({
+            data: event.output,
         })),
-        setError: assign((ctx, event) => ({
-            error: event.data,
+        setError: assign(({ event }) => ({
+            error: event.output,
         })),
     },
 };
 
-export const fetchMachine = createMachine(fetchMachineConfig, fetchMachineOptions);
+export const fetchMachine = setup(fetchMachineOptions).createMachine(fetchMachineConfig);

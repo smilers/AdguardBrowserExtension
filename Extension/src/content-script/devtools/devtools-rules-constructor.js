@@ -1,18 +1,21 @@
 /**
- * This file is part of Adguard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ * Copyright (c) 2015-2026 Adguard Software Ltd.
  *
- * Adguard Browser Extension is free software: you can redistribute it and/or modify
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Adguard Browser Extension is distributed in the hope that it will be useful,
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Adguard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
@@ -33,6 +36,7 @@ export const DevToolsRulesConstructor = (function () {
      * @param classList Override element classes (If classList is null, element classes will be used)
      * @param excludeTagName Omit tag name in selector
      * @param excludeId Omit element id in selector
+     *
      * @returns {string}
      */
     const makeDefaultCssFilter = function (element, classList, excludeTagName, excludeId) {
@@ -49,6 +53,7 @@ export const DevToolsRulesConstructor = (function () {
      *
      * @param element Element
      * @param options Construct options. For example: {excludeTagName: false, excludeId: false, classList: []}
+     *
      * @returns {string}
      */
     const makeCssNthChildFilter = function (element, options) {
@@ -143,8 +148,10 @@ export const DevToolsRulesConstructor = (function () {
     };
 
     /**
-     * Constructs css selector by combining classes by AND
+     * Constructs css selector by combining classes by AND.
+     *
      * @param classList
+     *
      * @returns {string}
      */
     const constructClassCssSelectorByAND = function (classList) {
@@ -158,8 +165,10 @@ export const DevToolsRulesConstructor = (function () {
     };
 
     /**
-     * Constructs css selector by combining classes by OR
+     * Constructs css selector by combining classes by OR.
+     *
      * @param classList
+     *
      * @returns {string}
      */
     const constructClassCssSelectorByOR = function (classList) {
@@ -178,6 +187,7 @@ export const DevToolsRulesConstructor = (function () {
      *
      * @param element Element
      * @param classList Override element classes (If classList is null, element classes will be used)
+     *
      * @returns {string}
      */
     const makeSimilarCssFilter = function (element, classList) {
@@ -185,10 +195,12 @@ export const DevToolsRulesConstructor = (function () {
     };
 
     /**
-     * Creates css rule text
+     * Creates css rule text.
+     *
      * @param element Element
      * @param options Construct options.
      * For example: {cssSelectorType: 'STRICT_FULL', excludeTagName: false, excludeId: false, classList: []}
+     *
      * @returns {string}
      */
     const constructCssRuleText = function (element, options) {
@@ -291,7 +303,7 @@ export const DevToolsRulesConstructor = (function () {
     };
 
     /**
-     * Returns detailed element info
+     * Returns detailed element info.
      *
      * @param element
      */
@@ -320,9 +332,10 @@ export const DevToolsRulesConstructor = (function () {
     };
 
     /**
-     * Constructs css selector for specified rule
+     * Constructs css selector for specified rule.
      *
      * @param ruleText rule text
+     *
      * @returns {string} css style selector
      */
     const constructRuleCssSelector = function (ruleText) {
@@ -348,7 +361,7 @@ export const DevToolsRulesConstructor = (function () {
     };
 
     /**
-     * Constructs adguard rule text from element node and specified options
+     * Constructs adguard rule text from element node and specified options.
      *
      * var options = {
      *  urlBlockAttribute: url mask,
@@ -364,6 +377,7 @@ export const DevToolsRulesConstructor = (function () {
      *
      * @param element
      * @param options
+     *
      * @returns {*}
      */
     const constructRuleText = function (element, options) {

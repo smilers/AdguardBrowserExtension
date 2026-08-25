@@ -1,70 +1,50 @@
-(function(source, args){
-function noeval(source) {
-    window.eval = function evalWrapper(s) {
-      hit(source, "AdGuard has prevented eval:\n".concat(s));
-    }.bind();
-  }
-function hit(source, message) {
-    if (source.verbose !== true) {
-      return;
+(function(source, args) {
+    const flag = "done";
+    const uniqueIdentifier = source.uniqueId + source.name + "_" + (Array.isArray(args) ? args.join("_") : "");
+    if (source.uniqueId) {
+        if (Window.prototype.toString[uniqueIdentifier] === flag) {
+            return;
+        }
     }
-
+    function noeval(source) {
+        window.eval = function evalWrapper(s) {
+            hit(source);
+            logMessage(source, `AdGuard has prevented eval:\n${s}`, true);
+        }.bind();
+    }
+    function hit(e) {
+        if (e.verbose) {
+            try {
+                var n = console.trace.bind(console), i = "[AdGuard] ";
+                "corelibs" === e.engine ? i += e.ruleText : (e.domainName && (i += `${e.domainName}`), 
+                e.args ? i += `#%#//scriptlet('${e.name}', '${e.args.join("', '")}')` : i += `#%#//scriptlet('${e.name}')`), 
+                n && n(i);
+            } catch (e) {}
+            "function" == typeof window.__debug && window.__debug(e);
+        }
+    }
+    function logMessage(e, o) {
+        var r = arguments.length > 2 && void 0 !== arguments[2] && arguments[2], a = !(arguments.length > 3 && void 0 !== arguments[3]) || arguments[3], {name: n, verbose: g} = e;
+        if (r || g) {
+            var i = console.log;
+            a ? i(`${n}: ${o}`) : Array.isArray(o) ? i(`${n}:`, ...o) : i(`${n}:`, o);
+        }
+    }
+    const updatedArgs = args ? [].concat(source).concat(args) : [ source ];
     try {
-      var log = console.log.bind(console);
-      var trace = console.trace.bind(console); // eslint-disable-line compat/compat
-
-      var prefix = source.ruleText || '';
-
-      if (source.domainName) {
-        var AG_SCRIPTLET_MARKER = '#%#//';
-        var UBO_SCRIPTLET_MARKER = '##+js';
-        var ruleStartIndex;
-
-        if (source.ruleText.indexOf(AG_SCRIPTLET_MARKER) > -1) {
-          ruleStartIndex = source.ruleText.indexOf(AG_SCRIPTLET_MARKER);
-        } else if (source.ruleText.indexOf(UBO_SCRIPTLET_MARKER) > -1) {
-          ruleStartIndex = source.ruleText.indexOf(UBO_SCRIPTLET_MARKER);
-        } // delete all domains from ruleText and leave just rule part
-
-
-        var rulePart = source.ruleText.slice(ruleStartIndex); // prepare applied scriptlet rule for specific domain
-
-        prefix = "".concat(source.domainName).concat(rulePart);
-      } // Used to check if scriptlet uses 'hit' function for logging
-
-
-      var LOG_MARKER = 'log: ';
-
-      if (message) {
-        if (message.indexOf(LOG_MARKER) === -1) {
-          log("".concat(prefix, " message:\n").concat(message));
-        } else {
-          log(message.slice(LOG_MARKER.length));
+        noeval.apply(this, updatedArgs);
+        if (source.uniqueId) {
+            Object.defineProperty(Window.prototype.toString, uniqueIdentifier, {
+                value: flag,
+                enumerable: false,
+                writable: false,
+                configurable: false
+            });
         }
-      }
-
-      log("".concat(prefix, " trace start"));
-
-      if (trace) {
-        trace();
-      }
-
-      log("".concat(prefix, " trace end"));
-    } catch (e) {// try catch for Edge 15
-      // In according to this issue https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/14495220/
-      // console.log throws an error
-    } // This is necessary for unit-tests only!
-
-
-    if (typeof window.__debug === 'function') {
-      window.__debug(source);
+    } catch (e) {
+        console.log(e);
     }
-  };
-        const updatedArgs = args ? [].concat(source).concat(args) : [source];
-        try {
-            noeval.apply(this, updatedArgs);
-        } catch (e) {
-            console.log(e);
-        }
-    
-})({"name":"noeval","args":[]}, []);
+})({
+    name: "noeval",
+    args: []
+}, []);

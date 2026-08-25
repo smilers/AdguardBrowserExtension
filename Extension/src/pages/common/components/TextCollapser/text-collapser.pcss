@@ -1,0 +1,32 @@
+.text-collapser {
+    padding: 12px 38px 12px 32px;
+    word-break: break-all;
+
+    &__copy-to-clipboard-wrapper {
+        display: inline;
+    }
+
+    &__copy-to-clipboard {
+        display: inline;
+        vertical-align: middle;
+    }
+
+    &__text {
+        display: inline-block;
+        vertical-align: middle;
+        width: auto;
+
+        &-short {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        &-full {
+            overflow: visible;
+            text-overflow: initial;
+        }
+    }
+}

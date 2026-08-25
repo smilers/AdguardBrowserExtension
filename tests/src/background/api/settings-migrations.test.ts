@@ -1,0 +1,40 @@
+/**
+ * Copyright (c) 2015-2026 Adguard Software Ltd.
+ *
+ * @file
+ * This file is part of AdGuard Browser Extension (https://github.com/AdguardTeam/AdguardBrowserExtension).
+ *
+ * AdGuard Browser Extension is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AdGuard Browser Extension is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with AdGuard Browser Extension. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import {
+    describe,
+    it,
+    expect,
+} from 'vitest';
+
+import { SettingsMigrations } from '../../../../Extension/src/background/api/settings/migrations';
+import { getSettingsV1, getSettingsV2 } from '../../../helpers';
+
+describe('Settings Migrations Api', () => {
+    describe('apply migration before import outdated settings', () => {
+        it('Apply migration from version 1.0 to 2.0', async () => {
+            const SETTINGS_V_1_0 = getSettingsV1();
+            const SETTINGS_V_2_0 = getSettingsV2();
+            const updatedSettings = await SettingsMigrations.migrateSettings('1.0', SETTINGS_V_1_0);
+
+            expect(updatedSettings).toStrictEqual(SETTINGS_V_2_0);
+        });
+    });
+});

@@ -1,0 +1,1243 @@
+<!-- omit in toc -->
+# Development
+
+- [Prerequisites](#prerequisites)
+- [Getting Started](#getting-started)
+- [Development Workflow](#development-workflow)
+  - [Available Scripts](#available-scripts)
+  - [Running Tests](#running-tests)
+  - [Linting and Type Checking](#linting-and-type-checking)
+  - [Building](#building)
+  - [Watch Mode](#watch-mode)
+- [Common Tasks](#common-tasks)
+  - [Linking with the developer build of tsurlfilter/tswebextension](#linking-with-the-developer-build-of-tsurlfiltertswebextension)
+  - [Linking tsurlfilter on CI (Bamboo)](#linking-tsurlfilter-on-ci-bamboo)
+    - [Configuring tsurlfilter reference](#configuring-tsurlfilter-reference)
+    - [How it works](#how-it-works)
+    - [Running CI tests locally](#running-ci-tests-locally)
+  - [Building the beta and release versions](#building-the-beta-and-release-versions)
+    - [Resources Process](#resources-process)
+    - [How to generate credentials for `crx` builds](#how-to-generate-credentials-for-crx-builds)
+  - [Special building instructions for Firefox reviewers](#special-building-instructions-for-firefox-reviewers)
+  - [Analyzing bundle size](#analyzing-bundle-size)
+  - [Debug MV3 declarative rules](#debug-mv3-declarative-rules)
+    - [How to build the MV3 extension](#how-to-build-the-mv3-extension)
+    - [How to install the unpacked extension in the browser](#how-to-install-the-unpacked-extension-in-the-browser)
+    - [How to debug rules](#how-to-debug-rules)
+    - [Technical information about commands](#technical-information-about-commands)
+  - [Hotfix filters for MV3 with skip review](#hotfix-filters-for-mv3-with-skip-review)
+    - [Prerequisites](#prerequisites-1)
+    - [Steps](#steps)
+  - [Update localizations](#update-localizations)
+  - [Bundle Size Monitoring](#bundle-size-monitoring)
+    - [Key Features](#key-features)
+    - [How it works](#how-it-works-1)
+    - [To update the bundle sizes manually](#to-update-the-bundle-sizes-manually)
+      - [Steps](#steps-1)
+    - [Checking bundle size locally](#checking-bundle-size-locally)
+    - [Custom Threshold](#custom-threshold)
+- [Project Architecture](#project-architecture)
+  - [Background Layers](#background-layers)
+    - [Layer responsibilities](#layer-responsibilities)
+    - [Supporting modules](#supporting-modules)
+    - [Folder structure](#folder-structure)
+  - [TypeScript Configuration](#typescript-configuration)
+    - [Configuration Files Overview](#configuration-files-overview)
+  - [CSS Cascade Layers](#css-cascade-layers)
+  - [Rules Editor](#rules-editor)
+    - [Dependencies](#dependencies)
+    - [WASM Grammar and CSP Requirement](#wasm-grammar-and-csp-requirement)
+    - [Editor Component API](#editor-component-api)
+- [Environment Variables](#environment-variables)
+- [Troubleshooting](#troubleshooting)
+  - [`pnpm install` fails with network errors](#pnpm-install-fails-with-network-errors)
+  - [ESLint reports `no-restricted-imports` errors](#eslint-reports-no-restricted-imports-errors)
+  - [TypeScript errors in IDE but not in CI (or vice versa)](#typescript-errors-in-ide-but-not-in-ci-or-vice-versa)
+  - [`lint-staged` leaves a `lint-staged` section in `package.json`](#lint-staged-leaves-a-lint-staged-section-in-packagejson)
+  - [Linked tsurlfilter changes not picked up in watch mode](#linked-tsurlfilter-changes-not-picked-up-in-watch-mode)
+  - [Bundle size check fails](#bundle-size-check-fails)
+- [Additional Resources](#additional-resources)
+
+<a name="dev-requirements"></a>
+
+## Prerequisites
+
+Ensure that the following software is installed on your computer:
+
+- [Node.js][nodejs]: v22 (you can install multiple versions using [nvm][nvm])
+- [pnpm][pnpm]: v10.33.4
+- [Git][git]
+- [Docker][docker] (optional, for CI-like builds and Firefox reviewer builds)
+
+[docker]: https://docs.docker.com/get-docker/
+[git]: https://git-scm.com/
+[nodejs]: https://nodejs.org/en/download
+[nvm]: https://github.com/nvm-sh/nvm
+[pnpm]: https://pnpm.io/installation
+
+## Getting Started
+
+1. Clone the repository:
+
+    ```shell
+    git clone https://github.com/AdguardTeam/AdguardBrowserExtension.git
+    cd AdguardBrowserExtension
+    ```
+
+2. Install dependencies:
+
+    ```shell
+    pnpm install
+    ```
+
+3. (Optional) Copy and configure environment variables:
+
+    ```shell
+    cp .env.example .env
+    ```
+
+    See [Environment Variables](#environment-variables) for details.
+
+4. Build the extension for a specific browser:
+
+    ```shell
+    pnpm dev chrome
+    ```
+
+5. Load the unpacked extension into your browser from `./build/dev/chrome`.
+   See [How to install the unpacked extension](#how-to-install-the-unpacked-extension-in-the-browser)
+   for step-by-step instructions.
+
+<a name="dev-build"></a>
+
+## Development Workflow
+
+### Available Scripts
+
+| Command | Description |
+| ------- | ----------- |
+| `pnpm dev [browser]` | Development build (all browsers if none specified) |
+| `pnpm dev <browser> --watch` | Development build with file watching |
+| `pnpm beta [browser]` | Beta build |
+| `pnpm release [browser]` | Release build |
+| `pnpm test` | Run all unit tests (MV2 + MV3) |
+| `pnpm test:mv2` | Run MV2 unit tests only |
+| `pnpm test:mv3` | Run MV3 unit tests only |
+| `pnpm test:integration <target>` | Run integration tests |
+| `pnpm test:e2e <env>` | Run extension browser E2E tests for a build env |
+| `pnpm lint` | Run all linters (ESLint + TypeScript) |
+| `pnpm lint:code` | Run ESLint only |
+| `pnpm lint:types` | Run TypeScript type checking (MV2 + MV3) |
+| `pnpm lint:types:mv2` | TypeScript type checking for MV2 |
+| `pnpm lint:types:mv3` | TypeScript type checking for MV3 |
+| `pnpm resources` | Download filters and public suffix list |
+| `pnpm resources:mv3` | Download resources for MV3 (includes DNR rulesets) |
+| `pnpm locales <command>` | Manage localizations (see [Update localizations](#update-localizations)) |
+| `pnpm check-bundle-size <env> [browser]` | Check bundle sizes against limits |
+| `pnpm update-bundle-size <env> [browser]` | Update bundle size reference values |
+
+Supported `<browser>` values: `chrome`, `chrome-mv3`, `edge`, `opera`, `opera-mv3`, `firefox-amo`, `firefox-standalone`.
+
+<a name="dev-tests-and-build"></a>
+
+### Running Tests
+
+Unit tests use [Vitest](https://vitest.dev/) with separate projects for MV2 and MV3:
+
+```shell
+pnpm test
+```
+
+Run tests matching a specific pattern:
+
+```shell
+pnpm test <pattern>
+```
+
+Integration tests require a built extension:
+
+```shell
+pnpm test:integration <TARGET>
+# TARGET can be 'dev', 'beta', 'release', same as build targets.
+```
+
+Integration tests with userscripts mode selection:
+
+```shell
+pnpm test:integration <TARGET> [-u <USERSCRIPTS_MODE>]
+# TARGET can be 'dev', 'beta', 'release', same as build targets.
+# USERSCRIPTS_MODE can be 'enabled' or 'disabled' (default: both modes)
+```
+
+Integration tests with debug mode (page will be stopped after
+tests execution) for one of them:
+
+```shell
+pnpm test:integration <TARGET> [-d|--debug-test-id <TEST_ID>] [-u <USERSCRIPTS_MODE>]
+# TARGET can be 'dev', 'beta', 'release', same as build targets.
+# TEST_ID can be extracted from https://testcases.agrd.dev/data.json
+# USERSCRIPTS_MODE can be 'enabled' or 'disabled' (default: both modes)
+```
+
+Browser E2E tests open popup, options, and filtering log pages for Chrome MV2,
+Chrome MV3, and Firefox MV2. They also include a background diagnostics check.
+They fail on page load failures, error-level console messages, and unhandled
+JavaScript exceptions from UI pages or the extension background context. Build
+required zip artifacts before running them:
+
+```shell
+pnpm dev chrome --zip
+pnpm dev chrome-mv3 --zip
+pnpm dev firefox-standalone --zip
+pnpm test:e2e dev
+```
+
+Run one matrix entry while debugging:
+
+```shell
+pnpm test:e2e dev --matrix chrome-mv3
+```
+
+Browser E2E runs through Vitest, so native Vitest filters work. Matrix `describe`
+titles are `chrome-mv2`, `chrome-mv3`, and `firefox-mv2`; current `it` titles
+are `popup`, `options`, `filtering-log`, and `background`:
+
+```shell
+pnpm test:e2e dev --matrix chrome-mv2 -t "chrome-mv2 filtering-log"
+pnpm test:e2e dev -t "filtering-log"
+```
+
+E2E checks run headless by default. Use `E2E_HEADLESS=false` for headed
+local debugging.
+
+Chrome MV2 support is disabled in newer Chromium builds. The E2E runner adds
+MV2 compatibility flags, but local runs may still need an older Chromium binary:
+
+```shell
+E2E_CHROMIUM_EXECUTABLE_PATH=/path/to/chromium pnpm test:e2e dev --matrix chrome-mv2
+```
+
+Browser E2E tests are wired to a separate Bamboo plan because they run slower than
+unit and integration tests.
+
+<a name="dev-linter"></a>
+
+### Linting and Type Checking
+
+The project uses ESLint with the Airbnb TypeScript configuration and strict TypeScript type checking.
+
+Run all linters:
+
+```shell
+pnpm lint
+```
+
+Run ESLint only:
+
+```shell
+pnpm lint:code
+```
+
+Run TypeScript type checking:
+
+```shell
+pnpm lint:types        # Both MV2 and MV3
+pnpm lint:types:mv2    # MV2 only
+pnpm lint:types:mv3    # MV3 only
+```
+
+Pre-commit hooks (via [Husky](https://typicode.github.io/husky/) and lint-staged) automatically lint staged files.
+
+> [!NOTE]
+> Before submitting a pull request, always run `pnpm lint` and `pnpm test` to verify
+> all checks pass. See the review checklist in [AGENTS.md](./AGENTS.md) for the full
+> pre-submission checklist.
+
+### Building
+
+Build the dev version for all browsers:
+
+```shell
+pnpm dev
+```
+
+This will create a build directory with unpacked extensions for all browsers:
+
+```shell
+build/dev/chrome
+build/dev/edge
+build/dev/firefox-amo
+build/dev/firefox-standalone
+build/dev/opera
+build/dev/opera-mv3
+```
+
+Build for a specific browser:
+
+```shell
+pnpm dev <browser>
+```
+
+Where `<browser>` is one of: `chrome`, `chrome-mv3`, `edge`, `opera`, `opera-mv3`, `firefox-amo`,
+`firefox-standalone`. For example:
+
+```shell
+pnpm dev chrome
+```
+
+### Watch Mode
+
+Run the dev build in watch mode to automatically rebuild on file changes:
+
+```shell
+pnpm dev --watch
+```
+
+Or for a specific browser:
+
+```shell
+pnpm dev <browser> --watch
+```
+
+## Common Tasks
+
+<a name="dev-link"></a>
+
+### Linking with the developer build of tsurlfilter/tswebextension
+
+Since version v4.0, AdGuard browser extension uses an open source library
+[tsurlfilter] that implements
+the filtering engine.
+
+While developing the browser extension it may be required to test the changes
+to `tsurlfilter`. Here's what you need to do to link your local dev build
+to the local dev build of `tsurlfilter`.
+
+1. Clone and build [tsurlfilter] libraries.
+
+1. You have two options to link the packages:
+
+    - **Option 1**: Link the packages globally:
+
+        1. Go to the `tsurlfilter/packages/tsurlfilter` or `tsurlfilter/packages/tswebextension` directory.
+
+        1. Run the following command:
+
+            ```shell
+            pnpm link --global
+            ```
+
+           This command will create a symlink to the package in the global `node_modules` directory.
+
+        1. Once you have the packages linked globally, you can link them to the browser extension.
+           Just run the following command in the root directory of the browser extension:
+
+            ```shell
+            pnpm link @adguard/tsurlfilter
+            ```
+
+    - **Option 2**: Link the packages by path:
+
+        1. Just run the following command in the root directory of the browser extension:
+
+            ```shell
+            pnpm link <path-to-tsurlfilter/packages/tsurlfilter>
+            ```
+
+1. If you want to unlink the packages, just run `pnpm unlink @adguard/tsurlfilter`
+   or `pnpm unlink @adguard/tswebextension` in the root directory of the browser extension
+   regardless of the linking option you chose.
+
+   > [!WARNING]
+   > pnpm will modify the lock file when linking packages. See <https://github.com/pnpm/pnpm/issues/4219>.
+
+   > [!NOTE]
+   > If you want to list linked packages, run `pnpm list --depth 0` in the root directory of the browser extension
+   > which will show you all dependencies. Linked packages have a version like `link:../path/to/package`.
+
+1. Build the browser extension in the watch mode:
+
+    ```shell
+    pnpm dev <browser> --watch --no-cache
+    ```
+
+   `--no-cache` flag is required to rebuild the extension on changes in the linked packages.
+
+[tsurlfilter]: https://github.com/AdguardTeam/tsurlfilter
+
+<a name="dev-ci-link"></a>
+
+### Linking tsurlfilter on CI (Bamboo)
+
+CI builds use Docker multi-stage builds defined in `Dockerfile`. The tsurlfilter linking process is split into two phases:
+
+1. **Clone phase** (`clone-tsurlfilter.sh`) - Clones tsurlfilter repository on CI (~3 seconds)
+2. **Build phase** (inside Docker) - Builds tsurlfilter packages (~70 seconds, cached by Docker)
+3. **Link phase** (`link-tsurlfilter.sh`) - Links pre-built packages to the browser extension (~2-3 seconds)
+
+#### Configuring tsurlfilter reference
+
+To link with a specific tsurlfilter commit, branch, or tag, edit the configuration in `bamboo-specs/scripts/clone-tsurlfilter.sh`:
+
+```bash
+# Set TSURLFILTER_REF to the desired reference
+# TSURLFILTER_REF="fix/AG-45315"     # branch name
+# TSURLFILTER_REF="a1b2c3d4e5f6..."  # commit hash
+# TSURLFILTER_REF="v2.1.0"           # tag name
+# TSURLFILTER_REF=""                 # skip cloning/building/linking
+```
+
+#### How it works
+
+The build process uses Docker named build contexts for efficient caching:
+
+1. **Clone on CI** - `clone-tsurlfilter.sh` clones tsurlfilter to a sibling directory (`../tsurlfilter`). This happens outside Docker, so no SSH keys are needed inside the container.
+
+2. **`tsurlfilter-build` stage** - Receives the cloned source via `--build-context tsurlfilter=../tsurlfilter`. Docker automatically checksums the content and caches the build (~70 seconds). Cache invalidates only when tsurlfilter source changes.
+
+3. **`linked-deps` stage** - Combines the browser extension dependencies with pre-built tsurlfilter packages. Runs `link-tsurlfilter.sh` to create pnpm links.
+
+4. **Build/test stages** - All CI jobs (lint, unit tests, integration tests, builds) inherit from `linked-deps` and share the same cached dependencies.
+
+> [!NOTE]
+> The tsurlfilter build stage is cached by Docker based on source content checksum. Rebuilds occur automatically when any file in the tsurlfilter repository changes.
+
+#### Running CI tests locally
+
+You can run the same CI tests locally using Docker:
+
+```shell
+# First, clone tsurlfilter to sibling directory
+./bamboo-specs/scripts/clone-tsurlfilter.sh
+
+# Run unit tests
+docker build -f Dockerfile --build-context tsurlfilter=../tsurlfilter --target unit-tests-output --output type=local,dest=output .
+
+# Run linter
+docker build -f Dockerfile --build-context tsurlfilter=../tsurlfilter --target lint-output --output type=local,dest=output .
+
+# Build dev artifacts
+docker build -f Dockerfile --build-context tsurlfilter=../tsurlfilter --target dev-build-output --output type=local,dest=output .
+```
+
+> [!TIP]
+> Pass `--build-arg TEST_RUN_ID=$(date +%s)` to bust the cache and force a fresh run.
+
+<a name="dev-beta-and-release"></a>
+
+### Building the beta and release versions
+
+Before building the release version, you should manually download the necessary
+resources that will be included into the build: filters and public suffix list.
+
+```shell
+pnpm resources
+```
+
+> [!TIP]
+> Run `pnpm resources:mv3` to download resources for MV3 version.
+
+#### Resources Process
+
+The `pnpm resources` command performs the following steps:
+
+1. **Downloads filters**: Fetches filter metadata and filter rules from the AdGuard filters repository
+2. **Updates local script rules**: Extract script rules inside separate file only for firefox.
+3. **Finds dangerous rules** (optional): If `OPENAI_API_KEY` environment variable is provided, uses OpenAI API to analyze and identify potentially dangerous rules in the filters
+
+For MV3 version (`pnpm resources:mv3`), the process includes additional steps:
+
+1. **Updates dnr-rulesets package**: Installs the latest `@adguard/dnr-rulesets` package
+2. **Updates local test script rules**: Fetches all script rules from test cases and updates local resources
+3. **Downloads and prepares MV3 filters**: Downloads filters and converts them to declarative format
+4. **Updates local resources for MV3**: Processes and updates local script resources for Chromium MV3
+5. **Finds dangerous rules** (optional): If `OPENAI_API_KEY` environment variable is provided, uses OpenAI API to analyze and identify potentially dangerous rules in the filters
+6. **Extracts unsafe rules**: Runs a separate command to identify and extract unsafe rules to ruleset metadata
+
+See [dangerous rules documentation](tools/resources/dangerous-rules/README.md) for more details about the dangerous rules detection process.
+
+```shell
+pnpm beta
+pnpm release
+```
+
+You will need to put certificate.pem file to the `./private/AdguardBrowserExtension` directory. This
+build will create unpacked extensions and then pack them (crx for Chrome).
+
+For testing purposes for `dev` command credentials taken from `./tests/certificate-test.pem` file.
+
+WARNING: DO NOT USE TEST CREDENTIALS FOR PRODUCTION BUILDS, BECAUSE THEY ARE AVAILABLE IN PUBLIC.
+
+#### How to generate credentials for `crx` builds
+
+You can use [Crx CLI `keygen`](https://github.com/thom4parisot/crx#crx-keygen-directory)
+to generate credentials for `crx` builds, see the example below:
+
+```bash
+# Command will generate `key.pem` credential in the `./private/AdguardBrowserExtension` directory
+pnpm crx keygen ./private/AdguardBrowserExtension
+```
+
+<a name="dev-for-firefox-reviewers"></a>
+
+### Special building instructions for Firefox reviewers
+
+1. To ensure that the extension is built in the same way, use the docker image:
+
+    ```shell
+    docker run --rm -it \
+        -v "$(pwd)":/workspace \
+        -w /workspace \
+        adguard/extension-builder:22.22--0.4.1--0 \
+        /bin/bash
+    ```
+
+1. Inside the docker container, install the dependencies:
+
+    ```shell
+    pnpm install
+    ```
+
+1. To build the **BETA** version, run:
+
+    ```shell
+    pnpm beta firefox-standalone
+    ```
+
+1. Navigate to the build directory:
+
+    ```shell
+    cd ./build/beta
+    ```
+
+1. Compare the generated `firefox-standalone.zip` file with the uploaded one.
+
+If you need to build the **RELEASE** version:
+
+1. Run:
+
+    ```shell
+    pnpm release firefox-amo
+    ```
+
+1. Navigate to the build directory:
+
+    ```shell
+    cd ./build/release
+    ```
+
+1. Compare the generated `firefox-amo.zip` file with the uploaded one.
+
+<a name="dev-bundle-size"></a>
+
+### Analyzing bundle size
+
+If you want to analyze the bundle size, run build with the `ANALYZE` environment:
+
+```shell
+pnpm cross-env ANALYZE=true pnpm <build command>
+```
+
+So, for example, if you want to analyze the beta build for Chrome, run:
+
+```shell
+pnpm cross-env ANALYZE=true pnpm beta chrome
+```
+
+Or if you want to analyze all beta builds, run:
+
+```shell
+pnpm cross-env ANALYZE=true pnpm beta
+```
+
+Analyzer will generate reports to the `./build/analyze-reports` directory in the following format:
+
+```shell
+build/analyze-reports
+├── <browser-name>-<build-type>.html
+```
+
+<a name="dev-debug-mv3"></a>
+
+### Debug MV3 declarative rules
+
+If you want to debug MV3 declarative rules and check exactly which rules have been applied to requests, you can build and install the extension as described in the sections below. This will allow you to view the applied declarative rules in the filtering log.
+
+Additionally, you can edit filters and rebuild DNR rulesets without rebuilding the entire extension, which may be useful for debugging purposes.
+
+<a name="dev-debug-mv3-how-to-build"></a>
+
+#### How to build the MV3 extension
+
+1. Ensure that you have installed all dependencies as described in the [Prerequisites](#prerequisites) section.
+
+    ```shell
+    pnpm install
+    ```
+
+1. Run the following command in the terminal:
+
+    ```shell
+    pnpm dev chrome-mv3 # OR: opera-mv3
+    ```
+
+1. The built extension will be located in the following directory:
+
+    ```shell
+    ./build/dev/chrome-mv3 # OR: opera-mv3
+    ```
+
+#### How to install the unpacked extension in the browser
+
+1. Turn on developer mode:
+
+   ![Developer mode](https://cdn.adtidy.org/content/Kb/ad_blocker/browser_extension/developer_mode.png)
+
+1. Click *Load unpacked*:
+
+   ![Load unpacked](https://cdn.adtidy.org/content/Kb/ad_blocker/browser_extension/load_unpacked.png)
+
+1. Select the extension directory and click `Select`:
+
+   ![Select](https://cdn.adtidy.org/content/Kb/ad_blocker/browser_extension/select.png)
+
+#### How to debug rules
+
+You can debug and update DNR rulesets without rebuilding the entire extension. There are two main workflows:
+
+**A. Automatic (recommended for most cases):**
+
+1. **Build the extension** (if not done yet):
+
+    ```shell
+    pnpm install
+    pnpm dev chrome-mv3 # OR: opera-mv3
+    ```
+
+1. **Start watching for filter changes:**
+
+    ```shell
+    pnpm debug-filters:watch
+    ```
+
+    - This command has `-b, --browser <browser>` option to specify the browser target.
+      Available browsers: `chrome-mv3`, `opera-mv3`.
+      Default: `chrome-mv3`.
+    - This will extract text filters to `./build/dev/<browser>/filters` and watch for changes.
+    - When you edit and save any filter file, DNR rulesets will be rebuilt automatically.
+
+1. **Reload the extension in your browser** to apply new rulesets.
+
+**B. Manual (for advanced/manual control):**
+
+1. **Build the extension** (if not done yet):
+
+    ```shell
+    pnpm install
+    pnpm dev chrome-mv3 # OR: opera-mv3
+    ```
+
+1. **Extract text filters:**
+
+    ```shell
+    pnpm debug-filters:extract
+    ```
+
+    - This command has `-b, --browser <browser>` option to specify the browser target.
+      Available browsers: `chrome-mv3`, `opera-mv3`.
+      Default: `chrome-mv3`.
+
+1. **Edit the text filters** in `./build/dev/<browser>/filters` as needed.
+
+1. **Convert filters to DNR rulesets:**
+
+    ```shell
+    pnpm debug-filters:convert
+    ```
+
+    - This command has `-b, --browser <browser>` option to specify the browser target.
+      Available browsers: `chrome-mv3`, `opera-mv3`.
+      Default: `chrome-mv3`.
+
+1. **Reload the extension in your browser** to apply new rulesets.
+
+> [!TIP]
+> To download the latest available text filters, run:
+>
+> ```shell
+> pnpm debug-filters:load
+> ```
+>
+> - This command has `-b, --browser <browser>` option to specify the browser target.
+>   Available browsers: `chrome-mv3`, `opera-mv3`.
+>   Default: `chrome-mv3`.
+
+If you see an exclamation mark in the filtering log, it means the assumed rule (calculated by the engine) and the applied rule (converted to DNR) are different. Otherwise, only the applied rule (in DNR and text ways) will be shown.
+
+<a name="dev-technical-info-about-debug-commands"></a>
+
+#### Technical information about commands
+
+- **Watch for changes and auto-convert:**
+
+    ```shell
+    pnpm debug-filters:watch
+    # Under the hood:
+    pnpm exec dnr-rulesets watch \
+        # Enable extended logging about rulesets, since it is optional - it can be removed
+        --debug \
+        # Path to the extension manifest
+        # Where <browser> is the browser target, can be 'chrome-mv3', 'opera-mv3'
+        ./build/dev/<browser>/manifest.json \
+        # Path to web-accessible-resources directory (needed for $redirect rules)
+        # relative to the root directory of the extension (because they will be
+        # loaded during runtime).
+        /web-accessible-resources/redirects
+    ```
+
+- **Load latest text filters and metadata:**
+
+    ```shell
+    pnpm debug-filters:load
+    # Under the hood:
+    pnpm exec dnr-rulesets load \
+        # This will load latest text filters with their metadata
+        --latest-filters \
+        # Browser target, can be 'chromium-mv3', 'opera-mv3'
+        # Note: `chrome-mv3` is automatically converted to `chromium-mv3`
+        # when you run `pnpm debug-filters:load chrome-mv3` command.
+        --browser <browser> \
+        # Destination path for text filters
+        # Where <browser> is the browser target, can be 'chrome-mv3', 'opera-mv3'
+        ./build/dev/<browser>/filters
+    ```
+
+- **Manual conversion:**
+
+    ```shell
+    pnpm debug-filters:convert
+    # Under the hood:
+    pnpm exec tsurlfilter convert \
+        # Enable extended logging about rulesets
+        --debug \
+        # Path to the directory with text filters
+        # Where <browser> is the browser target, can be 'chrome-mv3', 'opera-mv3'
+        ./build/dev/<browser>/filters \
+        # Path to web-accessible-resources directory (needed for $redirect rules)
+        # relative to the root directory of the extension (because they will be
+        # loaded during runtime).
+        /web-accessible-resources/redirects \
+        # Destination path for converted DNR rulesets
+        # Where <browser> is the browser target, can be 'chrome-mv3', 'opera-mv3'
+        ./build/dev/<browser>/filters/declarative
+    ```
+
+- **Extract text filters from DNR rulesets:**
+
+    ```shell
+    pnpm debug-filters:extract
+    # Under the hood:
+    pnpm exec tsurlfilter extract-filters \
+        # Path to the directory with DNR rulesets
+        # Where <browser> is the browser target, can be 'chrome-mv3', 'opera-mv3'
+        ./build/dev/<browser>/filters/declarative \
+        # Path to save extracted text filters
+        # Where <browser> is the browser target, can be 'chrome-mv3', 'opera-mv3'
+        ./build/dev/<browser>/filters
+    ```
+
+For all command options, use `--help`, e.g.:
+
+```shell
+pnpm exec dnr-rulesets watch --help
+pnpm exec tsurlfilter convert --help
+```
+
+<a name="dev-hotfix-mv3"></a>
+
+### Hotfix filters for MV3 with skip review
+
+This guide explains how to update MV3 rulesets and submit them for Chrome Web Store fast-track review (skip review).
+
+#### Prerequisites
+
+- Ensure you're on the branch you want to hotfix (beta or release)
+- Have the necessary permissions to upload to Chrome Web Store
+
+#### Steps
+
+1. **Navigate to the filters directory:**
+
+    ```shell
+    cd Extension/filters
+    ```
+
+2. **Extract text rules from DNR rulesets:**
+
+    ```shell
+    npx tsurlfilter extract-filters ./chromium-mv3/declarative ./extracted
+    ```
+
+    Text rules are now located in the `./extracted` folder.
+
+3. **Edit the text rules:**
+
+    Open the extracted text files and make your necessary changes to fix the rules.
+
+4. **Convert text rules back to DNR rulesets:**
+
+    ```shell
+    npx tsurlfilter convert ./extracted /web-accessible-resources/redirects ./chromium-mv3/declarative --prettify-json=false
+    ```
+
+5. **Exclude unsafe rules:**
+
+    ```shell
+    npx dnr-rulesets exclude-unsafe-rules ./chromium-mv3/declarative --prettify-json=false
+    ```
+
+6. **Review changes:**
+
+    Check `git diff` for anything unusual to ensure everything is correct. Some differences like rule reordering are expected and acceptable.
+
+7. **Return to project root and download the latest extension:**
+
+    ```shell
+    cd ../../
+    ```
+
+    For **release** version:
+
+    ```shell
+    pnpm tsx tools/skip-review/download-latest-extension-mv3.ts release
+    ```
+
+    For **beta** version:
+
+    ```shell
+    pnpm tsx tools/skip-review/download-latest-extension-mv3.ts beta
+    ```
+
+8. **Verify changes are acceptable for skip-review:**
+
+    Make sure you're on the correct branch that is currently deployed as release/beta.
+
+    For **release** version:
+
+    ```shell
+    pnpm tsx tools/skip-review/check-changes-for-cws.ts ./tmp/extension-release-latest ./build/release/chrome-mv3
+    ```
+
+    For **beta** version:
+
+    ```shell
+    pnpm tsx tools/skip-review/check-changes-for-cws.ts ./tmp/extension-beta-latest ./build/beta/chrome-mv3
+    ```
+
+9. **Deploy:**
+
+    - Run the manual Bamboo build
+    - Upload the extension to Chrome Web Store
+    - Submit for fast-track review
+
+<a name="dev-localizations"></a>
+
+### Update localizations
+
+For detailed localization workflow and best practices, see [Locales Documentation](./tools/locales/README.md#dev-locales).
+
+To download and append localizations run:
+
+```shell
+pnpm locales download
+```
+
+To upload new phrases to crowdin you need the file with phrases
+`./Extension/_locales/en/messages.json`. Then run:
+
+```shell
+pnpm locales upload
+```
+
+To remove old messages from locale messages run:
+
+```shell
+pnpm locales renew
+```
+
+To validate translations run:
+
+```shell
+pnpm locales validate
+```
+
+To show locales info run:
+
+```shell
+pnpm locales info
+```
+
+<a name="dev-bundle-size-monitoring"></a>
+
+### Bundle Size Monitoring
+
+The browser extension project includes a comprehensive bundle size monitoring system, located in `tools/bundle-size`. This system helps ensure that our extension bundles remain within defined size limits, and that any significant increases are reviewed and justified.
+
+#### Key Features
+
+- Tracks and compares bundle sizes across different build types (`beta`, `release`, etc.) and browser targets (`chrome`, `chrome-mv3`, `edge`, etc.)
+- Detects significant size increases using configurable thresholds (default: 10%)
+- Ensures Chrome MV3 bundle stays under the 30MB limit
+- Checks for duplicate package versions using `pnpm`
+- Stores historical size data in `.bundle-sizes.json`
+- Designed for CI/CD integration (Bamboo)
+- **For Firefox targets (AMO and Standalone) only**, every individual `.js` file is checked to ensure it does not exceed the 4MB limit imposed by the Firefox Add-ons Store. If any `.js` file is larger than 4MB, the check fails and the offending files are reported.
+
+#### How it works
+
+- On each beta or release build, the system compares the current bundle sizes to the reference values in `.bundle-sizes.json`.
+- If any size exceeds the configured threshold, or additionally check for 30MB limit for Chrome MV3 target or 4MB limit for Firefox targets - the check fails.
+- Duplicate package versions are detected and reported.
+
+#### To update the bundle sizes manually
+
+We have defined size limits in the project.
+
+1. When we build the `beta` or `release` version, the build process checks if we're exceeding those limits.
+2. If we exceed the limits, the developer should investigate the cause and decide whether the size increase is acceptable.
+3. If the new sizes are justified, the developer updates the size values in the package and creates a commit.
+4. We then review and approve any changes to the sizes as part of the PR process.
+
+##### Steps
+
+1. Run the build for the desired environment (e.g., `pnpm beta` or `pnpm release`).
+2. If the build fails due to bundle size limits, investigate the cause (e.g., new dependencies, large assets).
+3. If the increase is justified, update the reference sizes by running:
+
+    ```shell
+    pnpm update-bundle-size <buildEnv> [targetBrowser]
+    # Example: pnpm update-bundle-size release chrome-mv3
+    # Or: pnpm update-bundle-size beta firefox-amo
+    # Or: pnpm update-bundle-size dev
+    ```
+
+4. Commit the updated `.bundle-sizes.json` file and include justification in your PR.
+5. The changes will be reviewed and approved as part of the PR process.
+
+#### Checking bundle size locally
+
+To check bundle sizes locally, use:
+
+```shell
+pnpm check-bundle-size <buildEnv> [targetBrowser]
+# Example: pnpm check-bundle-size release chrome-mv3
+# Or: pnpm check-bundle-size beta firefox-amo
+# Or: pnpm check-bundle-size dev
+```
+
+For CLI help on parameters, use:
+
+```shell
+pnpm check-bundle-size --help
+pnpm update-bundle-size --help
+```
+
+#### Custom Threshold
+
+You can override the default threshold for significant bundle size increases using the `--threshold` option:
+
+```shell
+pnpm check-bundle-size <buildEnv> [targetBrowser] --threshold 5
+# or
+pnpm check-bundle-size release chrome-mv3 --threshold=20
+# or
+pnpm check-bundle-size beta
+```
+
+- `--threshold <number>`: Sets the allowed percentage increase in bundle size before the check fails. Default: 10%.
+
+This is useful for temporarily relaxing or tightening the allowed size delta for a specific check/build.
+
+## Project Architecture
+
+### Background Layers
+
+The background script (`Extension/src/background/`) follows a strict layered architecture. Each layer has a clear responsibility and dependency direction — **upper layers depend on lower layers, never the reverse**.
+
+```text
+┌─────────────────────────────────────────────────────┐
+│  app/              App entry point (init sequence)   │
+├─────────────────────────────────────────────────────┤
+│  services/         Event listeners, orchestration    │
+├─────────────────────────────────────────────────────┤
+│  api/              Business logic, public interface  │
+├─────────────────────────────────────────────────────┤
+│  engine/           tswebextension wrapper (MV2/MV3)  │
+├─────────────────────────────────────────────────────┤
+│  storages/         Data storage models               │
+├─────────────────────────────────────────────────────┤
+│  schema/           Zod validators and types          │
+└─────────────────────────────────────────────────────┘
+```
+
+#### Layer responsibilities
+
+- **`schema/`** — Zod validation schemas and TypeScript types for all persisted data (settings, filter state, metadata, etc.). This is the lowest layer — no dependencies on other background modules.
+- **`storages/`** — Data storage models built on top of the `schema` layer. Provides typed access to `chrome.storage.local`, IndexedDB, and in-memory caches.
+- **`engine/`** — Wrapper around `@adguard/tswebextension`. Has MV2 and MV3 implementations (`engine-mv2.ts`, `engine-mv3.ts`) resolved at build time via path aliases. Manages the filtering engine lifecycle (start, update, configuration).
+- **`api/`** — Business logic layer. Contains domain-specific APIs (filters, settings, allowlist, safebrowsing, UI, network, etc.) that read/write through `storages` and control the `engine`.
+- **`services/`** — Orchestration layer. Registers browser event listeners, wires together multiple APIs, and handles message-driven workflows (filter updates, settings sync, popup, filtering log, telemetry, etc.).
+- **`app/`** — Application entry point. `AppCommon` (with `AppMv2`/`AppMv3` subclasses) initializes all layers in the correct order: storages → engine → APIs → services.
+
+#### Supporting modules
+
+- **`events/`** — Typed event handlers for context menu and settings changes.
+- **`keep-alive/`** — Service worker / event page keep-alive mechanism (MV2/MV3 variants).
+- **`prefs/`** — Runtime preferences (MV2/MV3 variants).
+- **`tswebextension/`** — tswebextension configuration adapters (MV2/MV3 variants).
+- **`errors/`**, **`utils/`** — Shared error types and utility functions.
+- **`message-handler.ts`** — Routes messages from UI pages to the correct handler.
+- **`connection-handler.ts`** — Manages long-lived `Runtime.Port` connections.
+- **`notifier.ts`** — Internal pub/sub event bus for cross-module notifications.
+
+#### Folder structure
+
+```text
+Extension/src/background/
+├── app/                  # App entry point (AppCommon, AppMv2, AppMv3)
+├── api/                  # Business logic APIs
+│   ├── filters/          #   Filter management
+│   ├── network/          #   Network requests
+│   ├── settings/         #   Settings management
+│   ├── ui/               #   UI-related APIs (icons, popups, pages)
+│   └── ...               #   safebrowsing, install, update, etc.
+├── services/             # Event listeners and orchestration
+│   ├── filters/          #   Filter state management
+│   ├── settings/         #   Settings event handling
+│   ├── ui/               #   UI services (popup, promo notifications)
+│   ├── telemetry/        #   Telemetry collection
+│   └── ...               #   allowlist, userrules, custom-filters, etc.
+├── engine/               # tswebextension wrapper (MV2/MV3)
+├── storages/             # Data storage models
+├── schema/               # Zod validators and types
+├── events/               # Context menu and settings event handlers
+├── keep-alive/           # Service worker keep-alive (MV2/MV3)
+├── prefs/                # Runtime preferences (MV2/MV3)
+├── tswebextension/       # tswebextension config adapters (MV2/MV3)
+├── errors/               # Custom error types
+├── utils/                # Shared utilities
+├── connection-handler.ts # Long-lived port connections
+├── content-script-injector.ts
+├── message-handler.ts    # Message routing
+├── notifier.ts           # Internal pub/sub event bus
+└── index.ts              # Background script entry point
+```
+
+<a name="dev-typescript-configs"></a>
+
+### TypeScript Configuration
+
+The project uses **TypeScript Project References** to completely separate Manifest V2 and V3 codebases into independent TypeScript projects. This architectural approach eliminates the need for empty stub implementations and provides superior IDE support.
+
+#### Configuration Files Overview
+
+The project contains **5 TypeScript configuration files**, each serving a specific purpose:
+
+1. **`tsconfig.base.json`** - Shared base configuration
+    - Common compiler options for all projects
+    - JSX support and module resolution settings
+
+2. **`tsconfig.json`** - Root project references container
+    - Contains minimal includes
+    - References both MV2 and MV3 projects
+    - Enables VS Code to automatically switch between projects
+
+3. **`tsconfig.mv2.json`** - Manifest V2 project
+    - Excludes all `**/*-mv3.ts` and `**/*-mv3.tsx` files
+    - Contains MV2-specific path aliases
+    - Composite project with declaration output
+
+4. **`tsconfig.mv3.json`** - Manifest V3 project
+    - Excludes all `**/*-mv2.ts` and `**/*-mv2.tsx` files
+    - Contains MV3-specific path aliases
+    - Composite project with declaration output
+
+5. **`tsconfig.eslint.json`** - ESLint-specific configuration
+    - Includes all files for linting purposes
+    - Special path mapping for JSX files
+    - Separate from compilation projects
+
+<a name="dev-css"></a>
+
+### CSS Cascade Layers
+
+The project uses two CSS layers to manage style priority:
+
+- **`components`** - Component-specific styles (buttons, modals, etc.)
+- **`utilities`** - Utility classes with higher priority (e.g., `.hideOnMobile`)
+
+Layer order is declared inline in HTML templates (e.g., `Extension/pages/options/index.html`):
+This ensures the layer order is established before any `style-loader` injections from JavaScript bundles. The `utilities` layer has higher priority than `components`, ensuring utility classes always override component styles.
+
+<a name="dev-rules-editor"></a>
+
+### Rules Editor
+
+The user rules and allowlist editors are built on [CodeMirror 6], wrapped by the
+[`@adguard/rules-editor`][rules-editor] package. The editor lives in
+`Extension/src/pages/common/components/Editor/` and is consumed by:
+
+- `UserRulesEditor` (`Extension/src/pages/common/components/UserRulesEditor/`)
+- `Allowlist` (`Extension/src/pages/options/components/Allowlist/`)
+
+#### Dependencies
+
+The editor pulls in the following `package.json` dependencies:
+
+- `@adguard/rules-editor` — initialization wrapper around CodeMirror 6
+  (`initEditor`), providing the AdGuard filter syntax grammar, hotkeys, and
+  highlighting configuration.
+- `@codemirror/state`, `@codemirror/view`, `@codemirror/commands`,
+  `@codemirror/language`, `@codemirror/search` — CodeMirror 6 core packages
+  used directly by the `Editor` component and `editor-handle.ts`.
+- `@lezer/highlight` — Lezer highlight support used by the AdGuard theme.
+- `vscode-oniguruma` — provides the `onig.wasm` WebAssembly regex engine that
+  powers the TextMate grammar used for full syntax highlighting (see
+  [WASM Grammar and CSP Requirement](#wasm-grammar-and-csp-requirement)).
+
+> All `dependencies` and `devDependencies` are pinned to exact versions (no
+> `^` etc.), as required by the project conventions.
+
+#### WASM Grammar and CSP Requirement
+
+When the `Editor` is mounted with `highlightRules` enabled, it constructs a URL
+to `vscode-oniguruma/release/onig.wasm` and passes it to `initEditor`. The
+rules-editor uses this WASM module to instantiate the Oniguruma regex engine,
+which drives the TextMate grammar for full (token-level) syntax highlighting of
+AdGuard filter rules.
+
+Extension pages disallow WebAssembly compilation unless the CSP allows it.
+`tools/helpers.ts` (`getEnvPolicy`) therefore sets `'wasm-unsafe-eval'` for all
+targets:
+
+- MV3 (`chrome-mv3`, `opera-mv3`):
+  `script-src 'self' 'wasm-unsafe-eval'; object-src 'self'`
+- MV2 beta/release (Chrome, Edge, Opera, Firefox):
+  `script-src 'self' 'wasm-unsafe-eval' '<click-to-load-sha>'; object-src 'self'`
+- MV2 dev: same as beta/release, plus `'unsafe-eval'` for HMR / tooling
+
+This directive is also required by `@adguard/re2-wasm` (the RE2 regex engine).
+If it is removed, code that depends on WASM — including User rules editor
+highlighting — fails with `WasmLoadError` / `CompileError` even when `onig.wasm`
+fetches successfully (HTTP 200).
+
+The `onig.wasm` asset must be present in the build output; it is emitted by
+Rspack from the `vscode-oniguruma` package (configured in
+`tools/bundle/rspack.common.ts`).
+
+#### Editor Component API
+
+The `Editor` component (`Extension/src/pages/common/components/Editor/Editor.tsx`)
+is a thin React wrapper around CodeMirror 6. Callers interact with it
+imperatively through an `editorRef` ref; they do **not** receive a CodeMirror
+`EditorView` directly.
+
+**Props** (`EditorProps`):
+
+| Prop | Type | Description |
+| ---- | ---- | ----------- |
+| `name` | `string` | Unique editor name; used as part of the persisted size storage key. |
+| `editorRef` | `MutableRefObject<EditorHandle \| null>` | Ref that receives the imperative `EditorHandle` (see below). |
+| `onChange?` | `(value: string) => void` | Called with the full document content on every document change. |
+| `onSave?` | `() => void` | Called on the save hotkey (Ctrl/Cmd+S). |
+| `onExit?` | `() => void` | Called on Escape (unless the search panel is open). |
+| `fullscreen?` | `boolean` | Whether the editor renders in fullscreen mode. |
+| `highlightRules?` | `boolean` | Whether to enable full syntax highlighting. **Captured once at mount, not reactive** — to toggle at runtime, remount the editor (e.g. via `key`). |
+| `shouldResetSize?` | `boolean` | Resets the persisted editor size to the default. |
+| `readOnly?` | `boolean` | Whether the editor is read-only (default `false`). |
+| `wrapEnabled?` | `boolean` | Whether line wrapping is enabled (default `false`). |
+
+**`editorRef` expects an `EditorHandle`.**
+
+`editorRef` receives an `EditorHandle | null` — an imperative facade defined in
+`Extension/src/pages/common/components/Editor/editor-handle.ts`. It exposes:
+
+| Method | Description |
+| ------ | ----------- |
+| `getValue()` | Returns the entire document content as a string. |
+| `setValue(value)` | Replaces the document content and inserts a full history barrier. |
+| `getCursor()` | Returns `{ line, ch }` (1-based line, 0-based char). |
+| `setCursor(cursor)` | Moves the cursor and scrolls it into view. |
+| `setWrap(enabled)` | Toggles line wrapping. |
+| `setReadOnly(enabled)` | Toggles read-only mode. |
+| `focus()` | Focuses the editor. |
+
+Because `initEditor` resolves only after the WASM grammar loads, the underlying
+`EditorView` is created asynchronously. `Editor` exposes a
+`DeferredEditorHandle` so that writes made before the view exists are buffered
+and replayed in call order once the view attaches, while readers (`getValue`,
+`getCursor`) return sensible defaults (`''` / `{ line: 1, ch: 0 }`) until then.
+
+When consuming the editor, type the ref as:
+
+```typescript
+import { type EditorHandle } from '../../../common/components/Editor/editor-handle';
+
+const editorRef = useRef<EditorHandle | null>(null);
+```
+
+Do not import types from `@codemirror/view` or `@codemirror/state` to type
+`editorRef` — the facade is the stable public surface; the CodeMirror view is an
+implementation detail owned by the `Editor` component.
+
+## Environment Variables
+
+Optional environment variables are configured via a `.env` file (copy from `.env.example`):
+
+| Variable | Description |
+| -------- | ----------- |
+| `ARTIFACTORY_DOMAIN` | Artifactory domain for downloading blocking pages |
+| `OPENAI_API_KEY` | OpenAI API key for detecting dangerous script rules during `pnpm resources` |
+| `ANALYZE` | Set to `true` to generate bundle analysis reports during builds |
+
+## Troubleshooting
+
+### `pnpm install` fails with network errors
+
+The project has retry settings in `.npmrc`. If you still have issues, check your network/VPN configuration and try again.
+
+### ESLint reports `no-restricted-imports` errors
+
+You cannot import directly from `-mv2` or `-mv3` suffixed files in common code. Use TypeScript path aliases defined in `tsconfig.mv2.json` / `tsconfig.mv3.json` instead. See [AGENTS.md](./AGENTS.md) for import rules.
+
+### TypeScript errors in IDE but not in CI (or vice versa)
+
+The project uses TypeScript Project References with separate configs for MV2 and MV3. Make sure your IDE is using the correct `tsconfig.json` (the root one references both). Run `pnpm lint:types:mv2` and `pnpm lint:types:mv3` separately to isolate the issue.
+
+### `lint-staged` leaves a `lint-staged` section in `package.json`
+
+If the pre-commit hook is interrupted, lint-staged may leave a temporary section in `package.json`. Remove it manually from the diff before committing.
+
+### Linked tsurlfilter changes not picked up in watch mode
+
+Use the `--no-cache` flag when running watch mode with linked packages:
+
+```shell
+pnpm dev <browser> --watch --no-cache
+```
+
+### Bundle size check fails
+
+Investigate the cause of the size increase. If justified, update reference sizes with `pnpm update-bundle-size <env> [browser]` and include justification in your PR.
+
+## Additional Resources
+
+- [AGENTS.md](./AGENTS.md) — Code guidelines, conventions, and review checklist
+- [README.md](./README.md) — Project overview and installation instructions
+- [CHANGELOG.md](./CHANGELOG.md) — Version history
+- [Locales Documentation](./tools/locales/README.md) — Localization workflow
+- [Dangerous Rules Documentation](./tools/resources/dangerous-rules/README.md) — Dangerous rules detection
+- [tsurlfilter](https://github.com/AdguardTeam/tsurlfilter) — Filtering engine library
+
+[CodeMirror 6]: https://codemirror.net/
+[rules-editor]: https://github.com/AdguardTeam/rules-editor
